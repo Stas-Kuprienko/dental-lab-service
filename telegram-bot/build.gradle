@@ -1,0 +1,46 @@
+plugins {
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext {
+	set('springCloudVersion', "2025.0.0")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+
+	implementation project(':common')
+
+    // telegram
+    implementation "org.telegram:telegrambots-spring-boot-starter:${telegram_version}"
+
+    // cloud
+	implementation 'org.springframework.cloud:spring-cloud-config-server'
+
+    // cache
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// event-driving
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
+    // tests
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

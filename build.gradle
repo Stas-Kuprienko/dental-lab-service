@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.lab'
+version = '1.0-SNAPSHOT'
+
+allprojects {
+    repositories {
+        mavenCentral()
+    	mavenLocal()
+    }
+}
+
+subprojects {
+
+    java {
+    	toolchain {
+    		languageVersion = JavaLanguageVersion.of(21)
+    	}
+    }
+
+    apply plugin: 'java'
+
+    group = 'org.lab'
+    version = '1.0-SNAPSHOT'
+
+    sourceCompatibility = '21'
+
+    dependencies {
+    	compileOnly "org.projectlombok:lombok:${lombok_version}"
+    	annotationProcessor "org.projectlombok:lombok:${lombok_version}"
+    }
+}

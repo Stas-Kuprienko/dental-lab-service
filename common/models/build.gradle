@@ -1,0 +1,4 @@
+
+dependencies {
+    compileOnly("com.fasterxml.jackson.core:jackson-annotations:${jackson_annotations_version}")
+}
