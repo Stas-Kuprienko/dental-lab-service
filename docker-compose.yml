@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    container_name: trade_db
+    container_name: dental_db
     image: postgres:15.3-alpine
     networks:
       - lab-networks
@@ -23,7 +23,7 @@ services:
       - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
 
   keycloak:
-    container_name: trade_keycloak
+    container_name: dental_keycloak
     image: quay.io/keycloak/keycloak:25.0
     command: start
     networks:
@@ -49,7 +49,7 @@ services:
       - ./volumes/keycloak/data:/opt/keycloak/data
 
   kafka:
-    container_name: trade_kafka
+    container_name: dental_kafka
     image: bitnami/kafka:latest
     networks:
       - lab-networks
@@ -70,7 +70,7 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
 
   redis:
-    container_name: trade_redis
+    container_name: dental_redis
     image: redis:latest
     networks:
       - lab-networks

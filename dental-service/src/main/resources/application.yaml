@@ -1,4 +1,32 @@
 spring:
   application:
     name: dental-lab-service
+  config:
+    import: "optional:configserver:"
+  datasource:
+    url: jdbc:postgresql://${project.variables.datasource.url}/${project.variables.datasource.database}
+    username: ${project.variables.datasource.username}
+    password: ${project.variables.datasource.password}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${project.variables.datasource.url}/${project.variables.datasource.database}
+    user: ${project.variables.datasource.username}
+    password: ${project.variables.datasource.password}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
+
+
+project:
+  variables:
+    datasource:
+      database: dental_lab
+      url: localhost:5432
+      username: postgres
+      password: postgres

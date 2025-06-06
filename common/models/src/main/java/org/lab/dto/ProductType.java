@@ -20,7 +20,4 @@ public class ProductType {
 
     @JsonProperty("price")
     private BigDecimal price;
-
-    @JsonProperty("user_id")
-    private UUID userId;
 }

@@ -24,7 +24,7 @@ public class ProductTypeEntity {
     private String title;
 
     @Column(name = "price")
-    private double price;
+    private BigDecimal price;
 
     @Column(name = "user_id")
     private UUID userId;

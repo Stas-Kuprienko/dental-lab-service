@@ -18,8 +18,8 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "product_type")
-    private String productType;
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "price")
     private BigDecimal price;
@@ -38,7 +38,7 @@ public class ProductEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ProductEntity that)) return false;
-        return Objects.equals(productType, that.productType) &&
+        return Objects.equals(title, that.title) &&
                 Objects.equals(price, that.price) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(dentalWorkId, that.dentalWorkId);
@@ -46,14 +46,14 @@ public class ProductEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(productType, price, quantity, dentalWorkId);
+        return Objects.hash(title, price, quantity, dentalWorkId);
     }
 
     @Override
     public String toString() {
         return "ProductEntity{" +
                 "id=" + id +
-                ", productType='" + productType + '\'' +
+                ", productType='" + title + '\'' +
                 ", price=" + price +
                 ", quantity=" + quantity +
                 ", dentalWorkId=" + dentalWorkId +
