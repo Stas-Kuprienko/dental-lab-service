@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -19,5 +18,8 @@ public class ProductType {
     private String title;
 
     @JsonProperty("price")
-    private BigDecimal price;
+    private float price;
+
+
+    public ProductType() {}
 }

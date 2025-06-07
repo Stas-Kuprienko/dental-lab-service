@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -16,15 +15,18 @@ public class Product {
     @JsonProperty("id")
     private UUID id;
 
-    @JsonProperty("product_type")
-    private String productType;
+    @JsonProperty("title")
+    private String title;
 
     @JsonProperty("price")
-    private double price;
+    private float price;
 
     @JsonProperty("quantity")
     private int quantity;
 
     @JsonProperty("dental_work_id")
     private long dentalWorkId;
+
+
+    public Product() {}
 }

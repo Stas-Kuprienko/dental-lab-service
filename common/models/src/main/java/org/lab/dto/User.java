@@ -28,4 +28,7 @@ public class User {
 
     @JsonProperty("status")
     private UserStatus status;
+
+
+    public User() {}
 }

@@ -2,7 +2,6 @@ package org.lab.dental.repository;
 
 import jakarta.transaction.Transactional;
 import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.enums.WorkStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -77,6 +76,19 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             """)
     List<DentalWorkEntity> findByPatientAndUserId(@Param("userId") UUID userId,
                                                   @Param("patient") String patient);
+
+    @Query("""
+            SELECT DISTINCT dw
+            FROM DentalWorkEntity dw
+            LEFT JOIN FETCH dw.products p
+            LEFT JOIN FETCH dw.photoLinks pl
+            WHERE dw.patient LIKE %:patient%
+            AND dw.clinic LIKE %:clinic%
+            AND dw.userId = :userId
+            """)
+    List<DentalWorkEntity> findByClinicAndPatientAndUserId(@Param("userId") UUID userId,
+                                                           @Param("clinic") String clinic,
+                                                           @Param("patient") String patient);
 
 
     @Modifying

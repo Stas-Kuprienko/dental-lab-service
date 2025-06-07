@@ -3,6 +3,7 @@ package org.lab.dental.service;
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.entity.ProductEntity;
 import org.lab.enums.WorkStatus;
+import org.springframework.lang.Nullable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -18,9 +19,7 @@ public interface DentalWorkService {
 
     List<DentalWorkEntity> getAllForCurrentMonthByUserId(UUID userId);
 
-    List<DentalWorkEntity> getAllByPatientAndUserId(UUID userId, String patient);
-
-    List<DentalWorkEntity> getAllByClinicAndUserId(UUID userId, String clinic);
+    List<DentalWorkEntity> getAllByClinicAndPatientAndUserId(UUID userId, @Nullable String clinic, @Nullable String patient);
 
     DentalWorkEntity update(DentalWorkEntity updatable);
 

@@ -19,4 +19,6 @@ public class ProductMap {
         this.userId = userId;
         this.entries = entries;
     }
+
+    public ProductMap() {}
 }

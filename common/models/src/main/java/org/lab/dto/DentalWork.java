@@ -44,4 +44,7 @@ public class DentalWork {
 
     @JsonProperty("photo_links")
     private List<String> photoLinks;
+
+
+    public DentalWork() {}
 }

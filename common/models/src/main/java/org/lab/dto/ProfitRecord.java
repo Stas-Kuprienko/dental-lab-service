@@ -20,4 +20,7 @@ public class ProfitRecord {
 
     @JsonProperty("year_month")
     private YearMonth yearMonth;
+
+
+    public ProfitRecord() {}
 }
