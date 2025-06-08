@@ -29,8 +29,23 @@ eureka:
 
 project:
   variables:
+    keycloak:
+      url: http://localhost:8080
+      username: admin
+      password: admin
+      realm: dental-lab
+      client-id: dental-lab-client
+      client-secret: KnGk5wxSPJZLecWUDU69clfI7o5wOIy7
     datasource:
       database: dental_lab
       url: localhost:5432
       username: postgres
       password: postgres
+    minio:
+      url: http://minio:9000
+      access-key: minioadmin
+      secret-key: minioadmin
+      bucket: dental-photos
+      duration-minutes: 30
+    kafka:
+      url: localhost:9092

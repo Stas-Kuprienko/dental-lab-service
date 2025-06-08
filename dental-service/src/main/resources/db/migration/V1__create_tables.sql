@@ -36,7 +36,7 @@ CREATE TABLE dental_lab.product (
     dental_work_id BIGINT   NOT NULL    REFERENCES dental_lab.dental_work ON DELETE CASCADE
 );
 
-CREATE TABLE dental_lab.photo_link (
-    link VARCHAR(255)       PRIMARY KEY,
+CREATE TABLE dental_lab.photo_filename (
+    filename VARCHAR(255)   PRIMARY KEY,
     dental_work_id BIGINT   NOT NULL    REFERENCES dental_lab.dental_work ON DELETE CASCADE
 );

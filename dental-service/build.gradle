@@ -25,6 +25,9 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
+	// s3
+    implementation("io.minio:minio:${minio_version}")
+
 	// event-driving
 	implementation 'org.springframework.kafka:spring-kafka'
 
