@@ -48,11 +48,6 @@ public class DentalWorkEntity {
     @JoinColumn(name = "dental_work_id")
     private List<ProductEntity> products;
 
-    @ElementCollection
-    @CollectionTable(name = "photo_link", schema = "dental_lab", joinColumns = @JoinColumn(name = "dental_work_id"))
-    @Column(name = "link")
-    private List<String> photoLinks;
-
 
     public DentalWorkEntity() {}
 
@@ -87,7 +82,6 @@ public class DentalWorkEntity {
                 ", comment='" + comment + '\'' +
                 ", userId=" + userId +
                 ", products=" + products +
-                ", photoUrls=" + photoLinks +
                 '}';
     }
 }

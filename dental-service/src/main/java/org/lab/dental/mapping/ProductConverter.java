@@ -35,7 +35,6 @@ public class ProductConverter {
                 .title(newProduct.getTitle())
                 .price(BigDecimal.valueOf(newProduct.getPrice()))
                 .quantity(newProduct.getQuantity())
-                .dentalWorkId(newProduct.getDentalWorkId())
                 .build();
     }
 }

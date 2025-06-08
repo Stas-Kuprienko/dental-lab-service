@@ -15,7 +15,7 @@ public class PersistenceCustomException extends RuntimeException {
         return new PersistenceCustomException("Entity to update must have ID (%s)".formatted(entity.toString()));
     }
 
-    public static PersistenceCustomException findByNullableParam(Class<?> entity, String... params) {
+    public static PersistenceCustomException findByNullableParam(String entity, String... params) {
         StringBuilder str = new StringBuilder();
         for (String param : params) {
             str.append(param)
@@ -23,6 +23,6 @@ public class PersistenceCustomException extends RuntimeException {
                     .append(' ');
         }
         str.delete(str.length() - 2, str.length());
-        return new PersistenceCustomException("Try to find entity (%s) with nullable params: '%s'".formatted(entity.getName(), str.toString()));
+        return new PersistenceCustomException("Try to find entity (%s) with nullable params: '%s'".formatted(entity, str.toString()));
     }
 }

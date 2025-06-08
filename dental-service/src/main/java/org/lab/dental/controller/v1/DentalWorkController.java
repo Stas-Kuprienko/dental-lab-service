@@ -62,7 +62,7 @@ public class DentalWorkController {
     @GetMapping
     public List<DentalWork> findAllCurrentMonth(@RequestHeader("X-USER-ID") UUID userId) {
 
-        log.info("From user '{}' received request", userId);
+        log.info("From user '{}' received request to get all DentalWorks for current month", userId);
         List<DentalWorkEntity> entities = dentalWorkService.getAllForCurrentMonthByUserId(userId);
         return entities.stream().map(dentalWorkConverter::toDto).toList();
     }

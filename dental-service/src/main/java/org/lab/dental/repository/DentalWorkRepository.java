@@ -23,7 +23,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.id = :id
             """)
     Optional<DentalWorkEntity> findById(@NonNull @Param("id") Long id);
@@ -34,7 +33,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.id = :id
             AND dw.userId = :userId
             """)
@@ -45,7 +43,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT DISTINCT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.userId = :userId AND
             dw.completeAt BETWEEN :from AND :to
             """)
@@ -58,7 +55,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT DISTINCT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.clinic LIKE %:clinic%
             AND dw.userId = :userId
             """)
@@ -70,7 +66,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT DISTINCT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.patient LIKE %:patient%
             AND dw.userId = :userId
             """)
@@ -81,7 +76,6 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT DISTINCT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
-            LEFT JOIN FETCH dw.photoLinks pl
             WHERE dw.patient LIKE %:patient%
             AND dw.clinic LIKE %:clinic%
             AND dw.userId = :userId

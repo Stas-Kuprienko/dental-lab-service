@@ -9,11 +9,11 @@ public class NotFoundCustomException extends RuntimeException {
     }
 
 
-    public static NotFoundCustomException byId(Class<?> entity, Object id) {
+    public static NotFoundCustomException byId(String entity, Object id) {
         return new NotFoundCustomException("Entity '%s' is not found by id = '%s'".formatted(entity, id));
     }
 
-    public static NotFoundCustomException byParams(Class<?> entity, Map<String, Object> params) {
+    public static NotFoundCustomException byParams(String entity, Map<String, Object> params) {
         StringBuilder str = new StringBuilder();
         params.forEach((key, value) -> str
                 .append(key)

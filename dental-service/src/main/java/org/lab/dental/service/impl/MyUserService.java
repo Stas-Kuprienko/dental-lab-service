@@ -35,6 +35,6 @@ public class MyUserService implements UserService {
     @Override
     public UserEntity getById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> NotFoundCustomException.byId(UserEntity.class, id));
+                .orElseThrow(() -> NotFoundCustomException.byId("User", id));
     }
 }

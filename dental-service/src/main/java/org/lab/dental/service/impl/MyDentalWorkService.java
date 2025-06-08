@@ -38,6 +38,7 @@ public class MyDentalWorkService implements DentalWorkService {
             throw PersistenceCustomException.saveEntityWithId(dentalWork);
         }
         dentalWork.setAcceptedAt(LocalDate.now());
+        dentalWork.setStatus(WorkStatus.MAKING);
         log.info("Entity received to save: {}", dentalWork);
         DentalWorkEntity saved = dentalWorkRepository.save(dentalWork);
         log.info("Entity saved: {}", saved);
@@ -48,7 +49,7 @@ public class MyDentalWorkService implements DentalWorkService {
     public DentalWorkEntity getByIdAndUserId(Long id, UUID userId) {
         DentalWorkEntity dentalWork = dentalWorkRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> NotFoundCustomException
-                        .byParams(DentalWorkEntity.class, Map.of("id", id, "userId", userId)));
+                        .byParams("DentalWork", Map.of("id", id, "userId", userId)));
         log.info("Entity is found: {}", dentalWork);
         return dentalWork;
     }
@@ -76,7 +77,7 @@ public class MyDentalWorkService implements DentalWorkService {
     public List<DentalWorkEntity> getAllByClinicAndPatientAndUserId(UUID userId, @Nullable String clinic, @Nullable String patient) {
         List<DentalWorkEntity> dentalWorks;
         if (clinic == null && patient == null) {
-            throw PersistenceCustomException.findByNullableParam(DentalWorkEntity.class, "clinic", "patient");
+            throw PersistenceCustomException.findByNullableParam("DentalWork", "clinic", "patient");
         } else if (clinic != null && patient != null) {
             dentalWorks =  dentalWorkRepository.findByClinicAndPatientAndUserId(userId, clinic, patient);
             log.info("Found {} DentalWorks by parameters: userId='{}', clinic='{}', patient='{}'", dentalWorks.size(), userId, clinic, patient);
@@ -124,8 +125,9 @@ public class MyDentalWorkService implements DentalWorkService {
     @Override
     public DentalWorkEntity addProduct(Long id, UUID userId, ProductEntity product) {
         DentalWorkEntity dentalWork = getByIdAndUserId(id, userId);
+        product.setDentalWorkId(id);
         for (ProductEntity p : dentalWork.getProducts()) {
-            if (p.getTitle().equals(product.getTitle())) {
+            if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
                 p.setQuantity(p.getQuantity() + product.getQuantity());
                 ProductEntity updated = productRepository.save(p);
                 log.info("Product '{}' updated for '{}'", updated, dentalWork);

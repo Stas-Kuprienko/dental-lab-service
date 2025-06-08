@@ -52,8 +52,7 @@ public class ProductController {
                                                     @PathVariable("id") UUID id) {
 
         log.info("From user '{}' received request to delete by ID='{}' and workID={}", userId, id, workId);
-        dentalWorkService.deleteProduct(workId, userId, id);
-        DentalWorkEntity entity = dentalWorkService.getByIdAndUserId(workId, userId);
+        DentalWorkEntity entity = dentalWorkService.deleteProduct(workId, userId, id);
         return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
     }
 }

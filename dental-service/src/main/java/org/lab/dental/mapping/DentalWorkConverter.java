@@ -5,7 +5,6 @@ import org.lab.dto.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +30,6 @@ public class DentalWorkConverter {
                 .completeAt(dto.getCompleteAt())
                 .comment(dto.getComment())
                 .products(dto.getProducts() == null ? List.of() : dto.getProducts().stream().map(productConverter::toEntity).toList())
-                .photoLinks(dto.getPhotoLinks())
                 .build();
     }
 
@@ -46,13 +44,12 @@ public class DentalWorkConverter {
                 .completeAt(entity.getCompleteAt())
                 .comment(entity.getComment())
                 .products(entity.getProducts() == null ? List.of() : entity.getProducts().stream().map(productConverter::toDto).toList())
-                .photoLinks(entity.getPhotoLinks())
                 .build();
     }
 
     public DentalWorkEntity fromRequest(NewDentalWork newDentalWork, UUID userId) {
         return DentalWorkEntity.builder()
-                .clinic(newDentalWork.getPatient())
+                .clinic(newDentalWork.getClinic())
                 .patient(newDentalWork.getPatient())
                 .completeAt(newDentalWork.getCompleteAt())
                 .comment(newDentalWork.getComment())

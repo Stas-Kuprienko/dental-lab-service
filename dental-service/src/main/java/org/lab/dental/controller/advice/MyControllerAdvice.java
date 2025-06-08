@@ -1,5 +1,6 @@
 package org.lab.dental.controller.advice;
 
+import jakarta.validation.ValidationException;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.InternalServiceException;
@@ -8,8 +9,14 @@ import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,6 +30,24 @@ public class MyControllerAdvice {
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
+    }
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException ex) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        List<FieldError> errors = ex.getBindingResult().getFieldErrors();
+
+        for (int i = 0; i < errors.size(); i++) {
+            FieldError error = errors.get(i);
+            stringBuilder.append(error.getField()).append(" ").append(error.getDefaultMessage());
+            if (i != errors.size() - 1) { stringBuilder.append(", "); }
+        }
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), stringBuilder.toString()));
     }
 
     @ExceptionHandler(PersistenceCustomException.class)

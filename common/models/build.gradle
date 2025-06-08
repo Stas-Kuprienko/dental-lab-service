@@ -1,4 +1,6 @@
 
 dependencies {
     compileOnly("com.fasterxml.jackson.core:jackson-annotations:${jackson_annotations_version}")
+    compileOnly("io.swagger.core.v3:swagger-annotations-jakarta:${swagger_annotations_version}")
+    compileOnly("jakarta.validation:jakarta.validation-api:${jakarta_validation_version}")
 }

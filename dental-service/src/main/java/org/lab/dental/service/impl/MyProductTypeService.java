@@ -39,7 +39,7 @@ public class MyProductTypeService implements ProductTypeService {
     public ProductTypeEntity getByIdAndUserId(UUID id, UUID userId) {
         ProductTypeEntity productType = repository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> NotFoundCustomException
-                        .byParams(ProductTypeEntity.class, Map.of("id", id, "userId", userId)));
+                        .byParams("ProductType", Map.of("id", id, "userId", userId)));
         log.info("Entity is found: {}", productType);
         return productType;
     }
