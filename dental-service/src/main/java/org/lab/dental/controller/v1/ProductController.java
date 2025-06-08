@@ -9,6 +9,7 @@ import org.lab.dental.mapping.ProductConverter;
 import org.lab.dental.service.DentalWorkService;
 import org.lab.dto.DentalWork;
 import org.lab.dto.Product;
+import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +37,12 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<DentalWork> addProduct(@RequestHeader("X-USER-ID") UUID userId,
                                                  @PathVariable("work_id") Long workId,
-                                                 @RequestBody @Valid Product product) {
+                                                 @RequestBody @Valid NewProduct newProduct) {
 
-        log.info("From user '{}' received request to add: {}", userId, product);
-        ProductEntity productEntity = productConverter.toEntity(product);
-        DentalWorkEntity entity = dentalWorkService.addProduct(workId, userId, productEntity);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+        log.info("From user '{}' received request to add: {}", userId, newProduct);
+        ProductEntity product = productConverter.fromRequest(newProduct);
+        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, product);
+        return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
     }
 
 

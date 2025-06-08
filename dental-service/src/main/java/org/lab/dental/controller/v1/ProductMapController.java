@@ -8,6 +8,7 @@ import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dto.ProductMap;
 import org.lab.dto.ProductType;
+import org.lab.request.NewProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,11 +36,11 @@ public class ProductMapController {
 
     @PostMapping
     public ResponseEntity<ProductType> create(@RequestHeader("X-USER-ID") UUID userId,
-                                              @RequestBody @Valid ProductType productType) {
+                                              @RequestBody @Valid NewProductType newProductType) {
 
-        log.info("From user '{}' received request: {}", userId, productType);
-        ProductTypeEntity entity = converter.toEntity(productType, userId);
-        entity = productTypeService.save(entity);
+        log.info("From user '{}' received request: {}", userId, newProductType);
+        ProductTypeEntity entity = converter.fromRequest(newProductType, userId);
+        entity = productTypeService.create(entity);
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId())).body(converter.toDto(entity));
     }

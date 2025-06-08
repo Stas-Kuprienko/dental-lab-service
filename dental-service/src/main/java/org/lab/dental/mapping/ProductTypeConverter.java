@@ -3,6 +3,7 @@ package org.lab.dental.mapping;
 import org.lab.dental.entity.ProductTypeEntity;
 import org.lab.dto.ProductMap;
 import org.lab.dto.ProductType;
+import org.lab.request.NewProductType;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,6 +27,14 @@ public class ProductTypeConverter {
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .price(entity.getPrice().floatValue())
+                .build();
+    }
+
+    public ProductTypeEntity fromRequest(NewProductType newProductType, UUID userId) {
+        return ProductTypeEntity.builder()
+                .title(newProductType.getTitle())
+                .price(BigDecimal.valueOf(newProductType.getPrice()))
+                .userId(userId)
                 .build();
     }
 

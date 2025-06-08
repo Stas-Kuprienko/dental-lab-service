@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface DentalWorkService {
 
-    DentalWorkEntity save(DentalWorkEntity dentalWork);
+    DentalWorkEntity create(DentalWorkEntity dentalWork);
 
     DentalWorkEntity getByIdAndUserId(Long id, UUID userId);
 

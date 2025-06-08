@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProductTypeService {
-    ProductTypeEntity save(ProductTypeEntity productType);
+    ProductTypeEntity create(ProductTypeEntity productType);
 
     ProductTypeEntity getByIdAndUserId(UUID id, UUID userId);
 

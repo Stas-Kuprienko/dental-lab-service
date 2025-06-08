@@ -25,7 +25,7 @@ public class MyProductTypeService implements ProductTypeService {
 
 
     @Override
-    public ProductTypeEntity save(ProductTypeEntity productType) {
+    public ProductTypeEntity create(ProductTypeEntity productType) {
         if (productType.getId() != null) {
             throw PersistenceCustomException.saveEntityWithId(productType);
         }

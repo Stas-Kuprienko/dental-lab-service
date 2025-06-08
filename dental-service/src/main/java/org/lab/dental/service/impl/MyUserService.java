@@ -23,7 +23,7 @@ public class MyUserService implements UserService {
 
 
     @Override
-    public UserEntity save(UserEntity user) {
+    public UserEntity create(UserEntity user) {
         if (user.getId() != null) {
             throw PersistenceCustomException.saveEntityWithId(user);
         }

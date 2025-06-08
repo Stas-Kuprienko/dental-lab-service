@@ -9,6 +9,7 @@ import org.lab.dental.util.RequestMappingReader;
 import org.lab.dental.util.RequestParamsConverter;
 import org.lab.dto.DentalWork;
 import org.lab.enums.WorkStatus;
+import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,11 +39,11 @@ public class DentalWorkController {
 
     @PostMapping
     public ResponseEntity<DentalWork> create(@RequestHeader("X-USER-ID") UUID userId,
-                                             @RequestBody @Valid DentalWork dentalWork) {
+                                             @RequestBody @Valid NewDentalWork newDentalWork) {
 
-        log.info("From user '{}' received request: {}", userId, dentalWork);
-        DentalWorkEntity entity = dentalWorkConverter.toEntity(dentalWork);
-        entity = dentalWorkService.save(entity);
+        log.info("From user '{}' received request: {}", userId, newDentalWork);
+        DentalWorkEntity entity = dentalWorkConverter.fromRequest(newDentalWork, userId);
+        entity = dentalWorkService.create(entity);
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId())).body(dentalWorkConverter.toDto(entity));
     }

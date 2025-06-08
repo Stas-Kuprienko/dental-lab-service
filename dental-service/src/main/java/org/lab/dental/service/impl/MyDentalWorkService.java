@@ -33,7 +33,7 @@ public class MyDentalWorkService implements DentalWorkService {
 
 
     @Override
-    public DentalWorkEntity save(DentalWorkEntity dentalWork) {
+    public DentalWorkEntity create(DentalWorkEntity dentalWork) {
         if (dentalWork.getId() != null) {
             throw PersistenceCustomException.saveEntityWithId(dentalWork);
         }

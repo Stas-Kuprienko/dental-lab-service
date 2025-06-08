@@ -7,6 +7,7 @@ import org.lab.dental.mapping.UserConverter;
 import org.lab.dental.service.UserService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dto.User;
+import org.lab.request.NewUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,9 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody @Valid User user) {
-        UserEntity entity = userConverter.toEntity(user);
-        entity = userService.save(entity);
+    public ResponseEntity<User> create(@RequestBody @Valid NewUser newUser) {
+        UserEntity entity = userConverter.fromRequest(newUser);
+        entity = userService.create(entity);
         return ResponseEntity.created(URI.create(URL + '/' + entity.getId())).body(userConverter.toDto(entity));
     }
 

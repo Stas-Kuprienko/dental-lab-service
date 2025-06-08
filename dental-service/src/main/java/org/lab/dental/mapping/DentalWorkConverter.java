@@ -2,10 +2,12 @@ package org.lab.dental.mapping;
 
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dto.DentalWork;
+import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class DentalWorkConverter {
@@ -45,6 +47,16 @@ public class DentalWorkConverter {
                 .comment(entity.getComment())
                 .products(entity.getProducts() == null ? List.of() : entity.getProducts().stream().map(productConverter::toDto).toList())
                 .photoLinks(entity.getPhotoLinks())
+                .build();
+    }
+
+    public DentalWorkEntity fromRequest(NewDentalWork newDentalWork, UUID userId) {
+        return DentalWorkEntity.builder()
+                .clinic(newDentalWork.getPatient())
+                .patient(newDentalWork.getPatient())
+                .completeAt(newDentalWork.getCompleteAt())
+                .comment(newDentalWork.getComment())
+                .userId(userId)
                 .build();
     }
 }

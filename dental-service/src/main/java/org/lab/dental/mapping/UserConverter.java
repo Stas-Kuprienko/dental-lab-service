@@ -2,6 +2,7 @@ package org.lab.dental.mapping;
 
 import org.lab.dental.entity.UserEntity;
 import org.lab.dto.User;
+import org.lab.request.NewUser;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,6 +26,13 @@ public class UserConverter {
                 .name(entity.getName())
                 .createdAt(entity.getCreatedAt())
                 .status(entity.getStatus())
+                .build();
+    }
+
+    public UserEntity fromRequest(NewUser newUser) {
+        return UserEntity.builder()
+                .login(newUser.getLogin())
+                .name(newUser.getName())
                 .build();
     }
 }
