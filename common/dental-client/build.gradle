@@ -1,4 +1,7 @@
 
 dependencies {
-
+    compileOnly("org.springframework:spring-web:${spring_version}")
+    compileOnly "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    compileOnly "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+	compileOnly(project(':common:models'))
 }

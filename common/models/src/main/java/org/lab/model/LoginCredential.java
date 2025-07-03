@@ -1,26 +1,25 @@
-package org.lab.dto;
+package org.lab.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import java.time.YearMonth;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class ProfitRecord {
+public class LoginCredential {
+
+    @JsonProperty("token")
+    private AuthToken token;
 
     @JsonProperty("user_id")
     private UUID userId;
 
-    @JsonProperty("value")
-    private double value;
-
-    @JsonProperty("year_month")
-    private YearMonth yearMonth;
+    @JsonProperty("email")
+    private String email;
 
 
-    public ProfitRecord() {}
+    public LoginCredential() {}
 }

@@ -1,7 +1,7 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.ProductEntity;
-import org.lab.dto.Product;
+import org.lab.model.Product;
 import org.lab.request.NewProduct;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;

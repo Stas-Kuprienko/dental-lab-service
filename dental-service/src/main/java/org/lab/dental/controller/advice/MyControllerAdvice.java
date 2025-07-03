@@ -1,12 +1,11 @@
 package org.lab.dental.controller.advice;
 
-import jakarta.validation.ValidationException;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.InternalServiceException;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
-import org.lab.dto.ErrorResponse;
+import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @RestControllerAdvice

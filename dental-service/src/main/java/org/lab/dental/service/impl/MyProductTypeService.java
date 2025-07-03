@@ -8,6 +8,8 @@ import org.lab.dental.repository.ProductTypeRepository;
 import org.lab.dental.service.ProductTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,17 +54,9 @@ public class MyProductTypeService implements ProductTypeService {
     }
 
     @Override
-    public ProductTypeEntity update(ProductTypeEntity updatable) {
-        if (updatable.getId() == null) {
-            throw PersistenceCustomException.updateEntityWithoutId(updatable);
-        }
-        log.info("Entity received to update: {}", updatable);
-        ProductTypeEntity persisted = getByIdAndUserId(updatable.getId(), updatable.getUserId());
-        persisted.setTitle(updatable.getTitle());
-        persisted.setPrice(updatable.getPrice());
-        ProductTypeEntity updated = repository.save(persisted);
-        log.info("Entity updated: {}", updated);
-        return updated;
+    public void update(UUID id, UUID userId, float newPrice) {
+        repository.updatePrice(id, userId, BigDecimal.valueOf(newPrice));
+        log.info("ProductType with ID={} and userID='{}' is updated", id, userId);
     }
 
     @Override

@@ -6,12 +6,11 @@ import org.lab.dental.entity.UserEntity;
 import org.lab.dental.mapping.UserConverter;
 import org.lab.dental.service.UserService;
 import org.lab.dental.util.RequestMappingReader;
-import org.lab.dto.User;
+import org.lab.model.User;
 import org.lab.request.NewUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.util.UUID;
 

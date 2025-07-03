@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Map</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-container {
+            margin-top: 112px;
+            text-align: center;
+        }
+
+        .form-row input {
+            margin: 0 4px;
+        }
+
+        .form-row button {
+            margin-left: 8px;
+        }
+
+        .btn-main, .btn-submit {
+            font-size: 16px;
+            padding: 8px 16px;
+            margin: 6px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-main {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .btn-main:hover {
+            background-color: #0b7dda;
+        }
+
+        .btn-submit {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #3e8e41;
+        }
+
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="menu">
+    <header><strong>DENTAL MECHANIC SERVICE</strong></header>
+    <a th:href="@{/dental/main/new-work}">NEW WORK</a>
+    <a th:href="@{/dental/main/dental-works}">WORK LIST</a>
+    <a th:href="@{/dental/main/product-map}">PRODUCT MAP</a>
+    <a th:href="@{/dental/main/account}">ACCOUNT</a>
+    <a style="float:right;" th:href="@{/dental/main/log-out}" onclick="return confirm('LOG OUT?')">
+        <button>log out</button>
+    </a>
+</nav>
+
+<section class="page-container">
+
+    <h2 style="margin-bottom: 32px;">🛠️ Product Price Map</h2>
+
+    <!-- ➕ Добавление нового продукта -->
+    <form th:action="@{/main/product-map}" method="post" class="form-row">
+        <input type="text" name="title" placeholder="Product title" required />
+        <input type="number" name="price" placeholder="Price" min="0" step="0.01" required />
+        <button type="submit" class="btn-submit">Add Product</button>
+    </form>
+
+    <!-- 📦 Список всех продуктов -->
+    <div class="table" style="margin-top: 32px;">
+        <div class="thead">
+            <div class="tr">
+                <div class="th">PRODUCT</div>
+                <div class="th">PRICE</div>
+                <div class="th">ACTIONS</div>
+            </div>
+        </div>
+        <div class="tbody">
+            <div class="tr" th:each="item : ${map}">
+                <form th:action="@{/main/product-map/edit}" method="post" style="display: contents;">
+                    <input type="hidden" name="id" th:value="${item.id}" />
+                    <div class="td" th:text="${item.title}"></div>
+                    <div class="td">
+                        <input type="number" name="price" th:value="${item.price}" min="0" step="0.01" />
+                    </div>
+                    <div class="td">
+                        <button type="submit" class="btn-submit">Update</button>
+                    </div>
+                </form>
+                <form th:action="@{/main/product-map/delete}" method="post" style="display: contents;">
+                    <input type="hidden" name="id" th:value="${item.id}" />
+                    <div class="td" colspan="3">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Delete this product?')">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</section>
+</body>
+</html>

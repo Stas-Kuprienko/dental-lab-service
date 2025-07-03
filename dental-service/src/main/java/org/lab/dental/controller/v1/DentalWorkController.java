@@ -7,7 +7,7 @@ import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.service.DentalWorkService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dental.util.RequestParamsConverter;
-import org.lab.dto.DentalWork;
+import org.lab.model.DentalWork;
 import org.lab.enums.WorkStatus;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;

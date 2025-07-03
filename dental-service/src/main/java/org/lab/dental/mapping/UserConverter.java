@@ -1,7 +1,7 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.UserEntity;
-import org.lab.dto.User;
+import org.lab.model.User;
 import org.lab.request.NewUser;
 import org.springframework.stereotype.Component;
 

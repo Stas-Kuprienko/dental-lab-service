@@ -6,8 +6,8 @@ import org.lab.dental.entity.ProductTypeEntity;
 import org.lab.dental.mapping.ProductTypeConverter;
 import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.util.RequestMappingReader;
-import org.lab.dto.ProductMap;
-import org.lab.dto.ProductType;
+import org.lab.model.ProductMap;
+import org.lab.model.ProductType;
 import org.lab.request.NewProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -66,15 +66,13 @@ public class ProductMapController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductType> updateProductType(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateProductType(@RequestHeader("X-USER-ID") UUID userId,
                                                          @PathVariable("id") UUID id,
-                                                         @RequestBody @Valid ProductType updatable) {
+                                                         @RequestBody Float newPrice) {
 
-        log.info("From user '{}' received request: {}", userId, updatable);
-        ProductTypeEntity entity = converter.toEntity(updatable, userId);
-        entity.setId(id);
-        entity = productTypeService.update(entity);
-        return ResponseEntity.ok(converter.toDto(entity));
+        log.info("From user '{}' received request to update productType ID={}", userId, id);
+        productTypeService.update(id, userId, newPrice);
+        return ResponseEntity.ok().build();
     }
 
 

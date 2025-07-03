@@ -1,7 +1,7 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.dto.DentalWork;
+import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

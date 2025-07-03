@@ -1,8 +1,8 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.ProductTypeEntity;
-import org.lab.dto.ProductMap;
-import org.lab.dto.ProductType;
+import org.lab.model.ProductMap;
+import org.lab.model.ProductType;
 import org.lab.request.NewProductType;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;

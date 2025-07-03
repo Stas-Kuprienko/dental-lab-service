@@ -28,6 +28,12 @@ dependencies {
 	// s3
     implementation("io.minio:minio:${minio_version}")
 
+	// xlsx
+    implementation "org.apache.poi:poi-ooxml:${apache_poi_version}"
+
+    //jwt
+	implementation 'com.auth0:java-jwt:4.4.0'
+
 	// event-driving
 	implementation 'org.springframework.kafka:spring-kafka'
 
