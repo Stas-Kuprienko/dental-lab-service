@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -27,6 +28,12 @@ public class NewDentalWork {
 
     @JsonProperty("comment")
     private String comment;
+
+    @JsonProperty("product_id")
+    private UUID productId;
+
+    @JsonProperty("quantity")
+    private Integer quantity;
 
 
     public NewDentalWork() {}

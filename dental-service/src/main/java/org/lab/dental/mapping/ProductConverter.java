@@ -2,7 +2,6 @@ package org.lab.dental.mapping;
 
 import org.lab.dental.entity.ProductEntity;
 import org.lab.model.Product;
-import org.lab.request.NewProduct;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
@@ -27,14 +26,6 @@ public class ProductConverter {
                 .quantity(entity.getQuantity())
                 .price(entity.getPrice().floatValue())
                 .dentalWorkId(entity.getDentalWorkId())
-                .build();
-    }
-
-    public ProductEntity fromRequest(NewProduct newProduct) {
-        return ProductEntity.builder()
-                .title(newProduct.getTitle())
-                .price(BigDecimal.valueOf(newProduct.getPrice()))
-                .quantity(newProduct.getQuantity())
                 .build();
     }
 }

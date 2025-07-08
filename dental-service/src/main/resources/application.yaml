@@ -1,8 +1,16 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: dental-lab-service
   config:
     import: "optional:configserver:"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
   datasource:
     url: jdbc:postgresql://${project.variables.datasource.url}/${project.variables.datasource.database}
     username: ${project.variables.datasource.username}

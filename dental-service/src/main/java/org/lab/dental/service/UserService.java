@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface UserService {
 
-    UserEntity create(UserEntity user);
+    UserEntity create(String login, String password, String name);
 
     UserEntity getById(UUID id);
 }

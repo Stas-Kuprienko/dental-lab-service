@@ -3,7 +3,6 @@ package org.lab.dental.controller.v1;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.mapping.ProductConverter;
 import org.lab.dental.service.DentalWorkService;
@@ -39,8 +38,9 @@ public class ProductController {
                                                  @RequestBody @Valid NewProduct newProduct) {
 
         log.info("From user '{}' received request to add: {}", userId, newProduct);
-        ProductEntity product = productConverter.fromRequest(newProduct);
-        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, product);
+        UUID productTypeId = newProduct.getProduct();
+        Integer quantity = newProduct.getQuantity();
+        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, productTypeId, quantity);
         return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
     }
 

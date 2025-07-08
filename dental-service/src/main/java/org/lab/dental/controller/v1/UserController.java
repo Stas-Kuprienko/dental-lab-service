@@ -35,8 +35,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> create(@RequestBody @Valid NewUser newUser) {
-        UserEntity entity = userConverter.fromRequest(newUser);
-        entity = userService.create(entity);
+        UserEntity entity = userService.create(newUser.getLogin(), newUser.getPassword(), newUser.getName());
         return ResponseEntity.created(URI.create(URL + '/' + entity.getId())).body(userConverter.toDto(entity));
     }
 

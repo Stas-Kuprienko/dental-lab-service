@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🦷</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+<!-- 🔝 Меню -->
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a th:href="@{/main/dental-works/new}">NEW WORK</a>
+    <a th:href="@{/main/dental-works}">WORK LIST</a>
+    <a th:href="@{/main/product-map}">PRODUCT MAP</a>
+    <a th:href="@{/main/user}">ACCOUNT</a>
+    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Вы действительно хотите выйти?')">
+        <button>выйти</button>
+    </a>
+</nav>
+
+<section>
+    <!-- 📅 Заголовок месяца -->
+    <h3><strong th:text="${headerMonth.value()}">Июль - 2025</strong></h3>
+
+    <!-- 🟦 Легенда -->
+    <h4 style="float: left;">
+        <label style="background-color: #002d73; border: 5px solid #002d73">ВЫПОЛНЕНО</label> &emsp;
+        <label style="background-color: #075700; border: 5px solid #075700">ОПЛАЧЕНО</label>
+    </h4>
+
+    <!-- 🧾 Таблица -->
+    <div class="table">
+        <div class="thead" style="font-size: 65%;">
+            <div class="tr">
+                <div class="th">ПАЦИЕНТ</div>
+                <div class="th">КЛИНИКА</div>
+                <div class="th" th:each="item : ${map}" th:text="${item.title.toUpperCase()}">ПРОДУКТ</div>
+                <div class="th">ДАТА</div>
+                <div class="th">ПРИНЯТО</div>
+            </div>
+        </div>
+
+        <div class="tbody">
+            <a th:each="work : ${works}"
+               th:class="${work.status == 'COMPLETED'} ? 'tr-closed' : (${work.status == 'PAID'} ? 'tr-paid' : 'tr')"
+               th:href="@{'/main/dental-works/' + ${work.id}}">
+
+                <div class="td" th:text="${work.patient}">Пациент</div>
+                <div class="td" th:text="${work.clinic}">Клиника</div>
+
+                <!-- Продукты -->
+                <div class="td"
+                     th:each="item : ${map}"
+                     th:text="${work.quantityFor(item.title) ?: ' '}">
+                    0
+                </div>
+
+                <div class="td" th:text="${work.completeAt}">01-01-2000</div>
+                <div class="td" th:text="${work.acceptedAt}">01-01-2000</div>
+            </a>
+        </div>
+    </div>
+    </div>
+</section>
+
+<!-- ⏬ Нижнее меню -->
+<nav class="low-menu">
+    <!-- PROFIT -->
+    <a id="profit-label"><button>посчитать доход</button></a>
+    <div id="profit-form" style="display:none;">
+        <form method="post" th:action="@{/main/profit}">
+            <input class="medium-button" type="submit" value="текущий">
+            <input type="hidden" name="year" th:value="${headerMonth.year}">
+            <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
+        </form>
+        <form method="post" th:action="@{/main/profit}">
+            <input class="medium-button" type="submit" value="за всё время">
+        </form>
+    </div>
+
+    <!-- SEARCH -->
+    <a id="search-label"><button>поиск записи</button></a>
+    <div id="search-form" style="display:none;">
+        <form method="post" th:action="@{/main/dental-works/search}">
+            <input type="text" name="patient" placeholder="пациент">
+            <input type="text" name="clinic" placeholder="клиника">
+            <input class="medium-button" type="submit" value="найти">
+        </form>
+    </div>
+
+    <!-- SELECT MONTH -->
+    <a id="monthly-label"><button>другой месяц</button></a>
+    <div id="monthly-form" style="display:none;">
+        <form method="get" th:action="@{/main/dental-works}">
+            <input type="month" name="year-month"
+                   th:value="${headerMonth.year + '-' + headerMonth.monthValue}">
+            <input class="medium-button" type="submit" value="выбрать">
+        </form>
+    </div>
+
+    <!-- SORT -->
+    <a id="sort-label"><button>сортировать</button></a>
+    <div id="sort-form" style="display:none;">
+        <form method="post" th:action="@{/main/dental-works/sorting}">
+            <input type="hidden" name="year" th:value="${headerMonth.nowYear}">
+            <input type="hidden" name="month" th:value="${headerMonth.nowMonthValue}">
+            <input class="medium-button" type="submit" value="текущий">
+        </form>
+        <form method="post" th:action="@{/main/dental-works/sorting}">
+            <input type="hidden" name="year" th:value="${headerMonth.prevYear}">
+            <input type="hidden" name="month" th:value="${headerMonth.prevMonthValue}">
+            <input class="medium-button" type="submit" value="прошлый">
+        </form>
+        <form method="post" th:action="@{/main/dental-works/sorting}">
+            <input type="hidden" name="year" th:value="${headerMonth.year}">
+            <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
+            <input type="hidden" name="method" value="put">
+            <input class="medium-button" type="submit" value="все оплачены">
+        </form>
+    </div>
+
+    <!-- DOWNLOAD -->
+    <a>
+        <form method="get" th:action="@{/dental/main/reports/download}">
+            <input class="low-button" type="submit" value="скачать">
+            <input type="hidden" name="year" th:value="${headerMonth.year}">
+            <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
+        </form>
+    </a>
+</nav>
+
+<!-- ⚙️ Скрипты -->
+<script>
+    // Табличные ряды — клик по строке
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.row-clickable').forEach(row => {
+            row.addEventListener('click', () => {
+                const href = row.getAttribute('data-href');
+                if (href) window.location.href = href;
+            });
+        });
+
+        // Переключалки в нижнем меню
+        $('#search-label').click(() => $('#search-form').toggle("show"));
+        $('#profit-label').click(() => $('#profit-form').toggle("show"));
+        $('#sort-label').click(() => $('#sort-form').toggle("show"));
+        $('#monthly-label').click(() => $('#monthly-form').toggle("show"));
+    });
+</script>
+
+</body>
+</html>

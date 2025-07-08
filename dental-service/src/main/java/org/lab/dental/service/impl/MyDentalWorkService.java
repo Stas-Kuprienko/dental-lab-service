@@ -2,12 +2,14 @@ package org.lab.dental.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.ProductEntity;
+import org.lab.dental.entity.ProductTypeEntity;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.repository.DentalWorkRepository;
 import org.lab.dental.repository.ProductRepository;
 import org.lab.dental.service.DentalWorkService;
+import org.lab.dental.service.ProductTypeService;
 import org.lab.enums.WorkStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -24,11 +26,15 @@ public class MyDentalWorkService implements DentalWorkService {
 
     private final DentalWorkRepository dentalWorkRepository;
     private final ProductRepository productRepository;
+    private final ProductTypeService productTypeService;
 
     @Autowired
-    public MyDentalWorkService(DentalWorkRepository dentalWorkRepository, ProductRepository productRepository) {
+    public MyDentalWorkService(DentalWorkRepository dentalWorkRepository,
+                               ProductRepository productRepository,
+                               ProductTypeService productTypeService) {
         this.dentalWorkRepository = dentalWorkRepository;
         this.productRepository = productRepository;
+        this.productTypeService = productTypeService;
     }
 
 
@@ -123,9 +129,18 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
-    public DentalWorkEntity addProduct(Long id, UUID userId, ProductEntity product) {
+    public DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity) {
+        if (productTypeId == null || quantity == null) {
+            throw PersistenceCustomException.nullParameters("Product", "productTypeId", "quantity");
+        }
         DentalWorkEntity dentalWork = getByIdAndUserId(id, userId);
-        product.setDentalWorkId(id);
+        ProductTypeEntity productType = productTypeService.getByIdAndUserId(productTypeId, userId);
+        ProductEntity product = ProductEntity.builder()
+                .title(productType.getTitle())
+                .price(productType.getPrice())
+                .quantity(quantity)
+                .dentalWorkId(id)
+                .build();
         for (ProductEntity p : dentalWork.getProducts()) {
             if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
                 p.setQuantity(p.getQuantity() + product.getQuantity());
@@ -136,6 +151,30 @@ public class MyDentalWorkService implements DentalWorkService {
         }
         dentalWork.getProducts().add(productRepository.save(product));
         log.info("Product '{}' added to '{}'", product, dentalWork);
+        return dentalWork;
+    }
+
+    @Override
+    public DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity) {
+        log.info("Entity received to add product: {}", dentalWork);
+        if (productTypeId == null || quantity == null) {
+            log.info("Nothing to add for entity: {}", dentalWork);
+            return dentalWork;
+        }
+        ProductTypeEntity productType = productTypeService.getByIdAndUserId(productTypeId, dentalWork.getUserId());
+        ProductEntity product = ProductEntity.builder()
+                .dentalWorkId(dentalWork.getId())
+                .title(productType.getTitle())
+                .price(productType.getPrice())
+                .quantity(quantity)
+                .build();
+        product = productRepository.save(product);
+        log.info("Product '{}' added to '{}'", product, dentalWork);
+        if (dentalWork.getProducts() == null) {
+            dentalWork.setProducts(List.of(product));
+        } else {
+            dentalWork.getProducts().add(product);
+        }
         return dentalWork;
     }
 

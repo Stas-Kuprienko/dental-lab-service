@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>DENTAL MECHANIC SERVICE</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+<body>
+<!-- 🔝 Меню -->
+<nav class="menu">
+  <header><strong>DENTAL MECHANIC SERVICE</strong></header>
+  <a th:href="@{/main/dental-works/new}">NEW WORK</a>
+  <a th:href="@{/main/dental-works}">WORK LIST</a>
+  <a th:href="@{/main/product-map}">PRODUCT MAP</a>
+  <a th:href="@{/main/user}">ACCOUNT</a>
+  <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Вы действительно хотите выйти?')">
+    <button>выйти</button>
+  </a>
+</nav>
+
+<!-- 📝 Форма -->
+<section>
+  <h2>Запись новой работы:</h2>
+
+  <form th:action="@{/main/dental-works}" method="post" class="work">
+    <!-- Пациент -->
+    <label for="patient">пациент:</label><br>
+    <input type="text" id="patient" name="patient" required><br>
+
+    <!-- Клиника -->
+    <label for="clinic">клиника:</label><br>
+    <input type="text" id="clinic" name="clinic" required><br>
+
+    <!-- Вид работы -->
+    <label for="product">вид работы:</label><br>
+    <select id="product" name="productId"
+            style="width: 230px; height: 30px; font-size: 22px;" required>
+      <option value=""> </option>
+      <option th:each="item : ${map}"
+              th:value="${item.id}"
+              th:text="${item.title}">
+      </option>
+    </select><br>
+
+    <!-- Кол-во -->
+    <label for="quantity">количество:</label><br>
+    <input type="number" id="quantity" name="quantity" min="0" max="32"><br>
+
+    <!-- Дата -->
+    <label for="complete">дата назначения:</label><br>
+    <input type="date" id="complete" name="completeAt"><br>
+
+    <!-- 💬 Комментарий -->
+    <label for="comment">комментарий:</label><br>
+    <textarea id="comment" name="comment" rows="3" cols="50"
+              placeholder="Введите комментарий (необязательно)..."
+              style="font-size: 18px;"></textarea><br>
+
+    <!-- Кнопка -->
+    <br>
+    <button type="submit" class="medium-button">СОХРАНИТЬ</button>
+  </form>
+</section>
+</body>
+</html>

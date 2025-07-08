@@ -31,7 +31,7 @@ public class DentalWork {
     private LocalDate completeAt;
 
     @JsonProperty("status")
-    private WorkStatus status;
+    private String status;
 
     @JsonProperty("comment")
     private String comment;
@@ -47,4 +47,13 @@ public class DentalWork {
 
 
     public DentalWork() {}
+
+
+    public Integer quantityFor(String productKey) {
+        return products.stream()
+                .filter(p -> p.getTitle().equals(productKey))
+                .map(Product::getQuantity)
+                .findFirst()
+                .orElse(null);
+    }
 }

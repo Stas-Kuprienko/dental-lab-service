@@ -1,6 +1,7 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.DentalWorkEntity;
+import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class DentalWorkConverter {
                 .userId(dto.getUserId())
                 .clinic(dto.getClinic())
                 .patient(dto.getPatient())
-                .status(dto.getStatus())
+                .status(WorkStatus.valueOf(dto.getStatus()))
                 .acceptedAt(dto.getAcceptedAt())
                 .completeAt(dto.getCompleteAt())
                 .comment(dto.getComment())
@@ -39,7 +40,7 @@ public class DentalWorkConverter {
                 .userId(entity.getUserId())
                 .clinic(entity.getClinic())
                 .patient(entity.getPatient())
-                .status(entity.getStatus())
+                .status(entity.getStatus().name())
                 .acceptedAt(entity.getAcceptedAt())
                 .completeAt(entity.getCompleteAt())
                 .comment(entity.getComment())

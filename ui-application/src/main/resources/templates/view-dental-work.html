@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🦷</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+<body>
+<!-- 🔝 Меню -->
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a th:href="@{/main/dental-works/new}">NEW WORK</a>
+    <a th:href="@{/main/dental-works}">WORK LIST</a>
+    <a th:href="@{/main/product-map}">PRODUCT MAP</a>
+    <a th:href="@{/main/user}">ACCOUNT</a>
+    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Вы действительно хотите выйти?')">
+        <button>выйти</button>
+    </a>
+</nav>
+
+<section style="font-size:22px;">
+    <!-- PATIENT -->
+    <div class="work">
+        <label style="font-size:80%;">пациент:</label><br>
+        <label id="patient-label" th:text="${work.patient}">Иванов</label>
+        <form id="patient-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="text" name="patient" th:value="${work.patient}" required />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="Сохранить"/>
+        </form>
+    </div>
+
+    <!-- CLINIC -->
+    <div class="work">
+        <label style="font-size:80%;">клиника:</label><br>
+        <label id="clinic-label" th:text="${work.clinic}">Клиника</label>
+        <form id="clinic-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="text" name="clinic" th:value="${work.clinic}" required />
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="Сохранить" />
+        </form>
+    </div>
+
+    <!-- COMPLETE -->
+    <div class="work">
+        <label style="font-size:80%;">дата назначения:</label><br>
+        <label id="complete-label" th:text="${work.completeAt}">2025-07-01</label>
+        <form id="complete-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="date" name="completeAt" th:value="${work.completeAt}" required />
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="Сохранить" />
+        </form>
+    </div>
+
+    <!-- STATUS -->
+    <div class="work">
+        <label style="font-size:80%;">статус:</label><br>
+        <label id="status-label" th:text="${work.status}">make</label>
+        <form id="status-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <select name="status">
+                <option value="MAKING">делается</option>
+                <option value="COMPLETED">выполнено</option>
+                <option value="PAID">оплачено</option>
+            </select>
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="Сохранить" />
+        </form>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="work">
+        <label>ПРОДУКТЫ:</label><br>
+        <a class="tr">
+            <label id="product-label" class="td">+ новый продукт</label>
+        </a>
+        <!-- Add product form -->
+        <form id="add-product" th:action="@{'/main/dental-works/' + ${work.id} + '/products/new'}" method="post" style="display:none;">
+            <label for="product">продукт:</label>
+            <select id="product" name="product" required>
+                <option th:each="item : ${map}"
+                        th:value="${item.id}"
+                        th:text="${item.title}">Product</option>
+            </select>
+            <label for="quantity">количество:</label>
+            <input style="width:64px;" type="number" id="quantity" name="quantity" min="0" max="32" required/>
+            <button type="submit" name="id" th:value="${work.id}">добавить</button>
+        </form>
+
+        <!-- Existing products -->
+        <form th:action="@{'/main/dental-works/' + ${work.id} + '/products/delete'}" method="post">
+            <div th:each="product : ${work.products}" class="tr">
+                <div class="td" style="width:100%;" th:text="${product.title + ' - ' + product.quantity}"></div>
+                <button type="submit"
+                        th:name="product"
+                        th:value="${product.id}"
+                        onclick="return confirm('Вы действительно хотите удалить продукт?')">удалить</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- COMMENT -->
+    <div class="work">
+        <label style="font-size:80%;">комментарий:</label> &emsp;
+        <button id="comment-label">ввести</button><br>
+        <label th:text="${work.comment}">Комментарий</label>
+        <form id="comment-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <textarea name="value" th:text="${work.comment}"></textarea>
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="Сохранить" />
+
+        </form>
+    </div>
+
+    <!-- CREATED / DELETE -->
+    <div class="work">
+        <label style="font-size:80%;">принято:</label><br>
+        <span th:text="${work.acceptedAt}">01-01-2000</span><br><br>
+
+        <!-- Форма фото -->
+        <form th:action="@{/main/photo}" method="get" style="display:none;">
+            <button type="submit">OPEN PHOTOS</button>
+        </form>
+
+        <!-- Удалить работу -->
+        <form th:action="@{'/main/dental-works/' + ${work.id} + '/delete'}" method="post">
+            <button type="submit" onclick="return confirm('Вы действительно хотите удалить запись?')">УДАЛИТЬ</button>
+        </form>
+    </div>
+</section>
+
+<!-- ⚙️ JS: раскрытие форм -->
+<script>
+    $(function () {
+        $('#patient-label').click(() => $('#patient-form').toggle("show"));
+        $('#clinic-label').click(() => $('#clinic-form').toggle("show"));
+        $('#complete-label').click(() => $('#complete-form').toggle("show"));
+        $('#status-label').click(() => $('#status-form').toggle("show"));
+        $('#comment-label').click(() => $('#comment-form').toggle("show"));
+        $('#product-label').click(() => $('#add-product').toggle("show"));
+    });
+</script>
+</body>
+</html>

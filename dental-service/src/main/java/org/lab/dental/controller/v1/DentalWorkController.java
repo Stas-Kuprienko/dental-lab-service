@@ -7,8 +7,8 @@ import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.service.DentalWorkService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dental.util.RequestParamsConverter;
-import org.lab.model.DentalWork;
 import org.lab.enums.WorkStatus;
+import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +44,7 @@ public class DentalWorkController {
         log.info("From user '{}' received request: {}", userId, newDentalWork);
         DentalWorkEntity entity = dentalWorkConverter.fromRequest(newDentalWork, userId);
         entity = dentalWorkService.create(entity);
+        entity = dentalWorkService.addProduct(entity, newDentalWork.getProductId(), newDentalWork.getQuantity());
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId())).body(dentalWorkConverter.toDto(entity));
     }
