@@ -5,6 +5,7 @@ import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
 
@@ -77,6 +78,19 @@ public class DentalWorkService {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
+    public List<DentalWork> searchDentalWorks(UUID userId, @Nullable String clinic, @Nullable String patient) {
+        return restClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search")
+                        .queryParam("clinic", clinic)
+                        .queryParam("patient", patient)
+                        .build())
+                .header(DentalLabRestClient.HEADER, userId.toString())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
     public DentalWork update(UUID userId, DentalWork updatable) {
         return restClient
                 .put()
@@ -87,4 +101,15 @@ public class DentalWorkService {
                 .body(DentalWork.class);
     }
 
+    public void delete(UUID userId, long id) {
+        ResponseEntity<Void> response = restClient
+                .delete()
+                .uri(DentalLabRestClient.uriById(id))
+                .header(DentalLabRestClient.HEADER, userId.toString())
+                .retrieve()
+                .toBodilessEntity();
+        if (response.getStatusCode().isError()) {
+            throw new RuntimeException();
+        }
+    }
 }

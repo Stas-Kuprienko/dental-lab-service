@@ -9,7 +9,7 @@ import org.lab.model.DentalWork;
 import org.lab.model.ProductType;
 import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
-import org.lab.ui_application.util.HeaderMonth;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +18,19 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/main/dental-works")
-public class DentalWorkController extends MvcControllerUtil {
+public class DentalWorkItemController {
 
+    private static final String ATTRIBUTE_KEY_MAP = "map";
     private static final String VIEW_DENTAL_WORK = "view-dental-work";
-    private final ProductMapService productMapClient;
+
+    private final ProductMapService productMapService;
     private final DentalWorkService dentalWorkService;
     private final ProductService productService;
 
-    public DentalWorkController(DentalLabRestClient dentalLabRestClient) {
-        productMapClient = dentalLabRestClient.PRODUCT_MAP;
+
+    @Autowired
+    public DentalWorkItemController(DentalLabRestClient dentalLabRestClient) {
+        productMapService = dentalLabRestClient.PRODUCT_MAP;
         dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
         productService = dentalLabRestClient.PRODUCTS;
     }
@@ -38,7 +42,7 @@ public class DentalWorkController extends MvcControllerUtil {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
+            items = productMapService.findAll(userId).getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
@@ -53,7 +57,7 @@ public class DentalWorkController extends MvcControllerUtil {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
+            items = productMapService.findAll(userId).getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
@@ -66,31 +70,13 @@ public class DentalWorkController extends MvcControllerUtil {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
+            items = productMapService.findAll(userId).getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
         DentalWork work = dentalWorkService.findById(userId, id);
         model.addAttribute("work", work);
         return VIEW_DENTAL_WORK;
-    }
-
-    @GetMapping
-    public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
-                              HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
-        @SuppressWarnings("unchecked")
-        List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
-        if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
-            session.setAttribute(ATTRIBUTE_KEY_MAP, items);
-        }
-        model.addAttribute(ATTRIBUTE_KEY_MAP, items);
-        HeaderMonth headerMonth = new HeaderMonth(yearMonth);
-        List<DentalWork> works = dentalWorkService.findAllByMonth(userId, headerMonth.getYear(), headerMonth.getMonthValue());
-        model.addAttribute("headerMonth", headerMonth);
-        model.addAttribute("works", works);
-        return "dental-works";
     }
 
     @PostMapping("/{id}/products/new")
@@ -101,7 +87,7 @@ public class DentalWorkController extends MvcControllerUtil {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
+            items = productMapService.findAll(userId).getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
@@ -114,12 +100,20 @@ public class DentalWorkController extends MvcControllerUtil {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll(userId).getEntries();
+            items = productMapService.findAll(userId).getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
+        dentalWork.setId(id);
         DentalWork updated = dentalWorkService.update(userId, dentalWork);
         model.addAttribute("work", updated);
         return VIEW_DENTAL_WORK;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteDentalWork(@PathVariable("id") Long id) {
+        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        dentalWorkService.delete(userId, id);
+        return MvcControllerUtil.REDIRECT + "dental-works";
     }
 }

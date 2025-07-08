@@ -9,20 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
 
 @Controller
 @RequestMapping("/main/product-map")
-public class ProductMapController extends MvcControllerUtil {
+public class ProductMapController {
+
+    private static final String ATTRIBUTE_KEY_MAP = "map";
+    private static final String PRODUCT_MAP = "product-map";
 
     private final ProductMapService productMapClient;
+
 
     @Autowired
     public ProductMapController(DentalLabRestClient dentalLabRestClient) {
         this.productMapClient = dentalLabRestClient.PRODUCT_MAP;
     }
+
 
     @GetMapping
     public String productMapPage(HttpSession session, Model model) {
@@ -34,7 +38,7 @@ public class ProductMapController extends MvcControllerUtil {
         }
         session.setAttribute("userId", userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
-        return "product-map";
+        return PRODUCT_MAP;
     }
 
     @PostMapping
@@ -49,7 +53,7 @@ public class ProductMapController extends MvcControllerUtil {
             items.add(productType);
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
-        return REDIRECT + "/main/product-map";
+        return PRODUCT_MAP;
     }
 
     @PostMapping("/{id}/edit")
@@ -58,7 +62,7 @@ public class ProductMapController extends MvcControllerUtil {
                               HttpSession session) {
         UUID userId = (UUID) session.getAttribute("userId");
         productMapClient.updateProductType(userId, id, price);
-        return REDIRECT + "/main/product-map";
+        return MvcControllerUtil.REDIRECT + "/main/product-map";
     }
 
     @PostMapping("/{id}/delete")
@@ -66,6 +70,6 @@ public class ProductMapController extends MvcControllerUtil {
                                 HttpSession session) {
         UUID userId = (UUID) session.getAttribute("userId");
         productMapClient.delete(userId, id);
-        return REDIRECT + "/main/product-map";
+        return MvcControllerUtil.REDIRECT + "/main/product-map";
     }
 }
