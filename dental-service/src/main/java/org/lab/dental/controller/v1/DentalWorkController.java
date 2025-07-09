@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -112,17 +111,6 @@ public class DentalWorkController {
 
         log.info("From user '{}' received request to set 'status': {}", userId, status);
         DentalWorkEntity dentalWork = dentalWorkService.updateStatus(id, userId, status);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
-    }
-
-
-    @PatchMapping("/{id}/set-complete-{completeAt}")
-    public ResponseEntity<DentalWork> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
-                                                   @PathVariable("id") Long id,
-                                                   @PathVariable("completeAt") LocalDate completeAt) {
-
-        log.info("From user '{}' received request to set 'completeAt': {}", userId, completeAt);
-        DentalWorkEntity dentalWork = dentalWorkService.updateCompleteAt(id, userId, completeAt);
         return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
     }
 

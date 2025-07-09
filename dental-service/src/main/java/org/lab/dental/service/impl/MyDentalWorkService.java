@@ -122,13 +122,6 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
-    public DentalWorkEntity updateCompleteAt(Long id, UUID userId, LocalDate completeAt) {
-        dentalWorkRepository.updateCompleteAt(id, userId, completeAt);
-        log.info("Updated entity 'completeAt': {}", completeAt);
-        return getByIdAndUserId(id, userId);
-    }
-
-    @Override
     public DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity) {
         if (productTypeId == null || quantity == null) {
             throw PersistenceCustomException.nullParameters("Product", "productTypeId", "quantity");

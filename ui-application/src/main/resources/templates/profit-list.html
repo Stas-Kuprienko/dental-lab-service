@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>📊 Статистика прибыли</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+<!-- 🔝 Меню -->
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a th:href="@{/main/dental-works/new}">NEW WORK</a>
+    <a th:href="@{/main/dental-works}">WORK LIST</a>
+    <a th:href="@{/main/product-map}">PRODUCT MAP</a>
+    <a th:href="@{/main/user}">ACCOUNT</a>
+    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Log out?')">
+        <button>log out</button>
+    </a>
+</nav>
+
+<!-- 📈 Основной блок -->
+<section>
+    <h2>📊 Статистика по месяцам</h2>
+
+    <div class="table">
+        <div class="thead" style="font-size: 65%;">
+            <div class="tr">
+                <div class="th">ГОД</div>
+                <div class="th">МЕСЯЦ</div>
+                <div class="th">ПРИБЫЛЬ</div>
+            </div>
+        </div>
+
+        <div class="tbody">
+            <a class="tr"
+               th:each="record : ${profit}"
+               th:href="@{'/main/dental-works?year-month=' + ${record.year} + '-' + ${record.monthValue}}">
+                <div class="td" th:text="${record.year}">2025</div>
+                <div class="td" th:text="${record.monthToString}">JULY</div>
+                <div class="td" th:text="${record.value}">1000</div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ⬇️ Нижнее меню -->
+<nav class="low-menu">
+    <a>
+        <form method="get" th:action="@{/main/reports/profit}">
+            <input class="low-button" type="submit" value="скачать статистику за год">
+        </form>
+    </a>
+</nav>
+
+</body>
+</html>

@@ -72,12 +72,12 @@
     <!-- PROFIT -->
     <a id="profit-label"><button>посчитать доход</button></a>
     <div id="profit-form" style="display:none;">
-        <form method="post" th:action="@{/main/profit}">
+        <form method="get" th:action="@{/main/reports/profit}">
             <input class="medium-button" type="submit" value="текущий">
             <input type="hidden" name="year" th:value="${headerMonth.year}">
             <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
         </form>
-        <form method="post" th:action="@{/main/profit}">
+        <form method="get" th:action="@{/main/profit}">
             <input class="medium-button" type="submit" value="за всё время">
         </form>
     </div>
@@ -125,7 +125,7 @@
 
     <!-- DOWNLOAD -->
     <a>
-        <form method="get" th:action="@{/dental/main/reports/download}">
+        <form method="get" th:action="@{/main/reports/works/download}">
             <input class="low-button" type="submit" value="скачать">
             <input type="hidden" name="year" th:value="${headerMonth.year}">
             <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
