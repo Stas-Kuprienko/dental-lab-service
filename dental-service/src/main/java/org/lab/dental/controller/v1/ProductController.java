@@ -4,13 +4,13 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
-import org.lab.dental.mapping.ProductConverter;
 import org.lab.dental.service.DentalWorkService;
 import org.lab.model.DentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
@@ -20,15 +20,12 @@ public class ProductController {
 
     private final DentalWorkService dentalWorkService;
     private final DentalWorkConverter dentalWorkConverter;
-    private final ProductConverter productConverter;
 
     @Autowired
     public ProductController(DentalWorkService dentalWorkService,
-                             DentalWorkConverter dentalWorkConverter,
-                             ProductConverter productConverter) {
+                             DentalWorkConverter dentalWorkConverter) {
         this.dentalWorkService = dentalWorkService;
         this.dentalWorkConverter = dentalWorkConverter;
-        this.productConverter = productConverter;
     }
 
 
@@ -40,7 +37,8 @@ public class ProductController {
         log.info("From user '{}' received request to add: {}", userId, newProduct);
         UUID productTypeId = newProduct.getProduct();
         Integer quantity = newProduct.getQuantity();
-        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, productTypeId, quantity);
+        LocalDate completeAt = newProduct.getCompleteAt();
+        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, productTypeId, quantity, completeAt);
         return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
     }
 

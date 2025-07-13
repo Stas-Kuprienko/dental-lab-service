@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -26,6 +26,12 @@ public class Product {
 
     @JsonProperty("dental_work_id")
     private long dentalWorkId;
+
+    @JsonProperty("accepted_at")
+    private LocalDate acceptedAt;
+
+    @JsonProperty("complete_at")
+    private LocalDate completeAt;
 
 
     public Product() {}

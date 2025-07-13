@@ -122,7 +122,7 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
-    public DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity) {
+    public DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity, LocalDate completeAt) {
         if (productTypeId == null || quantity == null) {
             throw PersistenceCustomException.nullParameters("Product", "productTypeId", "quantity");
         }
@@ -133,22 +133,26 @@ public class MyDentalWorkService implements DentalWorkService {
                 .price(productType.getPrice())
                 .quantity(quantity)
                 .dentalWorkId(id)
+                .completeAt(completeAt)
+                .acceptedAt(LocalDate.now())
                 .build();
         for (ProductEntity p : dentalWork.getProducts()) {
             if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
                 p.setQuantity(p.getQuantity() + product.getQuantity());
+                p.setCompleteAt(completeAt);
                 ProductEntity updated = productRepository.save(p);
                 log.info("Product '{}' updated for '{}'", updated, dentalWork);
                 return dentalWork;
             }
         }
+        setCompleteAtIfIsLater(dentalWork, completeAt);
         dentalWork.getProducts().add(productRepository.save(product));
         log.info("Product '{}' added to '{}'", product, dentalWork);
         return dentalWork;
     }
 
     @Override
-    public DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity) {
+    public DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt) {
         log.info("Entity received to add product: {}", dentalWork);
         if (productTypeId == null || quantity == null) {
             log.info("Nothing to add for entity: {}", dentalWork);
@@ -160,9 +164,12 @@ public class MyDentalWorkService implements DentalWorkService {
                 .title(productType.getTitle())
                 .price(productType.getPrice())
                 .quantity(quantity)
+                .completeAt(completeAt)
+                .acceptedAt(LocalDate.now())
                 .build();
         product = productRepository.save(product);
         log.info("Product '{}' added to '{}'", product, dentalWork);
+        setCompleteAtIfIsLater(dentalWork, completeAt);
         if (dentalWork.getProducts() == null) {
             dentalWork.setProducts(List.of(product));
         } else {
@@ -182,5 +189,13 @@ public class MyDentalWorkService implements DentalWorkService {
     public void delete(Long id, UUID userId) {
         dentalWorkRepository.deleteByIdAndUserId(id, userId);
         log.info("DentalWork with ID={} and userID='{}' is deleted", id, userId);
+    }
+
+
+    private void setCompleteAtIfIsLater(DentalWorkEntity dentalWork, LocalDate completeAt) {
+        if (dentalWork.getCompleteAt().isBefore(completeAt)) {
+            dentalWorkRepository.updateCompleteAt(dentalWork.getId(), dentalWork.getUserId(), completeAt);
+            dentalWork.setCompleteAt(completeAt);
+        }
     }
 }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -20,6 +21,10 @@ public class NewProduct {
     @Positive
     @JsonProperty("quantity")
     private int quantity;
+
+    @NotNull
+    @JsonProperty("complete_at")
+    private LocalDate completeAt;
 
 
     public NewProduct() {}

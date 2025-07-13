@@ -30,7 +30,7 @@ public class ProductMapController {
 
     @GetMapping
     public String productMapPage(HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -45,7 +45,7 @@ public class ProductMapController {
     public String addProduct(@RequestParam("title") String title,
                              @RequestParam("price") float price,
                              HttpSession session) {
-        UUID userId = (UUID) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         ProductType productType = productMapClient.create(userId, new NewProductType(title, price));
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
@@ -60,7 +60,7 @@ public class ProductMapController {
     public String editProduct(@PathVariable("id") UUID id,
                               @RequestParam("price") float price,
                               HttpSession session) {
-        UUID userId = (UUID) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         productMapClient.updateProductType(userId, id, price);
         return MvcControllerUtil.REDIRECT + "/main/product-map";
     }
@@ -68,7 +68,7 @@ public class ProductMapController {
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable("id") UUID id,
                                 HttpSession session) {
-        UUID userId = (UUID) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         productMapClient.delete(userId, id);
         return MvcControllerUtil.REDIRECT + "/main/product-map";
     }

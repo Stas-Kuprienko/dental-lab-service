@@ -11,10 +11,13 @@ import org.lab.dental.service.CredentialService;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -48,13 +51,16 @@ public class KeycloakCredentialService implements CredentialService {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(false);
         credential.setValue(password);
-        credential.setType(OAuth2Constants.PASSWORD);
+        credential.setType(CredentialRepresentation.PASSWORD);
 
         UserRepresentation representation = new UserRepresentation();
         representation.setEmail(login);
         representation.setUsername(login);
         representation.setCredentials(Collections.singletonList(credential));
         representation.setEnabled(true);
+        representation.setClientRoles(Map.of(clientId, List.of("ROLE_USER")));
+        representation.setEmailVerified(true);
+        representation.setRequiredActions(Collections.emptyList());
 
         Response response = realmResource.users().create(representation);
         try (response) {
@@ -115,7 +121,7 @@ public class KeycloakCredentialService implements CredentialService {
     private AuthToken requestToken(MultiValueMap<String, String> params) {
         return restClient.post()
                 .uri(TOKEN_URI)
-                .header("Content-Type", "application/json")
+                .header("Content-Type", "application/x-www-form-urlencoded")
                 .body(params)
                 .retrieve()
                 .body(AuthToken.class);

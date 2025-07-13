@@ -38,7 +38,7 @@ public class DentalWorkTableController {
     @GetMapping
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
                               HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -61,7 +61,7 @@ public class DentalWorkTableController {
     @PostMapping("/search")
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {

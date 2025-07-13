@@ -38,7 +38,7 @@ public class DentalWorkItemController {
 
     @GetMapping("/new")
     public String newWorkForm(HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -51,7 +51,7 @@ public class DentalWorkItemController {
 
     @PostMapping
     public String createDentalWork(@ModelAttribute NewDentalWork newDentalWork, Model model, HttpSession session) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         DentalWork work = dentalWorkService.create(userId, newDentalWork);
         model.addAttribute("work", work);
         @SuppressWarnings("unchecked")
@@ -66,7 +66,7 @@ public class DentalWorkItemController {
 
     @GetMapping("/{id}")
     public String viewDentalWork(@PathVariable("id") Long id, HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -81,7 +81,7 @@ public class DentalWorkItemController {
 
     @PostMapping("/{id}/products/new")
     public String addProduct(@PathVariable("id") Long id, @ModelAttribute NewProduct newProduct, HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         DentalWork work = productService.addProduct(userId, id, newProduct);
         model.addAttribute("work", work);
         @SuppressWarnings("unchecked")
@@ -96,7 +96,7 @@ public class DentalWorkItemController {
 
     @PostMapping("/{id}/edit")
     public String updateDentalWork(@PathVariable("id") Long id, @ModelAttribute DentalWork dentalWork, HttpSession session, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -111,8 +111,8 @@ public class DentalWorkItemController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteDentalWork(@PathVariable("id") Long id) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+    public String deleteDentalWork(@PathVariable("id") Long id, HttpSession session) {
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         dentalWorkService.delete(userId, id);
         return MvcControllerUtil.REDIRECT + "dental-works";
     }

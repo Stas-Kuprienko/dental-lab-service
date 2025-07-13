@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,10 @@ public class DentalWorkController {
         log.info("From user '{}' received request: {}", userId, newDentalWork);
         DentalWorkEntity entity = dentalWorkConverter.fromRequest(newDentalWork, userId);
         entity = dentalWorkService.create(entity);
-        entity = dentalWorkService.addProduct(entity, newDentalWork.getProductId(), newDentalWork.getQuantity());
+        UUID productType = newDentalWork.getProductId();
+        Integer quantity = newDentalWork.getQuantity();
+        LocalDate completeAt = newDentalWork.getCompleteAt();
+        entity = dentalWorkService.addProduct(entity, productType, quantity, completeAt);
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId())).body(dentalWorkConverter.toDto(entity));
     }

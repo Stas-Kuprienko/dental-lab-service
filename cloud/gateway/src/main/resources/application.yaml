@@ -1,3 +1,56 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: gateway
+  profiles:
+    active: dev
+  config:
+    import: "configserver:"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: eureka-client
+          uri: lb://eureka-client
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - name: HeaderFilter
+    config:
+      uri: http://localhost:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
+      client:
+        registration:
+          gateway-client:
+            client-id: ${project.variables.keycloak.client-id}
+            client-secret: ${project.variables.keycloak.client-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
+            user-name-attribute: preferred_username
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

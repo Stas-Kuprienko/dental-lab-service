@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DENTAL MECHANIC SERVICE</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+<body>
+<!-- 🔝 Меню -->
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Вы действительно хотите выйти?')">
+        <button>выйти</button>
+    </a>
+</nav>
+
+<section>
+    <a th:href="@{/main/dental-works/new}" class="main-page">NEW WORK</a>
+    <a th:href="@{/main/dental-works}" class="main-page">WORK LIST</a>
+    <a th:href="@{/main/product-map}" class="main-page">PRODUCT MAP</a>
+    <a th:href="@{/main/user}" class="main-page">ACCOUNT</a>
+</section>
+</body>
+</html>

@@ -10,6 +10,7 @@ public abstract class MvcControllerUtil {
     public static final String SIGN_UP_PATH = "/sign-up";
     public static final String MAIN_PAGE = "main";
     public static final String MAIN_PATH = "/main";
+    public static final String ATTRIBUTE_KEY_USER_ID = "USER_ID";
     public static final String ATTRIBUTE_KEY_MAP = "map";
 
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
@@ -64,6 +65,19 @@ public class MyReportService implements ReportService {
                 .month(month.getMonth())
                 .value(profit)
                 .build();
+    }
+
+    @Override
+    public List<ProfitRecord> countMonthlyProfit(UUID userId, int year) {
+        List<Object[]> data = productRepository.countMonthlyProfit(userId, year);
+        return data.stream()
+                .map(row -> ProfitRecord.builder()
+                        .year(year)
+                        .month(Month.of((Integer) row[0]))
+                        .value((Double) row[1])
+                        .userId(userId)
+                        .build())
+                .toList();
     }
 
 

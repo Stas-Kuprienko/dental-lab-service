@@ -15,7 +15,7 @@
 </nav>
 <section>
   <h2>Войти:</h2>
-  <form th:action="@{/dental-lab/login}" method="post">
+  <form th:action="@{/login}" method="post">
     <label for="email">email:</label><br>
     <input type="text" id="email" name="email" required><br>
     <label for="password">пароль:</label><br>
@@ -23,7 +23,7 @@
     <button type="submit" style="font-size:18px;width:90px;">LOG IN</button>
   </form>
   <br><br>
-  <form th:action="@{/dental-lab/sign-up}">
+  <form th:action="@{/sign-up}">
     <button type="submit" style="font-size:14px;">SIGN UP</button>
   </form>
 </section>

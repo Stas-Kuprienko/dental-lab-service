@@ -15,17 +15,19 @@ dependencies {
 	implementation project(':common:dental-client')
 
 	// security
-// 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-// 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 	// cloud
-	implementation 'org.springframework.cloud:spring-cloud-config-server'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+	//datasource
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+// 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+// 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	// devtools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

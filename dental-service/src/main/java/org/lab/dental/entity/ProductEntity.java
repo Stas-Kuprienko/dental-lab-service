@@ -2,8 +2,8 @@ package org.lab.dental.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +30,12 @@ public class ProductEntity {
     @Column(name = "dental_work_id")
     private Long dentalWorkId;
 
+    @Column(name = "accepted_at")
+    private LocalDate acceptedAt;
+
+    @Column(name = "complete_at")
+    private LocalDate completeAt;
+
 
     public ProductEntity() {}
 
@@ -37,26 +43,30 @@ public class ProductEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ProductEntity that)) return false;
-        return Objects.equals(title, that.title) &&
-                Objects.equals(price, that.price) &&
-                Objects.equals(quantity, that.quantity) &&
-                Objects.equals(dentalWorkId, that.dentalWorkId);
+        if (!(o instanceof ProductEntity product)) return false;
+        return Objects.equals(title, product.title) &&
+                Objects.equals(price, product.price) &&
+                Objects.equals(quantity, product.quantity) &&
+                Objects.equals(dentalWorkId, product.dentalWorkId) &&
+                Objects.equals(acceptedAt, product.acceptedAt) &&
+                Objects.equals(completeAt, product.completeAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, price, quantity, dentalWorkId);
+        return Objects.hash(title, price, quantity, dentalWorkId, acceptedAt, completeAt);
     }
 
     @Override
     public String toString() {
         return "ProductEntity{" +
                 "id=" + id +
-                ", productType='" + title + '\'' +
+                ", title='" + title + '\'' +
                 ", price=" + price +
                 ", quantity=" + quantity +
                 ", dentalWorkId=" + dentalWorkId +
+                ", acceptedAt=" + acceptedAt +
+                ", completeAt=" + completeAt +
                 '}';
     }
 }

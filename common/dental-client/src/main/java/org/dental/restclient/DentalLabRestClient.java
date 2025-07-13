@@ -7,6 +7,7 @@ public class DentalLabRestClient {
     //TEMPORARY!!!
     public static final String HEADER = "X-USER-ID";
 
+    public final AuthenticationService AUTHENTICATION;
     public final ProductMapService PRODUCT_MAP;
     public final DentalWorkService DENTAL_WORKS;
     public final ProductService PRODUCTS;
@@ -18,6 +19,7 @@ public class DentalLabRestClient {
         DENTAL_WORKS = new DentalWorkService(baseUrl, restClientBuilder);
         PRODUCTS = new ProductService(baseUrl, restClientBuilder);
         REPORTS = new ReportService(baseUrl, restClientBuilder);
+        AUTHENTICATION = new AuthenticationService(baseUrl, restClientBuilder);
     }
 
 

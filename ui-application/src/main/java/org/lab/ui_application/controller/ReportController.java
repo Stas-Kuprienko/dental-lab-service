@@ -1,6 +1,7 @@
 package org.lab.ui_application.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.ReportService;
 import org.lab.model.ProfitRecord;
@@ -29,8 +30,8 @@ public class ReportController {
 
 
     @GetMapping("/works/download")
-    public void downloadWorkList(@RequestParam int year, @RequestParam int month, HttpServletResponse response) throws IOException {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+    public void downloadWorkList(@RequestParam int year, @RequestParam int month, HttpSession session, HttpServletResponse response) throws IOException {
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         byte[] fileBytes = reportService.downloadWorkReport(userId, year, month);
         StringBuilder header = new StringBuilder("attachment; filename=");
         header.append(Month.of(month))
@@ -47,8 +48,8 @@ public class ReportController {
     }
 
     @GetMapping("/profit")
-    public String profitListPage(@RequestParam int year, @RequestParam int month, Model model) {
-        UUID userId = UUID.fromString("30ac0d36-cd43-4083-9494-f2b37b12dc9c");
+    public String profitListPage(@RequestParam int year, @RequestParam int month, HttpSession session, Model model) {
+        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         ProfitRecord record = reportService.countProfitForMonth(userId, year, month);
         model.addAttribute("profit", List.of(record));
         return "profit-list";

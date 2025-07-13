@@ -33,6 +33,8 @@ CREATE TABLE dental_lab.product (
     title VARCHAR(127)      NOT NULL,
     quantity INT            NOT NULL    DEFAULT 0,
     price NUMERIC           NOT NULL    DEFAULT 0,
+    accepted_at DATE        NOT NULL    DEFAULT now(),
+    complete_at DATE        NOT NULL    DEFAULT now(),
     dental_work_id BIGINT   NOT NULL    REFERENCES dental_lab.dental_work ON DELETE CASCADE
 );
 

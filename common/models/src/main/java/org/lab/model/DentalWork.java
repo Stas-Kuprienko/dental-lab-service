@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.lab.enums.WorkStatus;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +30,7 @@ public class DentalWork {
     private LocalDate completeAt;
 
     @JsonProperty("status")
-    private String status;
+    private WorkStatus status;
 
     @JsonProperty("comment")
     private String comment;

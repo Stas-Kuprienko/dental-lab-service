@@ -61,7 +61,8 @@ public class ProductMapController {
 
         log.info("From user '{}' received request", userId);
         List<ProductTypeEntity> entities = productTypeService.getAllByUserId(userId);
-        return ResponseEntity.ok(converter.toProductMap(entities));
+        ProductMap productMap = converter.toProductMap(userId, entities);
+        return ResponseEntity.ok(productMap);
     }
 
 

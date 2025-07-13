@@ -30,6 +30,7 @@ public class MyUserService implements UserService {
         try {
             UserEntity user = UserEntity.builder()
                     .id(id)
+                    .login(login)
                     .name(name)
                     .createdAt(LocalDate.now())
                     .status(UserStatus.ENABLED)

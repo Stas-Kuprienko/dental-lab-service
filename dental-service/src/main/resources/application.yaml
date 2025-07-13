@@ -4,8 +4,13 @@ server:
 spring:
   application:
     name: dental-lab-service
+  profiles:
+    active: dev
   config:
-    import: "optional:configserver:"
+    import: "configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8888
   security:
     oauth2:
       resourceserver:
@@ -31,29 +36,16 @@ spring:
 
 eureka:
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    instance:
+      prefer-ip-address: true
 
-
-project:
-  variables:
-    keycloak:
-      url: http://localhost:8080
-      username: admin
-      password: admin
-      realm: dental-lab
-      client-id: dental-lab-client
-      client-secret: KnGk5wxSPJZLecWUDU69clfI7o5wOIy7
-    datasource:
-      database: dental_lab
-      url: localhost:5432
-      username: postgres
-      password: postgres
-    minio:
-      url: http://minio:9000
-      access-key: minioadmin
-      secret-key: minioadmin
-      bucket: dental-photos
-      duration-minutes: 30
-    kafka:
-      url: localhost:9092
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

@@ -38,8 +38,7 @@ public class ProductTypeConverter {
                 .build();
     }
 
-    public ProductMap toProductMap(List<ProductTypeEntity> entities) {
-        UUID userId = entities.getFirst().getUserId();
+    public ProductMap toProductMap(UUID userId, List<ProductTypeEntity> entities) {
         List<ProductType> productTypes = entities
                 .stream()
                 .map(entity -> {
