@@ -7,12 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
-
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 public class DentalWorkService {
 
@@ -32,7 +28,6 @@ public class DentalWorkService {
     public DentalWork create(UUID userId, NewDentalWork newDentalWork) {
         return restClient
                 .post()
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .body(newDentalWork)
                 .retrieve()
                 .body(DentalWork.class);
@@ -44,7 +39,6 @@ public class DentalWorkService {
         ResponseEntity<DentalWork> response = restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(id))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .toEntity(DentalWork.class);
         if (response.getStatusCode().value() == 200) {
@@ -60,7 +54,6 @@ public class DentalWorkService {
     public List<DentalWork> findAll(UUID userId) {
         return restClient
                 .get()
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -73,7 +66,6 @@ public class DentalWorkService {
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -86,7 +78,6 @@ public class DentalWorkService {
                         .queryParam("clinic", clinic)
                         .queryParam("patient", patient)
                         .build())
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -95,7 +86,6 @@ public class DentalWorkService {
         return restClient
                 .put()
                 .uri(DentalLabRestClient.uriById(updatable.getId()))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .body(updatable)
                 .retrieve()
                 .body(DentalWork.class);
@@ -105,7 +95,6 @@ public class DentalWorkService {
         ResponseEntity<Void> response = restClient
                 .delete()
                 .uri(DentalLabRestClient.uriById(id))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .toBodilessEntity();
         if (response.getStatusCode().isError()) {

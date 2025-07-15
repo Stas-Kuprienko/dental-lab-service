@@ -27,7 +27,6 @@ public class ReportService {
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(byte[].class);
     }
@@ -40,7 +39,6 @@ public class ReportService {
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(ProfitRecord.class);
     }

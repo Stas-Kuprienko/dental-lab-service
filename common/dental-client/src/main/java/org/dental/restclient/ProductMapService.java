@@ -23,20 +23,18 @@ public class ProductMapService {
     }
 
 
-    public ProductType create(UUID userId, NewProductType newProductType) {
+    public ProductType create(NewProductType newProductType) {
         return restClient
                 .post()
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .body(newProductType)
                 .retrieve()
                 .body(ProductType.class);
     }
 
-    public Optional<ProductType> findById(UUID userId, UUID id) {
+    public Optional<ProductType> findById(UUID id) {
         ResponseEntity<ProductType> response = restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(id))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .toEntity(ProductType.class);
         if (response.getStatusCode().value() == 200) {
@@ -49,19 +47,17 @@ public class ProductMapService {
         }
     }
 
-    public ProductMap findAll(UUID userId) {
+    public ProductMap findAll() {
         return restClient
                 .get()
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(ProductMap.class);
     }
 
-    public void updateProductType(UUID userId, UUID id, float newPrice) {
+    public void updateProductType(UUID id, float newPrice) {
         ResponseEntity<Void> response = restClient
                 .put()
                 .uri(DentalLabRestClient.uriById(id))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .body(newPrice)
                 .retrieve()
                 .toBodilessEntity();
@@ -71,11 +67,10 @@ public class ProductMapService {
         }
     }
 
-    public void delete(UUID userId, UUID id) {
+    public void delete(UUID id) {
         restClient
                 .delete()
                 .uri(DentalLabRestClient.uriById(id))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .toBodilessEntity();
     }

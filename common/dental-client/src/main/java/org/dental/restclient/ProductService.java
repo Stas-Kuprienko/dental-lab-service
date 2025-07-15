@@ -25,7 +25,6 @@ public class ProductService {
         return restClient
                 .post()
                 .uri(URI.formatted(workId))
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .body(newProduct)
                 .retrieve()
                 .body(DentalWork.class);
@@ -35,7 +34,6 @@ public class ProductService {
         return restClient
                 .delete()
                 .uri(URI.formatted(workId) + '/' + productId)
-                .header(DentalLabRestClient.HEADER, userId.toString())
                 .retrieve()
                 .body(DentalWork.class);
     }

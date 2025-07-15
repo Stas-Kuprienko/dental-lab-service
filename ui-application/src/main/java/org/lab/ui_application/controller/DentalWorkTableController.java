@@ -42,7 +42,7 @@ public class DentalWorkTableController {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapService.findAll(userId).getEntries();
+            items = productMapService.findAll().getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
@@ -65,7 +65,7 @@ public class DentalWorkTableController {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapService.findAll(userId).getEntries();
+            items = productMapService.findAll().getEntries();
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);

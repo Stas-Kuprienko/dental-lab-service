@@ -47,6 +47,7 @@ services:
       - postgres
     volumes:
       - ./volumes/keycloak/data:/opt/keycloak/data
+      - ./volumes/keycloak/my-theme/dental-ui:/opt/keycloak/themes/dental-ui
 
   kafka:
     container_name: dental_kafka

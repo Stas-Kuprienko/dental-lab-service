@@ -22,6 +22,20 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
+  spring:
+    spring:
+      security:
+        oauth2:
+          client:
+            registration:
+              keycloak:
+                client-id: ${project.variables.keycloak.client-id}
+                client-secret: ${project.variables.keycloak.client-secret}
+                scope: openid, profile, email
+                authorization-grant-type: authorization_code
+            provider:
+              keycloak:
+                issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
 
 management:
   endpoints:
