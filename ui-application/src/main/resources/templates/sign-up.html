@@ -15,17 +15,17 @@
 </nav>
 <section>
   <h2>Зарегистрироваться:</h2>
-  <form th:action="@{/dental-lab/new-user}" method="post">
+  <form th:action="@{/sign-up}" method="post">
     <label for="name">имя:</label><br>
     <input type="text" id="name" name="name" required><br>
     <label for="email">email:</label><br>
-    <input type="text" id="email" name="email" required><br>
+    <input type="text" id="email" name="login" required><br>
     <label for="password">пароль:</label><br>
     <input type="password" id="password" name="password" required><br><br>
     <button type="submit" style="font-size: 18px; width: 95px;">SIGN UP</button>
   </form>
   <br><br>
-  <form th:action="@{/dental-lab/login}">
+  <form th:action="@{/login}">
     <button type="submit" style="font-size: 14px; width: 80px;">LOG IN</button>
   </form>
 </section>

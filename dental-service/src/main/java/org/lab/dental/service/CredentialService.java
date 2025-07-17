@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface CredentialService {
 
-    UUID signUp(String login, String password);
+    UUID signUp(String login, String password, String name);
 
     AuthToken authenticate(String email, String password);
 

@@ -47,7 +47,7 @@ public class KeycloakCredentialService implements CredentialService {
 
 
     @Override
-    public UUID signUp(String login, String password) {
+    public UUID signUp(String login, String password, String name) {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(false);
         credential.setValue(password);
@@ -56,6 +56,7 @@ public class KeycloakCredentialService implements CredentialService {
         UserRepresentation representation = new UserRepresentation();
         representation.setEmail(login);
         representation.setUsername(login);
+        representation.setFirstName(name);
         representation.setCredentials(Collections.singletonList(credential));
         representation.setEnabled(true);
         representation.setClientRoles(Map.of(clientId, List.of("ROLE_USER")));

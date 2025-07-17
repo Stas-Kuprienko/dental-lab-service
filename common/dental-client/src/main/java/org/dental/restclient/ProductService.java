@@ -21,7 +21,7 @@ public class ProductService {
     }
 
 
-    public DentalWork addProduct(UUID userId, Long workId, NewProduct newProduct) {
+    public DentalWork addProduct(Long workId, NewProduct newProduct) {
         return restClient
                 .post()
                 .uri(URI.formatted(workId))
@@ -30,7 +30,7 @@ public class ProductService {
                 .body(DentalWork.class);
     }
 
-    public DentalWork deleteProduct(UUID userId, Long workId, UUID productId) {
+    public DentalWork deleteProduct(Long workId, UUID productId) {
         return restClient
                 .delete()
                 .uri(URI.formatted(workId) + '/' + productId)

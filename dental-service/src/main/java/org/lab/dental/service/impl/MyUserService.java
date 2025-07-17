@@ -26,7 +26,7 @@ public class MyUserService implements UserService {
 
     @Override
     public UserEntity create(String login, String password, String name) {
-        UUID id = credentialService.signUp(login, password);
+        UUID id = credentialService.signUp(login, password, name);
         try {
             UserEntity user = UserEntity.builder()
                     .id(id)

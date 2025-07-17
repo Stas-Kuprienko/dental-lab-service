@@ -22,20 +22,19 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
-  spring:
-    spring:
-      security:
-        oauth2:
-          client:
-            registration:
-              keycloak:
-                client-id: ${project.variables.keycloak.client-id}
-                client-secret: ${project.variables.keycloak.client-secret}
-                scope: openid, profile, email
-                authorization-grant-type: authorization_code
-            provider:
-              keycloak:
-                issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${project.variables.keycloak.client-id}
+            client-secret: ${project.variables.keycloak.client-secret}
+            scope: openid, profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+        provider:
+          keycloak:
+            issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
 
 management:
   endpoints:
@@ -45,3 +44,6 @@ management:
   endpoint:
     health:
       show-details: always
+logging:
+  level:
+    org.springframework.security: DEBUG

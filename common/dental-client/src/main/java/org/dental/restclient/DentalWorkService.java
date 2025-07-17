@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestClient;
 import java.util.List;
-import java.util.UUID;
 
 public class DentalWorkService {
 
@@ -25,7 +24,7 @@ public class DentalWorkService {
     }
 
 
-    public DentalWork create(UUID userId, NewDentalWork newDentalWork) {
+    public DentalWork create(NewDentalWork newDentalWork) {
         return restClient
                 .post()
                 .body(newDentalWork)
@@ -35,7 +34,7 @@ public class DentalWorkService {
 
 
 
-    public DentalWork findById(UUID userId, Long id) {
+    public DentalWork findById(Long id) {
         ResponseEntity<DentalWork> response = restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(id))
@@ -51,14 +50,14 @@ public class DentalWorkService {
         }
     }
 
-    public List<DentalWork> findAll(UUID userId) {
+    public List<DentalWork> findAll() {
         return restClient
                 .get()
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
 
-    public List<DentalWork> findAllByMonth(UUID userId, int year, int month) {
+    public List<DentalWork> findAllByMonth(int year, int month) {
         return restClient
                 .get()
                 .uri( uriBuilder -> uriBuilder
@@ -70,7 +69,7 @@ public class DentalWorkService {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
-    public List<DentalWork> searchDentalWorks(UUID userId, @Nullable String clinic, @Nullable String patient) {
+    public List<DentalWork> searchDentalWorks(@Nullable String clinic, @Nullable String patient) {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -82,7 +81,7 @@ public class DentalWorkService {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
-    public DentalWork update(UUID userId, DentalWork updatable) {
+    public DentalWork update(DentalWork updatable) {
         return restClient
                 .put()
                 .uri(DentalLabRestClient.uriById(updatable.getId()))
@@ -91,7 +90,7 @@ public class DentalWorkService {
                 .body(DentalWork.class);
     }
 
-    public void delete(UUID userId, long id) {
+    public void delete(long id) {
         ResponseEntity<Void> response = restClient
                 .delete()
                 .uri(DentalLabRestClient.uriById(id))

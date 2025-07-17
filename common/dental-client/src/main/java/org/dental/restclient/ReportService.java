@@ -2,7 +2,6 @@ package org.dental.restclient;
 
 import org.lab.model.ProfitRecord;
 import org.springframework.web.client.RestClient;
-import java.util.UUID;
 
 public class ReportService {
 
@@ -19,7 +18,7 @@ public class ReportService {
     }
 
 
-    public byte[] downloadWorkReport(UUID userId, int year, int month) {
+    public byte[] downloadWorkReport(int year, int month) {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -31,7 +30,7 @@ public class ReportService {
                 .body(byte[].class);
     }
 
-    public ProfitRecord countProfitForMonth(UUID userId, int year, int month) {
+    public ProfitRecord countProfitForMonth(int year, int month) {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder

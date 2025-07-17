@@ -1,14 +1,14 @@
 package org.lab.ui_application.configuration;
 
+import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
-import org.lab.ui_application.configuration.auth.OAuth2ClientHttpRequestInterceptor;
+import org.lab.ui_application.configuration.auth.HeaderSetterRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
-
 import java.util.Locale;
 
 @Configuration
@@ -18,8 +18,9 @@ public class UiApplicationConfig {
     @Bean
     public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,
                                                    RestClient.Builder restClientBuilder,
-                                                   OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor) {
-        restClientBuilder.requestInterceptor(oAuth2ClientHttpRequestInterceptor);
+                                                   HttpSession session) {
+        HeaderSetterRequestInterceptor interceptor = new HeaderSetterRequestInterceptor(session, url);
+        restClientBuilder.requestInterceptor(interceptor);
         return new DentalLabRestClient(url, restClientBuilder);
     }
 

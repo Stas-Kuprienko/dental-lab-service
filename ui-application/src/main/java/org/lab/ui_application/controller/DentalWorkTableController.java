@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/main/dental-works")
@@ -38,7 +37,6 @@ public class DentalWorkTableController {
     @GetMapping
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
                               HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -49,9 +47,9 @@ public class DentalWorkTableController {
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
         List<DentalWork> works;
         if (headerMonth.isCurrentMonth()) {
-            works = dentalWorkService.findAll(userId);
+            works = dentalWorkService.findAll();
         } else {
-            works = dentalWorkService.findAllByMonth(userId, headerMonth.getYear(), headerMonth.getMonthValue());
+            works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
         }
         model.addAttribute("headerMonth", headerMonth);
         model.addAttribute("works", works);
@@ -61,7 +59,6 @@ public class DentalWorkTableController {
     @PostMapping("/search")
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
@@ -69,7 +66,7 @@ public class DentalWorkTableController {
             session.setAttribute(ATTRIBUTE_KEY_MAP, items);
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
-        List<DentalWork> works = dentalWorkService.searchDentalWorks(userId, clinic, patient);
+        List<DentalWork> works = dentalWorkService.searchDentalWorks(clinic, patient);
         HeaderMonth headerMonth = new HeaderMonth(null);
         model.addAttribute("headerMonth", headerMonth);
         model.addAttribute("works", works);

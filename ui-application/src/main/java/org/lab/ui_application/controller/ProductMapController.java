@@ -19,12 +19,12 @@ public class ProductMapController {
     private static final String ATTRIBUTE_KEY_MAP = "map";
     private static final String PRODUCT_MAP = "product-map";
 
-    private final ProductMapService productMapClient;
+    private final ProductMapService productMapService;
 
 
     @Autowired
     public ProductMapController(DentalLabRestClient dentalLabRestClient) {
-        this.productMapClient = dentalLabRestClient.PRODUCT_MAP;
+        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
     }
 
 
@@ -33,7 +33,7 @@ public class ProductMapController {
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items == null) {
-            items = productMapClient.findAll().getEntries();
+            items = productMapService.findAll().getEntries();
         }
         model.addAttribute(ATTRIBUTE_KEY_MAP, items);
         return PRODUCT_MAP;
@@ -43,7 +43,7 @@ public class ProductMapController {
     public String addProduct(@RequestParam("title") String title,
                              @RequestParam("price") float price,
                              HttpSession session) {
-        ProductType productType = productMapClient.create(new NewProductType(title, price));
+        ProductType productType = productMapService.create(new NewProductType(title, price));
         @SuppressWarnings("unchecked")
         List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
         if (items != null) {
@@ -56,13 +56,13 @@ public class ProductMapController {
     @PostMapping("/{id}/edit")
     public String editProduct(@PathVariable("id") UUID id,
                               @RequestParam("price") float price) {
-        productMapClient.updateProductType(id, price);
+        productMapService.updateProductType(id, price);
         return MvcControllerUtil.REDIRECT + "/main/product-map";
     }
 
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable("id") UUID id) {
-        productMapClient.delete(id);
+        productMapService.delete(id);
         return MvcControllerUtil.REDIRECT + "/main/product-map";
     }
 }
