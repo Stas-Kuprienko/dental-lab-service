@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -12,7 +14,7 @@ import java.util.UUID;
 @Data
 @Builder
 @AllArgsConstructor
-public class ProfitRecord {
+public class ProfitRecord implements Serializable {
 
     @JsonProperty("user_id")
     private UUID userId;

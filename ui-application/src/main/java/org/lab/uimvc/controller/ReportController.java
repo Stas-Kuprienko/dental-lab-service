@@ -1,4 +1,4 @@
-package org.lab.ui_application.controller;
+package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.dental.restclient.DentalLabRestClient;

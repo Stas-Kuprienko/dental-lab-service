@@ -1,12 +1,11 @@
-package org.lab.ui_application.controller;
+package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.DentalWorkService;
-import org.dental.restclient.ProductMapService;
 import org.lab.model.DentalWork;
-import org.lab.model.ProductType;
-import org.lab.ui_application.util.HeaderMonth;
+import org.lab.uimvc.service.ProductMapMvcService;
+import org.lab.uimvc.util.HeaderMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,16 +19,15 @@ import java.util.List;
 @RequestMapping("/main/dental-works")
 public class DentalWorkTableController {
 
-    private static final String ATTRIBUTE_KEY_MAP = "map";
     private static final String DENTAL_WORKS = "dental-works";
 
-    private final ProductMapService productMapService;
+    private final ProductMapMvcService productMapService;
     private final DentalWorkService dentalWorkService;
 
 
     @Autowired
-    public DentalWorkTableController(DentalLabRestClient dentalLabRestClient) {
-        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
+    public DentalWorkTableController(ProductMapMvcService productMapService, DentalLabRestClient dentalLabRestClient) {
+        this.productMapService = productMapService;
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
     }
 
@@ -37,13 +35,7 @@ public class DentalWorkTableController {
     @GetMapping
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
                               HttpSession session, Model model) {
-        @SuppressWarnings("unchecked")
-        List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
-        if (items == null) {
-            items = productMapService.findAll().getEntries();
-            session.setAttribute(ATTRIBUTE_KEY_MAP, items);
-        }
-        model.addAttribute(ATTRIBUTE_KEY_MAP, items);
+        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
         List<DentalWork> works;
         if (headerMonth.isCurrentMonth()) {
@@ -59,13 +51,7 @@ public class DentalWorkTableController {
     @PostMapping("/search")
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
-        @SuppressWarnings("unchecked")
-        List<ProductType> items = (List<ProductType>) session.getAttribute(ATTRIBUTE_KEY_MAP);
-        if (items == null) {
-            items = productMapService.findAll().getEntries();
-            session.setAttribute(ATTRIBUTE_KEY_MAP, items);
-        }
-        model.addAttribute(ATTRIBUTE_KEY_MAP, items);
+        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
         List<DentalWork> works = dentalWorkService.searchDentalWorks(clinic, patient);
         HeaderMonth headerMonth = new HeaderMonth(null);
         model.addAttribute("headerMonth", headerMonth);

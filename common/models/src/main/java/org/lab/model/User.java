@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import org.lab.enums.UserStatus;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class User {
+public class User implements Serializable {
 
     @JsonProperty("id")
     private UUID id;

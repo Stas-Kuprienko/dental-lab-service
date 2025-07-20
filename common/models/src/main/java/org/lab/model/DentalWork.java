@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.lab.enums.WorkStatus;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +14,7 @@ import java.util.UUID;
 @Data
 @Builder
 @AllArgsConstructor
-public class DentalWork {
+public class DentalWork implements Serializable {
 
     @JsonProperty("id")
     private Long id;

@@ -1,4 +1,4 @@
-package org.lab.ui_application.controller;
+package org.lab.uimvc.controller;
 
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
@@ -20,6 +20,11 @@ public class UserController extends MvcControllerUtil {
     }
 
 
+    @GetMapping("/login")
+    public String login() {
+        return REDIRECT + LOGIN_PATH;
+    }
+
     @GetMapping("/sign-up")
     public String signUpPage() {
         return SIGN_UP_PAGE;
@@ -29,5 +34,10 @@ public class UserController extends MvcControllerUtil {
     public String signUpProcess(@ModelAttribute NewUser newUser) {
         userService.signUp(newUser);
         return REDIRECT + MAIN_PATH;
+    }
+
+    @GetMapping("/main")
+    public String mainPage() {
+        return MAIN_PAGE;
     }
 }

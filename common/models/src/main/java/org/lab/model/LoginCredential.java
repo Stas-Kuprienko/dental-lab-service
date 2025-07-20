@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class LoginCredential {
+public class LoginCredential implements Serializable {
 
     @JsonProperty("token")
     private AuthToken token;

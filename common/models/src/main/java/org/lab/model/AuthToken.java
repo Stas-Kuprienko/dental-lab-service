@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @AllArgsConstructor
-public class AuthToken {
+public class AuthToken implements Serializable {
 
     @JsonProperty("access_token")
     private String accessToken;

@@ -27,13 +27,11 @@
     <button type="submit" style="font-size:18px;width:90px;">LOG IN</button>
   </form>
 
-  <#-- Регистрация, если включена -->
-  <#if realm.registrationAllowed>
-    <br><br>
-    <form action="${url.registrationUrl}" method="get">
-      <button type="submit" style="font-size:14px;">SIGN UP</button>
-    </form>
-  </#if>
+  <br><br>
+
+  <form action="${properties.registrationUrl}" method="get">
+    <button type="submit" style="font-size:14px;">SIGN UP</button>
+  </form>
 
   <#-- Сообщение об ошибке -->
   <#if message?has_content>

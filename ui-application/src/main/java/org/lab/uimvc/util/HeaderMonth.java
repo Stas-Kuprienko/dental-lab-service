@@ -1,4 +1,4 @@
-package org.lab.ui_application.util;
+package org.lab.uimvc.util;
 
 import lombok.Data;
 import java.time.Month;

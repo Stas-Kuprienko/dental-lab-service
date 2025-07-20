@@ -30,11 +30,20 @@ spring:
             client-id: ${project.variables.keycloak.client-id}
             client-secret: ${project.variables.keycloak.client-secret}
             scope: openid, profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: http://localhost:8081/dental-lab/login/oauth2/code/keycloak
             authorization-grant-type: authorization_code
         provider:
           keycloak:
             issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
+  redis:
+    host: ${project.variables.redis.host}
+    port: ${project.variables.redis.port}
+    timeout: 6000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
 
 management:
   endpoints:

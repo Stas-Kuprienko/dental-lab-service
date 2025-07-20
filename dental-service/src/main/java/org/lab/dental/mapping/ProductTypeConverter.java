@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductTypeConverter {
@@ -47,7 +48,7 @@ public class ProductTypeConverter {
                     }
                     return toDto(entity);
                 })
-                .toList();
+                .collect(Collectors.toList());
         return new ProductMap(userId, productTypes);
     }
 

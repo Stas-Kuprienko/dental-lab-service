@@ -1,3 +1,5 @@
 package org.lab.model;
 
-public record ErrorResponse(String status, String message) {}
+import java.io.Serializable;
+
+public record ErrorResponse(String status, String message) implements Serializable {}

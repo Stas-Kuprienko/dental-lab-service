@@ -12,6 +12,24 @@ section {
     overflow: auto;
 }
 
+.main-page {
+    border: 3px solid black;
+    background-image: linear-gradient(to bottom right, dimGrey, black);
+    float: left;
+    width: 45%;
+    margin: auto;
+    padding: 1%;
+    min-height: 128px;
+    color: white;
+    font-size: bold;
+    text-decoration: none;
+}
+
+.main-page:hover {
+    background-image: linear-gradient(to bottom right, #808080, #1f1f1f);
+    font-size: 110%;
+}
+
 /* TABLE FIXED WIDTH SETUP */
 .table {
     display: table;

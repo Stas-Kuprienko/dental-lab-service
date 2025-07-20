@@ -2,11 +2,11 @@ package org.lab.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import java.util.List;
-import java.util.UUID;
+import java.io.Serializable;
+import java.util.*;
 
 @Data
-public class ProductMap {
+public class ProductMap implements Serializable {
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -21,4 +21,28 @@ public class ProductMap {
     }
 
     public ProductMap() {}
+
+
+    public Optional<ProductType> get(UUID id) {
+        if (entries == null) {
+            return Optional.empty();
+        }
+        return entries
+                .stream()
+                .filter(productType -> productType.getId().equals(id))
+                .findFirst();
+    }
+
+    public boolean delete(UUID id) {
+        if (entries == null) {
+            return false;
+        }
+        for (int i = 0; i < entries.size(); i++) {
+            if (entries.get(i).getId().equals(id)) {
+                entries.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -17,10 +17,10 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: eureka-client
-          uri: lb://eureka-client
+        - id: dental-lab-service
+          uri: lb://dental-lab-service
           predicates:
-            - Path=/api/v1/**
+            - Path=/**
           filters:
             - name: HeaderFilter
   security:
@@ -28,18 +28,6 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
-      client:
-        registration:
-          gateway-client:
-            client-id: ${project.variables.keycloak.client-id}
-            client-secret: ${project.variables.keycloak.client-secret}
-            authorization-grant-type: client_credentials
-            scope: openid
-            provider: keycloak
-        provider:
-          keycloak:
-            issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
-            user-name-attribute: preferred_username
 
 eureka:
   client:

@@ -1,4 +1,4 @@
-package org.lab.ui_application;
+package org.lab.uimvc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
