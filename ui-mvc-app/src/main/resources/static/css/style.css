@@ -293,3 +293,11 @@ select {
 ::-webkit-scrollbar-thumb:hover {
     background: dimGrey;
 }
+
+#product-label {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+}

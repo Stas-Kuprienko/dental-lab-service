@@ -3,6 +3,7 @@ package org.dental.restclient;
 import org.lab.model.DentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.web.client.RestClient;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class ProductService {
@@ -26,6 +27,15 @@ public class ProductService {
                 .post()
                 .uri(URI.formatted(workId))
                 .body(newProduct)
+                .retrieve()
+                .body(DentalWork.class);
+    }
+
+    public DentalWork updateCompletion(Long workId, UUID productId, LocalDate completeAt) {
+        return restClient
+                .put()
+                .uri(URI.formatted(workId) + '/' + productId)
+                .body(completeAt)
                 .retrieve()
                 .body(DentalWork.class);
     }

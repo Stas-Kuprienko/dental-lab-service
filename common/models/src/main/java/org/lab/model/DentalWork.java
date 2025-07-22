@@ -57,4 +57,12 @@ public class DentalWork implements Serializable {
                 .findFirst()
                 .orElse(null);
     }
+
+    public int countPhoto() {
+        if (photoLinks == null) {
+            return 0;
+        } else {
+            return photoLinks.size();
+        }
+    }
 }

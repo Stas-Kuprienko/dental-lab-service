@@ -12,6 +12,6 @@ include 'common:models'
 findProject(':common:models')?.name = 'models'
 include 'common:dental-client'
 findProject(':common:dental-client')?.name = 'dental-client'
-include 'ui-application'
+include 'ui-mvc-app'
 include 'telegram-bot'
 

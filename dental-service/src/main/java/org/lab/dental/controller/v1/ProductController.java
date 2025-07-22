@@ -43,6 +43,17 @@ public class ProductController {
     }
 
 
+    @PutMapping("/{id}")
+    public ResponseEntity<DentalWork> updateCompletion(@RequestHeader("X-USER-ID") UUID userId,
+                                                       @PathVariable("work_id") Long workId,
+                                                       @PathVariable("id") UUID productId,
+                                                       @RequestBody LocalDate completeAt) {
+        log.info("From user '{}' received request to update completion ({}) by ID='{}' and workID={}", userId, completeAt, productId, workId);
+        DentalWorkEntity entity = dentalWorkService.updateProductCompletion(workId, userId, productId, completeAt);
+        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<DentalWork> deleteProduct(@RequestHeader("X-USER-ID") UUID userId,
                                                     @PathVariable("work_id") Long workId,

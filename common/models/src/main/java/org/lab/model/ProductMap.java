@@ -23,6 +23,14 @@ public class ProductMap implements Serializable {
     public ProductMap() {}
 
 
+    public List<ProductType> sortEntries() {
+        if (entries == null) {
+            return new ArrayList<>();
+        }
+        entries.sort(Comparator.comparing(ProductType::getTitle));
+        return entries;
+    }
+
     public Optional<ProductType> get(UUID id) {
         if (entries == null) {
             return Optional.empty();

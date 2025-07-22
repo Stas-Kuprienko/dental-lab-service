@@ -15,6 +15,8 @@ public class ProductConverter {
                 .title(dto.getTitle())
                 .quantity(dto.getQuantity())
                 .price(BigDecimal.valueOf(dto.getPrice()))
+                .acceptedAt(dto.getAcceptedAt())
+                .completeAt(dto.getCompleteAt())
                 .dentalWorkId(dto.getDentalWorkId())
                 .build();
     }
@@ -25,6 +27,8 @@ public class ProductConverter {
                 .title(entity.getTitle())
                 .quantity(entity.getQuantity())
                 .price(entity.getPrice().floatValue())
+                .acceptedAt(entity.getAcceptedAt())
+                .completeAt(entity.getCompleteAt())
                 .dentalWorkId(entity.getDentalWorkId())
                 .build();
     }

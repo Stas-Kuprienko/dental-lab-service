@@ -68,8 +68,8 @@ public class ProductMapController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateProductType(@RequestHeader("X-USER-ID") UUID userId,
-                                                         @PathVariable("id") UUID id,
-                                                         @RequestBody Float newPrice) {
+                                                  @PathVariable("id") UUID id,
+                                                  @RequestBody Float newPrice) {
 
         log.info("From user '{}' received request to update productType ID={}", userId, id);
         productTypeService.update(id, userId, newPrice);

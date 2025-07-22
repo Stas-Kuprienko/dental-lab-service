@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Фотографии</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        .photo-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin: 20px;
+        }
+        .photo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .photo-box img {
+            max-width: 280px;
+            max-height: 200px;
+            border: 2px solid gray;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a th:href="@{/main/dental-works}" style="float:right;"><button>назад</button></a>
+</nav>
+
+<section>
+    <h2>Фото работы</h2>
+
+    <!-- 🔽 Галерея -->
+    <div class="photo-gallery">
+        <div th:each="photo : ${photoLinks}" class="photo-box">
+            <img th:src="@{${photo}}" alt="Фото" />
+            <form th:action="@{'/main/photo/delete'}" method="post">
+                <input type="hidden" name="id" th:value="${workId}" />
+                <input type="hidden" name="photoLink" th:value="${photo}" />
+                <button type="submit" onclick="return confirm('Удалить это фото?')">удалить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🔼 Загрузка фото -->
+    <h3>Добавить фото</h3>
+    <form method="post"
+          enctype="multipart/form-data"
+          th:action="@{'/main/photo/upload'}">
+        <input type="hidden" name="id" th:value="${workId}" />
+        <input type="file" name="file" accept="image/*" required />
+        <button type="submit">загрузить</button>
+    </form>
+</section>
+</body>
+</html>

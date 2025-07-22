@@ -179,6 +179,13 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public DentalWorkEntity updateProductCompletion(Long id, UUID userId, UUID productId, LocalDate completeAt) {
+        productRepository.updateCompleteAt(productId, id, completeAt);
+        log.info("Product with ID='{}' updated 'completeAt' on '{}' for DentalWork with ID={} and userID='{}'", productId, completeAt, id, userId);
+        return getByIdAndUserId(id, userId);
+    }
+
+    @Override
     public DentalWorkEntity deleteProduct(Long id, UUID userId, UUID productId) {
         productRepository.deleteById(productId);
         log.info("Product with ID='{}' is deleted for DentalWork with ID={} and userID='{}'", productId, id, userId);

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DENTAL MECHANIC SERVICE</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+<!-- 🔝 Меню -->
+<nav class="menu">
+    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
+    <a th:href="@{/main/dental-works/new}">NEW WORK</a>
+    <a th:href="@{/main/dental-works}">WORK LIST</a>
+    <a th:href="@{/main/product-map}">PRODUCT MAP</a>
+    <a th:href="@{/main/user}">ACCOUNT</a>
+    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Выйти?')">
+        <button>выйти</button>
+    </a>
+</nav>
+
+<section style="font-size:22px;">
+
+    <!-- PATIENT -->
+    <div class="work">
+        <label style="font-size:80%;">пациент:</label><br>
+        <label id="patient-label" th:text="${work.patient}">Пациент</label>
+        <form id="patient-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="text" name="patient" th:value="${work.patient}" required />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="✅" style="font-weight: bold; background-color: #fffed4; height: 30px; width: 75px;"/>
+            <button type="button" onclick="hideForm('patient-label', 'patient-form')">❌</button>
+        </form>
+    </div>
+
+    <!-- CLINIC -->
+    <div class="work">
+        <label style="font-size:80%;">клиника:</label><br>
+        <label id="clinic-label" th:text="${work.clinic}">Клиника</label>
+        <form id="clinic-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="text" name="clinic" th:value="${work.clinic}" required />
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="✅" style="font-weight: bold; background-color: #fffed4; height: 30px; width: 75px;"/>
+            <button type="button" onclick="hideForm('clinic-label', 'clinic-form')">❌</button>
+        </form>
+    </div>
+
+    <!-- STATUS -->
+    <div class="work">
+        <label style="font-size:80%;">статус:</label><br>
+        <label id="status-label">
+        <span th:switch="${work.status.name}">
+            <span th:case="MAKING">ДЕЛАЕТСЯ</span>
+            <span th:case="COMPLETED">ВЫПОЛНЕНО</span>
+            <span th:case="PAID">ОПЛАЧЕНО</span>
+        </span>
+        </label>
+        <form id="status-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <select name="status">
+                <option value="MAKING">ДЕЛАЕТСЯ</option>
+                <option value="COMPLETED">ВЫПОЛНЕНО</option>
+                <option value="PAID">ОПЛАЧЕНО</option>
+            </select>
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="✅" style="font-weight: bold; background-color: #fffed4; height: 30px; width: 75px;"/>
+            <button type="button" onclick="hideForm('status-label', 'status-form')">❌</button>
+        </form>
+    </div>
+
+    <!-- COMPLETE AT -->
+    <div class="work">
+        <label style="font-size:80%;">дата выполнения:</label><br>
+        <label id="completeAt-label" th:text="${work.completeAt}">01-01-2025</label>
+        <form id="completeAt-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <input type="date" name="completeAt" th:value="${work.completeAt}" required />
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="comment" th:value="${work.comment}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="✅" style="font-weight: bold; background-color: #fffed4; height: 30px; width: 75px;"/>
+            <button type="button" onclick="hideForm('completeAt-label', 'completeAt-form')">❌</button>
+        </form>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="work" style="text-align:center; display:flex; flex-direction:column; align-items:center;">
+        <label>ПРОДУКТЫ:</label><br>
+        <a class="tr">
+            <label id="product-label" class="td" style="cursor:pointer; width: auto;">+ новый продукт</label>
+        </a>
+
+        <form id="add-product" th:action="@{'/main/dental-works/' + ${work.id} + '/products/new'}" method="post" style="display:none; margin-top:10px; text-align:left; width:100%; max-width:600px;">
+            <label for="product">продукт:</label>
+            <select id="product" name="product" required>
+                <option th:each="item : ${map}"
+                        th:value="${item.id}"
+                        th:text="${item.title}">Product</option>
+            </select>
+            <label for="quantity">количество:</label>
+            <input style="width:64px;" type="number" id="quantity" name="quantity" min="0" max="32" required/><br>
+            <label>дата выполнения:</label>
+            <input type="date" name="completeAt" required />
+            <button type="submit" name="id" th:value="${work.id}">✅</button>
+            <button type="button" onclick="hideForm('product-label', 'add-product')">❌</button>
+        </form><br>
+
+        <!-- Список продуктов -->
+        <div th:each="product : ${work.products}" class="tr" th:id="'product-row-' + ${product.id}" style="margin-top:8px; text-align:left; width:100%; max-width:600px;">
+            <div class="td">
+                <b th:text="${product.title}">Название</b>: <span th:text="${product.quantity}">1</span> -—-
+                <small>
+                    дата выполнения:
+                    <span class="complete-label"
+                          th:text="${#temporals.format(product.completeAt, 'dd-MM-yyyy')}"
+                          th:attr="data-id=${product.id}, data-date=${#temporals.format(product.completeAt, 'yyyy-MM-dd')}" style="cursor:pointer; text-decoration: underline;">🗓️</span>
+                </small>
+
+                <!-- Форма редактирования completeAt -->
+                <form class="complete-form" style="display:none; margin-top: 4px;"
+                      th:action="@{'/main/products/' + ${product.id} + '/complete-date'}" method="post">
+                    <input type="date" name="completeAt"
+                           th:value="${#temporals.format(product.completeAt, 'yyyy-MM-dd')}" required />
+                    <button type="submit">✅</button>
+                    <button type="button" class="cancel-complete">❌</button>
+                </form>
+                <form th:action="@{'/main/dental-works/' + ${work.id} + '/products/delete'}" method="post">
+                    <button type="submit" th:name="product" th:value="${product.id}" onclick="return confirm('Удалить продукт?')">удалить</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- COMMENT -->
+    <div class="work">
+        <label style="font-size:80%;">комментарий:</label> &emsp;
+        <button id="comment-label">ввести</button><br>
+        <label th:text="${work.comment}">Комментарий</label>
+        <form id="comment-form" th:action="@{'/main/dental-works/' + ${work.id} + '/edit'}" method="post" style="display:none;">
+            <textarea name="comment" th:text="${work.comment}"></textarea>
+            <input type="hidden" name="patient" th:value="${work.patient}" />
+            <input type="hidden" name="clinic" th:value="${work.clinic}" />
+            <input type="hidden" name="status" th:value="${work.status}" />
+            <input type="hidden" name="completeAt" th:value="${work.completeAt}" />
+            <input type="hidden" name="userId" th:value="${work.userId}" />
+            <input type="submit" value="✅" style="font-weight: bold; background-color: #fffed4; height: 30px; width: 75px;"/>
+            <button type="button" onclick="hideForm('comment-label', 'comment-form')">❌</button>
+        </form>
+    </div>
+
+    <div class="work">
+        <label th:text="${work.countPhoto()} + ' фотофайлов'">0 фотофайлов</label>
+        <a th:href="@{/main/dental-works/' + ${work.id} + '/photo}" style="font-weight: bold; background-color: #fffed4; height: 30px; width: auto">
+            ОТКРЫТЬ
+        </a>
+    </div>
+
+    <!-- CREATED / DELETE -->
+    <div class="work">
+        <label style="font-size:80%;">создано:</label><br>
+        <span th:text="${#temporals.format(work.acceptedAt, 'dd-MM-yyyy')}">01-01-2000</span><br><br>
+
+        <form th:action="@{'/main/dental-works/' + ${work.id} + '/delete'}" method="post">
+            <button type="submit" onclick="return confirm('Удалить запись?')" style="width: auto;">УДАЛИТЬ ЗАПИСЬ</button>
+        </form>
+    </div>
+</section>
+
+<!-- ⚙️ JS -->
+<script>
+    function toggleDateFromAttr(button) {
+        const id = button.getAttribute('data-id');
+        const form = document.getElementById('form-' + id);
+        if (form) {
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+        }
+    }
+
+
+        function hideForm(labelId, formId) {
+            const label = document.getElementById(labelId);
+            const form = document.getElementById(formId);
+            if (label && form) {
+                label.style.display = 'block';
+                form.style.display = 'none';
+            }
+        }
+
+        function setupToggle(labelId, formId) {
+            const label = document.getElementById(labelId);
+            const form = document.getElementById(formId);
+            if (label && form) {
+                label.addEventListener('click', () => {
+                    label.style.display = 'none';
+                    form.style.display = 'block';
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupToggle('patient-label', 'patient-form');
+            setupToggle('clinic-label', 'clinic-form');
+            setupToggle('status-label', 'status-form');
+            setupToggle('completeAt-label', 'completeAt-form');
+            setupToggle('comment-label', 'comment-form');
+            setupToggle('product-label', 'add-product');
+        });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Показ формы редактирования completeAt
+        document.querySelectorAll('.complete-label').forEach(label => {
+            label.addEventListener('click', () => {
+                const rowId = label.getAttribute('data-id');
+                const row = document.getElementById('product-row-' + rowId);
+                const form = row.querySelector('.complete-form');
+                const span = row.querySelector('.complete-label');
+
+                form.style.display = 'inline-block';
+                span.style.display = 'none';
+            });
+        });
+
+        // Кнопка "Отмена"
+        document.querySelectorAll('.cancel-complete').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('.complete-form');
+                const row = this.closest('.tr');
+                const label = row.querySelector('.complete-label');
+
+                form.style.display = 'none';
+                label.style.display = 'inline';
+            });
+        });
+    });
+</script>
+</body>
+</html>

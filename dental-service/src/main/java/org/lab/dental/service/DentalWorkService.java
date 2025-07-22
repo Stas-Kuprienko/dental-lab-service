@@ -28,6 +28,8 @@ public interface DentalWorkService {
 
     DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt);
 
+    DentalWorkEntity updateProductCompletion(Long id, UUID userId, UUID productId, LocalDate completeAt);
+
     DentalWorkEntity deleteProduct(Long id, UUID userId, UUID productId);
 
     void delete(Long id, UUID userId);

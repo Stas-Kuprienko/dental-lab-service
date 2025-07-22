@@ -32,7 +32,7 @@ public class MyWorkPhotoLinkService implements WorkPhotoLinkService {
         WorkPhotoFilenameEntity entity = new WorkPhotoFilenameEntity(filename, workId);
         entity = repository.save(entity);
         log.info("Entity saved: {}", entity);
-        return filename;
+        return getById(filename);
     }
 
     @Override
