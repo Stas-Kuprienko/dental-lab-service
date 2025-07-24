@@ -8,6 +8,15 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
+  kafka:
+    topic: transactions-topic
+    consumer:
+      bootstrap-servers: ${project.variables.kafka.url}
+      group-id: telegram-bot-group
+      auto-offset-reset: earliest
+  redis:
+    host: ${project.variables.redis.host}
+    port: ${project.variables.redis.port}
 
 eureka:
   client:

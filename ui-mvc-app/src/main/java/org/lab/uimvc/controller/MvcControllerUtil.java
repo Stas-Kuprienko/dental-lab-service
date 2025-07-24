@@ -23,6 +23,8 @@ public abstract class MvcControllerUtil {
     public static final String ATTRIBUTE_KEY_USER_EMAIL = "USER_EMAIL";
     public static final String ATTRIBUTE_KEY_USER_NAME = "USER_NAME";
     public static final String ATTRIBUTE_KEY_MAP = "map";
+    public static final String USER_PROFILE_PAGE = "user-profile";
+    public static final String USER_PROFILE_PATH = "/main/profile";
 
 
 

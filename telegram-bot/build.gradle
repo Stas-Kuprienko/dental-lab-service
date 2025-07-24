@@ -9,14 +9,13 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
-
-	implementation project(':common')
-
-    // telegram
     implementation "org.telegram:telegrambots-spring-boot-starter:${telegram_version}"
 
+	implementation project(':common:models')
+	implementation project(':common:dental-client')
+
     // cloud
-	implementation 'org.springframework.cloud:spring-cloud-config-server'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -26,9 +25,9 @@ dependencies {
 
 	// monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+// 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+// 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+// 	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
     // tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

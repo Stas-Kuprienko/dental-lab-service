@@ -1,6 +1,7 @@
 package org.lab.dental.controller.advice;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.InternalServiceException;
 import org.lab.dental.exception.NotFoundCustomException;
@@ -12,7 +13,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.util.List;
 
 @Slf4j
@@ -28,7 +28,6 @@ public class MyControllerAdvice {
                 .status(httpStatus.value())
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException ex) {
@@ -67,8 +66,17 @@ public class MyControllerAdvice {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> illegalArgumentHandle(IllegalArgumentException e) {
-        log.warn(e.getMessage());
+        log.warn(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), httpStatus.getReasonPhrase()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> forbiddenHandle(ForbiddenException e) {
+        log.warn(e.getMessage(), e);
+        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(new ErrorResponse(httpStatus.name(), httpStatus.getReasonPhrase()));
@@ -76,7 +84,7 @@ public class MyControllerAdvice {
 
     @ExceptionHandler(InternalServiceException.class)
     public ResponseEntity<ErrorResponse> internalServiceExceptionHandle(InternalServiceException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(httpStatus.value())
@@ -85,7 +93,7 @@ public class MyControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> exceptionHandle(Exception e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(httpStatus.value())

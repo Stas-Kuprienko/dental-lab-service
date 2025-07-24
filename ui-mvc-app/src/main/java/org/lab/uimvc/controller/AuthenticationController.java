@@ -2,20 +2,22 @@ package org.lab.uimvc.controller;
 
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
+import org.lab.model.User;
 import org.lab.request.NewUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-public class UserController extends MvcControllerUtil {
+public class AuthenticationController extends MvcControllerUtil {
 
     private final UserService userService;
 
     @Autowired
-    public UserController(DentalLabRestClient dentalLabRestClient) {
+    public AuthenticationController(DentalLabRestClient dentalLabRestClient) {
         userService = dentalLabRestClient.USERS;
     }
 
@@ -31,9 +33,10 @@ public class UserController extends MvcControllerUtil {
     }
 
     @PostMapping("/sign-up")
-    public String signUpProcess(@ModelAttribute NewUser newUser) {
-        userService.signUp(newUser);
-        return REDIRECT + MAIN_PATH;
+    public String signUpProcess(@ModelAttribute NewUser newUser, Model model) {
+        User user = userService.signUp(newUser);
+        model.addAttribute("user", user);
+        return REDIRECT + USER_PROFILE_PAGE;
     }
 
     @GetMapping("/main")

@@ -2,12 +2,12 @@ package org.dental.restclient;
 
 import org.lab.model.User;
 import org.lab.request.NewUser;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
-import java.util.UUID;
 
 public class UserService {
 
-    private static final String RESOURCE = "/users";
+    private static final String RESOURCE = "/user";
 
     private final RestClient restClient;
 
@@ -28,11 +28,34 @@ public class UserService {
                 .body(User.class);
     }
 
-    public User find(UUID userId) {
+    public User get() {
         return restClient
                 .get()
-                .uri(DentalLabRestClient.uriById(userId))
                 .retrieve()
                 .body(User.class);
+    }
+
+    public User updateName(String name) {
+        return restClient
+                .put()
+                .body(name)
+                .retrieve()
+                .body(User.class);
+    }
+
+    public boolean delete() {
+        ResponseEntity<Void> response = restClient
+                .delete()
+                .retrieve()
+                .toBodilessEntity();
+        return response.getStatusCode().is2xxSuccessful();
+    }
+
+    public boolean changeEmail() {
+        return false;
+    }
+
+    public boolean verifyEmailChangeCode(String code) {
+        return false;
     }
 }

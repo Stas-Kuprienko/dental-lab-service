@@ -17,6 +17,7 @@ public class MyUserService implements UserService {
     private final UserRepository userRepository;
     private final CredentialService credentialService;
 
+
     @Autowired
     public MyUserService(UserRepository userRepository, CredentialService credentialService) {
         this.userRepository = userRepository;
@@ -47,5 +48,16 @@ public class MyUserService implements UserService {
     public UserEntity getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> NotFoundCustomException.byId("User", id));
+    }
+
+    @Override
+    public UserEntity updateName(UUID id, String name) {
+        userRepository.updateName(id, name);
+        return getById(id);
+    }
+
+    @Override
+    public void delete(UUID id) {
+        userRepository.deleteById(id);
     }
 }

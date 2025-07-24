@@ -33,6 +33,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${project.variables.kafka.url}
+    partitions: 3
+    replicas: 3
 
 eureka:
   client:

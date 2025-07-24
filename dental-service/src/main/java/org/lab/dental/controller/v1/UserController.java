@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     private final String URL;
@@ -40,9 +40,30 @@ public class UserController {
     }
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable("id") UUID id) {
-        UserEntity entity = userService.getById(id);
+    @GetMapping
+    public ResponseEntity<User> getUser(@RequestHeader("X-USER-ID") UUID userId) {
+        UserEntity entity = userService.getById(userId);
         return ResponseEntity.ok(userConverter.toDto(entity));
+    }
+
+
+    @PutMapping
+    public ResponseEntity<User> updateName(@RequestHeader("X-USER-ID") UUID userId,
+                                           @RequestBody String name) {
+        UserEntity entity = userService.updateName(userId, name);
+        return ResponseEntity.ok(userConverter.toDto(entity));
+    }
+
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId) {
+        userService.delete(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    public ResponseEntity<Void> sendOtpForChangeEmail(@RequestHeader("X-USER-ID") UUID userId) {
+
+        return ResponseEntity.ok().build();
     }
 }
