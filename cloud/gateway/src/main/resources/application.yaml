@@ -20,9 +20,7 @@ spring:
         - id: dental-lab-service
           uri: lb://dental-lab-service
           predicates:
-            - Path=/**
-          filters:
-            - name: HeaderFilter
+            - Path=/api/v1/**
   security:
     oauth2:
       resourceserver:

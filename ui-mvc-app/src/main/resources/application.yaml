@@ -29,8 +29,8 @@ spring:
           keycloak:
             client-id: ${project.variables.keycloak.client-id}
             client-secret: ${project.variables.keycloak.client-secret}
-            scope: openid, profile, email
-            redirect-uri: http://localhost:8081/dental-lab/login/oauth2/code/keycloak
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
         provider:
           keycloak:

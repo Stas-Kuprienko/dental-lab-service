@@ -1,7 +1,9 @@
 package org.lab.dental.service.impl;
 
+import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.UserEntity;
 import org.lab.dental.exception.NotFoundCustomException;
+import org.lab.dental.repository.TelegramChatRepository;
 import org.lab.dental.repository.UserRepository;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.UserService;
@@ -16,12 +18,16 @@ public class MyUserService implements UserService {
 
     private final UserRepository userRepository;
     private final CredentialService credentialService;
+    private final TelegramChatRepository telegramChatRepository;
 
 
     @Autowired
-    public MyUserService(UserRepository userRepository, CredentialService credentialService) {
+    public MyUserService(UserRepository userRepository,
+                         CredentialService credentialService,
+                         TelegramChatRepository telegramChatRepository) {
         this.userRepository = userRepository;
         this.credentialService = credentialService;
+        this.telegramChatRepository = telegramChatRepository;
     }
 
 
@@ -59,5 +65,16 @@ public class MyUserService implements UserService {
     @Override
     public void delete(UUID id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void addTelegram(UUID id, Long chatId) {
+        TelegramChatEntity telegramChat = TelegramChatEntity.builder()
+                .userId(id)
+                .chatId(chatId)
+                .status(UserStatus.ENABLED)
+                .createdAt(LocalDate.now())
+                .build();
+        telegramChatRepository.save(telegramChat);
     }
 }

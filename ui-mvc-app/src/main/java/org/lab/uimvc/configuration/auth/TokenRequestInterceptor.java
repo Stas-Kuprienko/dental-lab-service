@@ -1,6 +1,7 @@
 package org.lab.uimvc.configuration.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -27,14 +28,16 @@ public class TokenRequestInterceptor implements ClientHttpRequestInterceptor {
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("keycloak")
-                .principal(authentication)
-                .build();
-        OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
-        if (authorizedClient != null) {
-            String token = authorizedClient.getAccessToken().getTokenValue();
-            request.getHeaders().setBearerAuth(token);
+        if (!(request.getURI().getPath().equals("/api/v1/users") && request.getMethod().equals(HttpMethod.POST))) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("keycloak")
+                    .principal(authentication)
+                    .build();
+            OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+            if (authorizedClient != null) {
+                String token = authorizedClient.getAccessToken().getTokenValue();
+                request.getHeaders().setBearerAuth(token);
+            }
         }
         return execution.execute(request, body);
     }

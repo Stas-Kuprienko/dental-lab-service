@@ -12,4 +12,6 @@ public interface UserService {
     UserEntity updateName(UUID id, String name);
 
     void delete(UUID id);
+
+    void addTelegram(UUID id, Long chatId);
 }

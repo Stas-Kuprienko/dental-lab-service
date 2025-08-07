@@ -36,7 +36,7 @@ public class AuthenticationController extends MvcControllerUtil {
     public String signUpProcess(@ModelAttribute NewUser newUser, Model model) {
         User user = userService.signUp(newUser);
         model.addAttribute("user", user);
-        return REDIRECT + USER_PROFILE_PAGE;
+        return REDIRECT + LOGIN_PATH + "?login_hint=" + user.getLogin();
     }
 
     @GetMapping("/main")

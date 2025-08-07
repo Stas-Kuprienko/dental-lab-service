@@ -42,3 +42,18 @@ CREATE TABLE dental_lab.photo_filename (
     filename VARCHAR(255)   PRIMARY KEY,
     dental_work_id BIGINT   NOT NULL    REFERENCES dental_lab.dental_work ON DELETE CASCADE
 );
+
+CREATE TABLE dental_lab.telegram_chat (
+    chat_id BIGINT          PRIMARY KEY,
+    user_id UUID            NOT NULL    REFERENCES dental_lab.users ON DELETE CASCADE,
+    status VARCHAR(63)      NOT NULL    DEFAULT 'ENABLED' CHECK (status IN('ENABLED', 'DISABLED')),
+    created_at DATE         NOT NULL    DEFAULT now()
+);
+
+CREATE TABLE dental_lab.telegram_otp_link (
+    key VARCHAR(31)         PRIMARY KEY,
+    user_id UUID            NOT NULL    REFERENCES dental_lab.users ON DELETE CASCADE,
+    chat_id BIGINT          NOT NULL    REFERENCES dental_lab.telegram_chat ON DELETE CASCADE,
+    otp VARCHAR(31)         NOT NULL,
+    expires_at TIMESTAMP    NOT NULL
+);

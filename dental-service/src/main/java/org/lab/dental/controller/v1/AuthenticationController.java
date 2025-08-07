@@ -4,6 +4,7 @@ import org.lab.dental.service.CredentialService;
 import org.lab.dental.util.LoginUtil;
 import org.lab.model.AuthToken;
 import org.lab.model.LoginCredential;
+import org.lab.request.ClientCredentialsRequest;
 import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginCredential> login(@RequestBody LoginRequest request) {
-        AuthToken authToken = credentialService.authenticate(request.email(), request.password());
+        AuthToken authToken = credentialService.userLogin(request.email(), request.password());
         return ResponseEntity.ok(LoginUtil.buildLoginCredential(authToken));
+    }
+
+    @PostMapping("/login/client-id")
+    public ResponseEntity<AuthToken> login(@RequestBody ClientCredentialsRequest request) {
+        AuthToken token = credentialService.clientLogin(request.getClientId(), request.getClientSecret());
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/refresh")

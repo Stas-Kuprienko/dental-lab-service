@@ -7,7 +7,9 @@ public interface CredentialService {
 
     UUID signUp(String login, String password, String name);
 
-    AuthToken authenticate(String email, String password);
+    AuthToken clientLogin(String clientId, String clientSecret);
+
+    AuthToken userLogin(String email, String password);
 
     AuthToken refresh(String refreshToken);
 

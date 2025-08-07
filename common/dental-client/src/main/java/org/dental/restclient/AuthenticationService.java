@@ -2,6 +2,7 @@ package org.dental.restclient;
 
 import org.lab.model.AuthToken;
 import org.lab.model.LoginCredential;
+import org.lab.request.ClientCredentialsRequest;
 import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,19 @@ public class AuthenticationService extends ClientExceptionDispatcher {
     }
 
 
-    public LoginCredential login(String email, String password) {
+    public AuthToken clientLogin(String clientId, String clientSecret) {
+        ResponseEntity<AuthToken> response = restClient
+                .post()
+                .uri("/login/client-id")
+                .body(new ClientCredentialsRequest(clientId, clientSecret))
+                .retrieve()
+                .toEntity(AuthToken.class);
+        check(response);
+        //TODO
+        return getBodyOrThrowNotFoundEx(response, "authentication error");
+    }
+
+    public LoginCredential userLogin(String email, String password) {
         ResponseEntity<LoginCredential> response = restClient
                 .post()
                 .uri("/login")

@@ -9,7 +9,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.dental.restclient.DentalLabRestClient;
 import org.lab.event.EventMessage;
 import org.lab.model.ProductMap;
-import org.lab.telegram_bot.configuration.auth.TokenRequestInterceptor;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,9 +52,7 @@ public class TelegramBotConfig {
 
     @Bean
     public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,
-                                                   RestClient.Builder restClientBuilder,
-                                                   TokenRequestInterceptor interceptor) {
-        restClientBuilder.requestInterceptor(interceptor);
+                                                   RestClient.Builder restClientBuilder) {
         return new DentalLabRestClient(url, restClientBuilder);
     }
 

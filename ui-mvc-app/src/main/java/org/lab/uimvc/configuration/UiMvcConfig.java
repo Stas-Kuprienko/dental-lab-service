@@ -20,7 +20,7 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import java.util.Locale;
 
 @Configuration
-public class UiApplicationConfig {
+public class UiMvcConfig {
 
 
     @Bean

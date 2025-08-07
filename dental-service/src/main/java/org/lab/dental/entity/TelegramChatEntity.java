@@ -10,10 +10,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+@Entity
 @Builder
 @Getter @Setter
 @AllArgsConstructor
-@Table(name = "telegram_chat", schema = "person")
+@Table(name = "telegram_chat", schema = "dental_lab")
 public class TelegramChatEntity {
 
     @Id

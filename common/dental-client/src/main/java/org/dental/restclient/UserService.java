@@ -7,7 +7,7 @@ import org.springframework.web.client.RestClient;
 
 public class UserService {
 
-    private static final String RESOURCE = "/user";
+    private static final String RESOURCE = "/users";
 
     private final RestClient restClient;
 

@@ -1,7 +1,6 @@
 package org.lab.dental.service.impl;
 
 import jakarta.ws.rs.core.Response;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -11,13 +10,10 @@ import org.lab.dental.service.CredentialService;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +73,16 @@ public class KeycloakCredentialService implements CredentialService {
     }
 
     @Override
-    public AuthToken authenticate(String email, String password) {
+    public AuthToken clientLogin(String clientId, String clientSecret) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "client_credentials");
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        return requestToken(params);
+    }
+
+    @Override
+    public AuthToken userLogin(String email, String password) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
         params.add("client_id", clientId);
