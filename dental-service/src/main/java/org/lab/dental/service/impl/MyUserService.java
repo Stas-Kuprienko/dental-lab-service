@@ -77,4 +77,10 @@ public class MyUserService implements UserService {
                 .build();
         telegramChatRepository.save(telegramChat);
     }
+
+    @Override
+    public TelegramChatEntity getTelegramChat(Long chatId) {
+        return telegramChatRepository.findById(chatId)
+                .orElseThrow(() -> NotFoundCustomException.byId("TelegramChat", chatId));
+    }
 }

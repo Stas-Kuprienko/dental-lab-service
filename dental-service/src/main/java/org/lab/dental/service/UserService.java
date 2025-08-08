@@ -1,5 +1,6 @@
 package org.lab.dental.service;
 
+import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.UserEntity;
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public interface UserService {
     void delete(UUID id);
 
     void addTelegram(UUID id, Long chatId);
+
+    TelegramChatEntity getTelegramChat(Long chatId);
 }

@@ -52,7 +52,7 @@ CREATE TABLE dental_lab.telegram_chat (
 
 CREATE TABLE dental_lab.telegram_otp_link (
     key VARCHAR(31)         PRIMARY KEY,
-    user_id UUID            NOT NULL    REFERENCES dental_lab.users ON DELETE CASCADE,
+    user_id UUID                        REFERENCES dental_lab.users ON DELETE CASCADE,
     chat_id BIGINT          NOT NULL    REFERENCES dental_lab.telegram_chat ON DELETE CASCADE,
     otp VARCHAR(31)         NOT NULL,
     expires_at TIMESTAMP    NOT NULL

@@ -1,6 +1,8 @@
 package org.lab.dental.mapping;
 
+import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.UserEntity;
+import org.lab.model.TelegramChat;
 import org.lab.model.User;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,15 @@ public class UserConverter {
                 .name(entity.getName())
                 .createdAt(entity.getCreatedAt())
                 .status(entity.getStatus())
+                .build();
+    }
+
+    public TelegramChat telegramChatToDto(TelegramChatEntity entity) {
+        return TelegramChat.builder()
+                .chatId(entity.getChatId())
+                .userId(entity.getUserId())
+                .status(entity.getStatus())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

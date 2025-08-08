@@ -16,7 +16,7 @@ import java.util.UUID;
 public class MyTelegramOtpLinkService implements TelegramOtpLinkService {
 
     private static final int linkDurationInMinutes = 10;
-    private static final int otpLength = 7;
+    private static final int otpLength = 5;
 
     private final TelegramOtpLinkRepository repository;
     private final NumericCodeGenerator codeGenerator;
@@ -30,12 +30,11 @@ public class MyTelegramOtpLinkService implements TelegramOtpLinkService {
 
 
     @Override
-    public void create(String key, UUID userId, Long chatId) {
+    public void create(String key, Long chatId) {
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(linkDurationInMinutes);
         String otp = codeGenerator.generateNumericCode(otpLength);
         TelegramOtpLinkEntity link = TelegramOtpLinkEntity.builder()
                 .key(key)
-                .userId(userId)
                 .chatId(chatId)
                 .otp(otp)
                 .expiresAt(expiresAt)
@@ -44,16 +43,32 @@ public class MyTelegramOtpLinkService implements TelegramOtpLinkService {
     }
 
     @Override
-    public boolean validate(String key, UUID userId, Long chatId, String otp) {
-        Optional<TelegramOtpLinkEntity> optionalTelegramLink = repository.findByKeyAndUserIdAndChatId(key, userId, chatId);
+    public void setUserId(String key, UUID userId) {
+        repository.setUserId(key, userId);
+    }
+
+    @Override
+    public TelegramOtpLinkEntity find(String key) {
+        Optional<TelegramOtpLinkEntity> optionalTelegramLink = repository.findByKey(key);
         if (optionalTelegramLink.isEmpty()) {
             throw new NotFoundCustomException("Telegram link is not found");
         }
         TelegramOtpLinkEntity link = optionalTelegramLink.get();
+        if (link.getUserId() == null) {
+            throw new BadRequestCustomException("Telegram link doesn't have UserID");
+        }
         if (link.getExpiresAt().isAfter(LocalDateTime.now())) {
             throw new BadRequestCustomException("Telegram link is expired");
         }
-        return otp.equals(link.getOtp());
+        return link;
+    }
+
+    @Override
+    public boolean validate(TelegramOtpLinkEntity otpLink, String otp) {
+        if (otpLink.getExpiresAt().isAfter(LocalDateTime.now())) {
+            throw new BadRequestCustomException("Telegram link is expired");
+        }
+        return otp.equals(otpLink.getOtp());
     }
 
     @Override
