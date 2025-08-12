@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DENTAL MECHANIC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<!-- 🔝 Меню -->
+<div th:replace="fragments/nav :: main-menu"></div>
+
+<section style="text-align:center; margin-top: 50px;">
+    <!-- Текст из messages.properties -->
+    <p style="font-size: 18px;" th:text="#{telegram.otp.instruction}">
+        Введите этот код в чате с нашим Telegram-ботом:
+    </p>
+
+    <!-- Сам OTP -->
+    <p style="font-size: 36px; font-weight: bold; margin-top: 20px;" th:text="${otp}">
+        123456
+    </p>
+</section>
+
+</body>
+</html>

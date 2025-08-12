@@ -2,11 +2,12 @@ package org.dental.restclient;
 
 import org.lab.model.TelegramChat;
 import org.lab.request.NewTelegramOtpLink;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
-
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class TelegramChatService {
 
@@ -32,11 +33,11 @@ public class TelegramChatService {
                 .toBodilessEntity();
     }
 
-    public void createLink(NewTelegramOtpLink newTelegramOtpLink, String headerKey, String headerValue) {
+    public void createLink(NewTelegramOtpLink newTelegramOtpLink, Consumer<HttpHeaders> headersConsumer) {
         //TODO
         restClient
                 .post()
-                .header(headerKey, headerValue)
+                .headers(headersConsumer)
                 .body(newTelegramOtpLink)
                 .retrieve()
                 .toBodilessEntity();
@@ -51,11 +52,11 @@ public class TelegramChatService {
                 .toBodilessEntity();
     }
 
-    public void setUserId(String key, String headerKey, String headerValue) {
+    public void setUserId(String key, Consumer<HttpHeaders> headersConsumer) {
         restClient
                 .put()
                 .uri(DentalLabRestClient.uriById(key))
-                .header(headerKey, headerValue)
+                .headers(headersConsumer)
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -68,17 +69,16 @@ public class TelegramChatService {
                 .body(String.class);
     }
 
-    public String getOtpByKey(String key, String headerKey, String headerValue) {
+    public String getOtpByKey(String key, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(key))
-                .header(headerKey, headerValue)
+                .headers(headersConsumer)
                 .retrieve()
                 .body(String.class);
     }
 
     public UUID bindTelegram(String key, String otp) {
-        //TODO
         return restClient
                 .post()
                 .uri(DentalLabRestClient.uriById(key))
@@ -87,12 +87,11 @@ public class TelegramChatService {
                 .body(UUID.class);
     }
 
-    public UUID bindTelegram(String key, String otp, String headerKey, String headerValue) {
-        //TODO
+    public UUID bindTelegram(String key, String otp, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
                 .uri(DentalLabRestClient.uriById(key))
-                .header(headerKey, headerValue)
+                .headers(headersConsumer)
                 .body(otp)
                 .retrieve()
                 .body(UUID.class);
@@ -102,6 +101,21 @@ public class TelegramChatService {
         ResponseEntity<TelegramChat> response = restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(chatId))
+                .retrieve()
+                .toEntity(TelegramChat.class);
+        if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+            return Optional.of(response.getBody());
+        } else {
+            //TODO
+            return Optional.empty();
+        }
+    }
+
+    public Optional<TelegramChat> get(long chatId, Consumer<HttpHeaders> headersConsumer) {
+        ResponseEntity<TelegramChat> response = restClient
+                .get()
+                .uri(DentalLabRestClient.uriById(chatId))
+                .headers(headersConsumer)
                 .retrieve()
                 .toEntity(TelegramChat.class);
         if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {

@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Component
-public class TelegramBotAuthenticationManager {
+public class AuthenticationManager {
 
     private final AuthenticationService authenticationService;
     private final String clientId;
@@ -20,9 +20,9 @@ public class TelegramBotAuthenticationManager {
 
 
     @Autowired
-    public TelegramBotAuthenticationManager(DentalLabRestClient dentalLabRestClient,
-                                            @Value("${project.variables.keycloak.client-id}") String clientId,
-                                            @Value("${project.variables.keycloak.client-secret}") String clientSecret) {
+    public AuthenticationManager(DentalLabRestClient dentalLabRestClient,
+                                 @Value("${project.variables.keycloak.client-id}") String clientId,
+                                 @Value("${project.variables.keycloak.client-secret}") String clientSecret) {
         this.authenticationService = dentalLabRestClient.AUTHENTICATION;
         this.clientId = clientId;
         this.clientSecret = clientSecret;

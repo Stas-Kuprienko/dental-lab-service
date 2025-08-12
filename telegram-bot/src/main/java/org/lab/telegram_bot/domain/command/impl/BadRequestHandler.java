@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.impl;
 
+import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.utils.ChatBotUtility;
@@ -28,7 +29,7 @@ public class BadRequestHandler extends BotCommandHandler {
         Locale locale = ChatBotUtility.getLocale(message);
 
         String text = messageSource
-                .getMessage("ILLEGAL_ARGUMENT", null, locale);
+                .getMessage(TelegramBotExceptionHandler.MessageTextKey.ILLEGAL_ARGUMENT.name(), null, locale);
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);

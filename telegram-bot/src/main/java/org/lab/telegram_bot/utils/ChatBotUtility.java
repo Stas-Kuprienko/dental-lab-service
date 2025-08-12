@@ -63,9 +63,9 @@ public final class ChatBotUtility {
     }
 
     public static String callBackQuery(ChatSession session, String data) {
-        return session.getContext().getCommand().value +
+        return session.getCommand().value +
                 ':' +
-                session.getContext().getStep() +
+                session.getStep() +
                 ':' +
                 data;
     }

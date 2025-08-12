@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Repository
-public class ChatSessionRepositoryRedis implements ChatSessionRepository {
+public class RedisChatSessionRepository implements ChatSessionRepository {
 
     private static final String CHAT_SESSION_KEY = "CHAT_SESSION";
 
@@ -21,7 +21,7 @@ public class ChatSessionRepositoryRedis implements ChatSessionRepository {
 
 
     @Autowired
-    public ChatSessionRepositoryRedis(@Qualifier("chatSessionRedisTemplate") RedisTemplate<String, ChatSession> redisTemplate) {
+    public RedisChatSessionRepository(@Qualifier("chatSessionRedisTemplate") RedisTemplate<String, ChatSession> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

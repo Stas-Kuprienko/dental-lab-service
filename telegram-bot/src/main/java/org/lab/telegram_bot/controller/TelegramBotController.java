@@ -46,13 +46,13 @@ public class TelegramBotController extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage() && update.getMessage().hasText()) {
-                commandDispatcher.apply(update.getMessage());
+                this.execute(commandDispatcher.apply(update.getMessage()));
 
             } else if (update.hasCallbackQuery()) {
-                commandDispatcher.apply(update.getCallbackQuery());
+                this.execute(commandDispatcher.apply(update.getCallbackQuery()));
             }
         } catch (Exception e) {
-            exceptionHandler.apply(e, update);
+            this.execute(exceptionHandler.apply(e, update));
         }
     }
 

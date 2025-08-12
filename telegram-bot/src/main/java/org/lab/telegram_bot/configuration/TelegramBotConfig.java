@@ -8,7 +8,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.dental.restclient.DentalLabRestClient;
 import org.lab.event.EventMessage;
-import org.lab.model.ProductMap;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +35,7 @@ import java.util.Map;
 @Slf4j
 public class TelegramBotConfig {
 
+    public static final String SERVICE_CLIENT_ID = "TELEGRAM-BOT-SERVICE";
     public static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final String bootstrapServers;
@@ -80,14 +80,14 @@ public class TelegramBotConfig {
     }
 
     @Bean
-    public Jackson2JsonRedisSerializer<ProductMap> jsonRedisSerializer(ObjectMapper objectMapper) {
-        return new Jackson2JsonRedisSerializer<>(objectMapper, ProductMap.class);
+    public Jackson2JsonRedisSerializer<ChatSession> jsonRedisSerializer(ObjectMapper objectMapper) {
+        return new Jackson2JsonRedisSerializer<>(objectMapper, ChatSession.class);
     }
 
     @Bean("chatSessionRedisTemplate")
     public RedisTemplate<String, ChatSession> chatSessionRedisTemplate(RedisConnectionFactory redisConnectionFactory,
                                                                        StringRedisSerializer stringRedisSerializer,
-                                                                       Jackson2JsonRedisSerializer<ProductMap> jsonRedisSerializer) {
+                                                                       Jackson2JsonRedisSerializer<ChatSession> jsonRedisSerializer) {
 
         RedisTemplate<String, ChatSession> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);

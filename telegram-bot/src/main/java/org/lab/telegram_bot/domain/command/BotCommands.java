@@ -4,7 +4,8 @@ public enum BotCommands {
 
     START("/start"),
     HELP("/help"),
-    CLEAR("/clear");
+    CLEAR("/clear"),
+    LOGIN("/login");
 
 
     public final String value;

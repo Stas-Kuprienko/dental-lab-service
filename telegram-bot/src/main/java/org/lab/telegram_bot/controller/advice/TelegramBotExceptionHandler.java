@@ -85,7 +85,7 @@ public class TelegramBotExceptionHandler {
     }
 
 
-    enum MessageTextKey {
+    public enum MessageTextKey {
         UNREGISTERED,
         NOT_FOUND,
         ILLEGAL_ARGUMENT,

@@ -3,6 +3,7 @@ package org.lab.telegram_bot.domain.command;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
+import org.lab.telegram_bot.exception.UnregisteredUserException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -21,25 +23,35 @@ public class CommandDispatcher {
     private final Map<String, BotCommandHandler> commandHandlerStore;
     private final ChatSessionService chatSessionService;
 
+
     @Autowired
-    public CommandDispatcher(ApplicationContext applicationContext, ChatSessionService chatSessionService) {
+    public CommandDispatcher(ApplicationContext applicationContext,
+                             ChatSessionService chatSessionService) {
         commandHandlerStore = collectHandlers(applicationContext);
         this.chatSessionService = chatSessionService;
     }
 
 
     public BotApiMethod<?> apply(Message message) {
-        ChatSession session = chatSessionService.get(message.getChatId());
-        BotCommandHandler handler = commandHandlerStore.get(message.getText());
-        if (handler != null) {
-            session.getContext().setStep(0);
-        } else {
-            BotCommands sessionContextCommand = session.getContext().getCommand();
-            if (sessionContextCommand != null) {
-                handler = commandHandlerStore.get(sessionContextCommand.value);
+        BotCommandHandler handler;
+        ChatSession session;
+        try {
+            handler = commandHandlerStore.get(message.getText());
+            session = chatSessionService.get(message.getChatId());
+            if (handler != null) {
+                session.setStep(0);
             } else {
-                handler = commandHandlerStore.get(null);
+                BotCommands sessionContextCommand = session.getCommand();
+                if (sessionContextCommand != null) {
+                    handler = commandHandlerStore.get(sessionContextCommand.value);
+                } else {
+                    handler = commandHandlerStore.get(null);
+                }
             }
+        } catch (UnregisteredUserException e) {
+            log.info(e.getMessage());
+            handler = commandHandlerStore.get(BotCommands.START.value);
+            session = chatSessionService.create(message.getChatId(), null);
         }
         log.info("Command handler {} is applied", handler.getClass().getSimpleName());
         return handler.handle(message, session);
@@ -52,8 +64,8 @@ public class CommandDispatcher {
         String[] callback = ChatBotUtility.callBackData(callbackQuery);
         BotCommands command = BotCommands.valueOf(callback[0]);
         int step = Integer.parseInt(callback[1]);
-        if (session.getContext().getStep() != step) {
-            session.getContext().setStep(step);
+        if (session.getStep() != step) {
+            session.setStep(step);
         }
         BotCommandHandler handler = commandHandlerStore.get(command.value);
         if (handler == null) {
