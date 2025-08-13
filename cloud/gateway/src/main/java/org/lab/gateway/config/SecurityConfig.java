@@ -18,14 +18,14 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    private final HeaderFilter headerFilter;
+    private final HttpHeaderManagementFilter httpHeaderManagementFilter;
     private final String issuerUri;
 
 
     @Autowired
-    public SecurityConfig(HeaderFilter headerFilter,
+    public SecurityConfig(HttpHeaderManagementFilter httpHeaderManagementFilter,
                           @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
-        this.headerFilter = headerFilter;
+        this.httpHeaderManagementFilter = httpHeaderManagementFilter;
         this.issuerUri = issuerUri;
     }
 
@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .pathMatchers("/api/v1/auth/*").permitAll()
+                        .pathMatchers("/api/v1/auth/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                         .anyExchange().authenticated()
                 )
@@ -56,7 +56,7 @@ public class SecurityConfig {
         return builder.routes()
                 .route("dental-lab-service", r -> r
                         .path("/api/v1/**")
-                        .filters(f -> f.filter(headerFilter))
+                        .filters(f -> f.filter(httpHeaderManagementFilter))
                         .uri("lb://dental-lab-service"))
                 .build();
     }

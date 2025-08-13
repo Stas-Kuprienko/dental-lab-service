@@ -28,7 +28,7 @@ public class RedisChatSessionRepository implements ChatSessionRepository {
 
     @PostConstruct
     public void init() {
-        Duration duration = Duration.of(5, ChronoUnit.MINUTES);
+        Duration duration = Duration.of(30, ChronoUnit.MINUTES);
         redisTemplate.expire(CHAT_SESSION_KEY, duration);
         log.info("Cache duration for {} key is set to {}", CHAT_SESSION_KEY, duration);
     }

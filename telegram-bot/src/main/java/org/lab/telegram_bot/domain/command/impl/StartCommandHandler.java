@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @CommandHandler(command = BotCommands.START)
 public class StartCommandHandler extends BotCommandHandler {
+    //TODO
+    //переделать - сделать отдельный LoginCommandHandler, StartCommandHandler просто показывает приветствие и описание
 
     private static final String LINK_CREATED = "LINK_CREATED";
     private static final String LINK_CREATED_FOR_LINKED_USER = "LINK_CREATED_FOR_LINKED_USER";
@@ -78,7 +80,7 @@ public class StartCommandHandler extends BotCommandHandler {
 
     private SendMessage createLink(ChatSession session, Locale locale, String userName) {
         long chatId = session.getChatId();
-        String key = keyGenerator.generate();
+        String key = keyGenerator.generate(31);
         NewTelegramOtpLink newTelegramOtpLink = NewTelegramOtpLink.builder()
                 .key(key)
                 .chatId(chatId)

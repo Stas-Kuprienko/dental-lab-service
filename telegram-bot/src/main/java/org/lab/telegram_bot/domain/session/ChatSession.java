@@ -1,16 +1,13 @@
 package org.lab.telegram_bot.domain.session;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.springframework.data.redis.core.RedisHash;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Builder
+@Data
 @AllArgsConstructor
 @RedisHash("chat_session")
 public class ChatSession {
@@ -25,14 +22,6 @@ public class ChatSession {
 
     public static ChatSession createNew(long chatId, UUID userId) {
         return new ChatSession(chatId, userId, new Context(null, new HashMap<>(), 0));
-    }
-
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public UUID getUserId() {
-        return userId;
     }
 
     public Map<String, String> getAttributes() {
@@ -62,9 +51,8 @@ public class ChatSession {
     }
 
 
-    @Getter
-    @Setter
-    static class Context {
+    @Getter @Setter
+    public static class Context {
 
         private BotCommands command;
         private Map<String, String> attributes;

@@ -3,8 +3,9 @@ package org.dental.restclient;
 import org.lab.model.TelegramChat;
 import org.lab.request.NewTelegramOtpLink;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -98,30 +99,30 @@ public class TelegramChatService {
     }
 
     public Optional<TelegramChat> get(long chatId) {
-        ResponseEntity<TelegramChat> response = restClient
-                .get()
-                .uri(DentalLabRestClient.uriById(chatId))
-                .retrieve()
-                .toEntity(TelegramChat.class);
-        if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-            return Optional.of(response.getBody());
-        } else {
-            //TODO
+        try {
+            TelegramChat response = restClient
+                    .get()
+                    .uri(DentalLabRestClient.uriById(chatId))
+                    .retrieve()
+                    .toEntity(TelegramChat.class)
+                    .getBody();
+            return Optional.of(response);
+        } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();
         }
     }
 
     public Optional<TelegramChat> get(long chatId, Consumer<HttpHeaders> headersConsumer) {
-        ResponseEntity<TelegramChat> response = restClient
-                .get()
-                .uri(DentalLabRestClient.uriById(chatId))
-                .headers(headersConsumer)
-                .retrieve()
-                .toEntity(TelegramChat.class);
-        if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-            return Optional.of(response.getBody());
-        } else {
-            //TODO
+        try {
+            TelegramChat response = restClient
+                    .get()
+                    .uri(DentalLabRestClient.uriById(chatId))
+                    .headers(headersConsumer)
+                    .retrieve()
+                    .toEntity(TelegramChat.class)
+                    .getBody();
+            return Optional.of(response);
+        } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();
         }
     }

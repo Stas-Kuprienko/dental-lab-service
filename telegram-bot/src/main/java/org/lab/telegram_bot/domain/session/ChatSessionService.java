@@ -1,10 +1,10 @@
 package org.lab.telegram_bot.domain.session;
 
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.TelegramChatService;
 import org.lab.model.TelegramChat;
 import org.lab.telegram_bot.datasource.ChatSessionRepository;
 import org.lab.telegram_bot.exception.UnregisteredUserException;
+import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
+import org.lab.telegram_bot.service.TelegramChatServiceWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
@@ -13,10 +13,10 @@ import java.util.UUID;
 public class ChatSessionService {
 
     private final ChatSessionRepository repository;
-    private final TelegramChatService telegramChatService;
+    private final TelegramChatServiceWrapper telegramChatService;
 
     @Autowired
-    public ChatSessionService(ChatSessionRepository repository, DentalLabRestClient dentalLabRestClient) {
+    public ChatSessionService(ChatSessionRepository repository, DentalLabRestClientWrapper dentalLabRestClient) {
         this.repository = repository;
         this.telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
     }
