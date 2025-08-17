@@ -7,6 +7,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.lab.dental.exception.InternalServiceException;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.service.CredentialService;
+import org.lab.exception.BadRequestCustomException;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +65,7 @@ public class KeycloakCredentialService implements CredentialService {
             if (response.getStatus() == 201) {
                 return extractId(response);
             } else if (response.getStatus() == 409) {
-                throw new IllegalArgumentException("User duplication: " + login);
+                throw new BadRequestCustomException("User duplication: " + login);
             } else {
                 String statusInfo = response.getStatusInfo().toString();
                 throw InternalServiceException.keycloakAuthFail(login, statusInfo);
