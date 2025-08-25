@@ -1,25 +1,54 @@
 package org.lab.telegram_bot.domain.element;
 
+import org.lab.telegram_bot.domain.command.BotCommands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+
+import java.util.*;
 
 @Component
-public class InlineKeyboardBuilder {
+public class KeyboardBuilderKit {
 
     private final MessageSource messageSource;
 
     @Autowired
-    public InlineKeyboardBuilder(MessageSource messageSource) {
+    public KeyboardBuilderKit(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
+
+    public ReplyKeyboardMarkup mainKeyboard(Locale locale) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        markup.setResizeKeyboard(true);
+        markup.setSelective(true);
+        markup.setOneTimeKeyboard(true);
+        List<BotCommands> commands = Arrays
+                .stream(BotCommands.values())
+                .filter(c -> !c.isMenu)
+                .toList();
+        List<KeyboardRow> rows = new ArrayList<>();
+        rows.add(new KeyboardRow());
+        int i = 0;
+        for (BotCommands command : commands) {
+            String key = messageSource.getMessage(command.value, null, locale);
+            if (i < 2) {
+                rows.getLast().add(new KeyboardButton(key));
+            } else {
+                KeyboardRow row = new KeyboardRow();
+                row.add(key);
+                rows.add(row);
+            }
+            i++;
+        }
+        markup.setKeyboard(rows);
+        return markup;
+    }
 
     @SafeVarargs
     public final InlineKeyboardMarkup inlineKeyboard(List<InlineKeyboardButton>... buttons) {

@@ -2,7 +2,9 @@ package org.lab.telegram_bot.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
+import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandDispatcher;
+import org.lab.telegram_bot.domain.command.impl.StartCommandHandler;
 import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +36,8 @@ public class TelegramBotController extends TelegramLongPollingBot {
         this.commandDispatcher = commandDispatcher;
         this.exceptionHandler = exceptionHandler;
         this.execute(commandMenuList.getDefaultMenu());
+        StartCommandHandler startCommandHandler = (StartCommandHandler) commandDispatcher.getCommandHandler(BotCommands.START);
+        startCommandHandler.setMyCommandsExecutor(this::execute);
     }
 
 

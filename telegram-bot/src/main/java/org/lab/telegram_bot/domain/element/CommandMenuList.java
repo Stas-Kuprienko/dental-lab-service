@@ -15,28 +15,23 @@ import java.util.Locale;
 public class CommandMenuList {
 
     private final MessageSource messageSource;
-    private final List<BotCommand> botCommandList;
+    private final SetMyCommands botCommandListWithDefaultLocale;
 
     @Autowired
     public CommandMenuList(MessageSource messageSource) {
         this.messageSource = messageSource;
-        botCommandList = Arrays
-                .stream(BotCommands.values())
-                .map(c -> {
-                    String description = messageSource.getMessage(c.value, null, Locale.getDefault());
-                    return new BotCommand(c.value, description);
-                })
-                .toList();
+        botCommandListWithDefaultLocale = getMenuForLocale(Locale.getDefault());
     }
 
 
     public SetMyCommands getDefaultMenu() {
-        return new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null);
+        return botCommandListWithDefaultLocale;
     }
 
     public SetMyCommands getMenuForLocale(Locale locale) {
         List<BotCommand> commandList = Arrays
                 .stream(BotCommands.values())
+                .filter(c -> c.isMenu)
                 .map(c -> {
                     String description = messageSource.getMessage(c.value, null, locale);
                     return new BotCommand(c.value, description);

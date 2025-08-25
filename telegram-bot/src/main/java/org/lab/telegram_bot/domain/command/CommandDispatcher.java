@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -73,6 +72,10 @@ public class CommandDispatcher {
         }
         log.info("Command handler {} is applied", handler.getClass().getSimpleName());
         return handler.handle(callbackQuery, session, locale);
+    }
+
+    public BotCommandHandler getCommandHandler(BotCommands botCommand) {
+        return commandHandlerStore.get(botCommand.value);
     }
 
 

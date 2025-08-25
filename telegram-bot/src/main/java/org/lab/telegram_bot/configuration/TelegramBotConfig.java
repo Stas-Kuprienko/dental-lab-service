@@ -8,6 +8,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.dental.restclient.DentalLabRestClient;
 import org.lab.event.EventMessage;
+import org.lab.telegram_bot.controller.TelegramBotController;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +27,12 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.web.client.RestClient;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Configuration
 @Slf4j
@@ -49,6 +52,11 @@ public class TelegramBotConfig {
         this.groupId = groupId;
     }
 
+
+    @Bean("setMyCommandsExecutor")
+    public Consumer<SetMyCommands> setMyCommandsExecutor(TelegramBotController telegramBotController) {
+        return telegramBotController::execute;
+    }
 
     @Bean
     public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,

@@ -48,7 +48,7 @@ public class TelegramChatService {
         //TODO
         restClient
                 .put()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -56,7 +56,7 @@ public class TelegramChatService {
     public void setUserId(String key, Consumer<HttpHeaders> headersConsumer) {
         restClient
                 .put()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .retrieve()
                 .toBodilessEntity();
@@ -65,7 +65,7 @@ public class TelegramChatService {
     public String getOtpByKey(String key) {
         return restClient
                 .get()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .retrieve()
                 .body(String.class);
     }
@@ -73,7 +73,7 @@ public class TelegramChatService {
     public String getOtpByKey(String key, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .retrieve()
                 .body(String.class);
@@ -82,7 +82,7 @@ public class TelegramChatService {
     public UUID bindTelegram(String key, String otp) {
         return restClient
                 .post()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .body(otp)
                 .retrieve()
                 .body(UUID.class);
@@ -91,7 +91,7 @@ public class TelegramChatService {
     public UUID bindTelegram(String key, String otp, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
-                .uri(DentalLabRestClient.uriById(key))
+                .uri("/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .body(otp)
                 .retrieve()
