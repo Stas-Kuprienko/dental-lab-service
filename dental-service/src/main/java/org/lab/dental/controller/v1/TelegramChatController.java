@@ -6,12 +6,14 @@ import org.lab.dental.entity.TelegramOtpLinkEntity;
 import org.lab.dental.mapping.UserConverter;
 import org.lab.dental.service.TelegramOtpLinkService;
 import org.lab.dental.service.UserService;
+import org.lab.exception.BadRequestCustomException;
 import org.lab.model.TelegramChat;
 import org.lab.request.NewTelegramOtpLink;
+import org.lab.request.OtpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.UUID;
 
 @Slf4j
@@ -61,18 +63,18 @@ public class TelegramChatController {
 
 
     @PostMapping("/link/{key}")
-    public ResponseEntity<?> bindTelegram(@RequestHeader("X-USER-ID") UUID userId,
-                                          @RequestBody String otp,
-                                          @PathVariable("key") String key) {
+    public ResponseEntity<UUID> bindTelegram(@RequestHeader("X-SERVICE-ID") String serviceId,
+                                             @PathVariable("key") String key,
+                                             @RequestBody OtpRequest otp) {
 
-        log.info("From user '{}' received request to bind TelegramChat", userId);
+        log.info("From service '{}' received request to bind TelegramChat", serviceId);
         TelegramOtpLinkEntity link = otpLinkService.find(key);
-        if (otpLinkService.validate(link, otp)) {
-            userService.addTelegram(userId, link.getChatId());
+        if (otpLinkService.validate(link, otp.getOtp())) {
+            userService.addTelegram(link.getUserId(), link.getChatId());
             otpLinkService.delete(key);
-            return ResponseEntity.ok(userId);
+            return ResponseEntity.ok(link.getUserId());
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP is wrong!");
+            throw new BadRequestCustomException("OTP is wrong!");
         }
     }
 

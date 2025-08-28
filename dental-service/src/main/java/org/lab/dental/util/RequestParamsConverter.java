@@ -1,6 +1,7 @@
 package org.lab.dental.util;
 
-import jakarta.ws.rs.BadRequestException;
+import org.lab.exception.BadRequestCustomException;
+
 import java.time.DateTimeException;
 import java.time.Month;
 import java.time.YearMonth;
@@ -14,7 +15,7 @@ public final class RequestParamsConverter {
         try{
             return YearMonth.of(year, Month.of(month));
         } catch (DateTimeException e) {
-            throw new BadRequestException(e);
+            throw new BadRequestCustomException(e);
         }
     }
 }

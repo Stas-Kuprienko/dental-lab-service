@@ -2,6 +2,7 @@ package org.dental.restclient;
 
 import org.lab.model.TelegramChat;
 import org.lab.request.NewTelegramOtpLink;
+import org.lab.request.OtpRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -88,7 +89,7 @@ public class TelegramChatService {
                 .body(UUID.class);
     }
 
-    public UUID bindTelegram(String key, String otp, Consumer<HttpHeaders> headersConsumer) {
+    public UUID bindTelegram(String key, OtpRequest otp, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
                 .uri("/link" + DentalLabRestClient.uriById(key))

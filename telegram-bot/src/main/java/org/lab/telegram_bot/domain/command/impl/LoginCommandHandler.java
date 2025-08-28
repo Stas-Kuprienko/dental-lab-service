@@ -1,6 +1,7 @@
 package org.lab.telegram_bot.domain.command.impl;
 
 import org.lab.request.NewTelegramOtpLink;
+import org.lab.request.OtpRequest;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
@@ -62,7 +63,7 @@ public class LoginCommandHandler extends BotCommandHandler {
         String userName = ChatBotUtility.getUsername(message);
         String messageText = message.getText();
         Steps step = getStep(session);
-        session.setCommand(BotCommands.START);
+        session.setCommand(BotCommands.LOGIN);
         return switch (step) {
             case CREATE_LINK -> createLink(session, locale, userName);
             case INPUT_OTP -> inputOtp(session, locale, messageText, userName);
@@ -100,7 +101,7 @@ public class LoginCommandHandler extends BotCommandHandler {
         if (userLink == null || userLink.isExpired()) {
             text = messageSource.getMessage(LINK_EXPIRED, null, locale);
         } else {
-            UUID userId = telegramChatService.bindTelegram(userLink.key, messageText);
+            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText));
             chatSessionService.create(chatId, userId);
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
         }

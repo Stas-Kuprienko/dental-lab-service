@@ -57,15 +57,12 @@ public class MyTelegramOtpLinkService implements TelegramOtpLinkService {
         if (link.getUserId() == null) {
             throw new BadRequestCustomException("Telegram link doesn't have UserID");
         }
-        if (link.getExpiresAt().isAfter(LocalDateTime.now())) {
-            throw new BadRequestCustomException("Telegram link is expired");
-        }
         return link;
     }
 
     @Override
     public boolean validate(TelegramOtpLinkEntity otpLink, String otp) {
-        if (otpLink.getExpiresAt().isAfter(LocalDateTime.now())) {
+        if (LocalDateTime.now().isAfter(otpLink.getExpiresAt())) {
             throw new BadRequestCustomException("Telegram link is expired");
         }
         return otp.equals(otpLink.getOtp());

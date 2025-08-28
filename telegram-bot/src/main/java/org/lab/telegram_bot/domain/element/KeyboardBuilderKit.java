@@ -39,12 +39,13 @@ public class KeyboardBuilderKit {
             String key = messageSource.getMessage(command.value, null, locale);
             if (i < 2) {
                 rows.getLast().add(new KeyboardButton(key));
+                i++;
             } else {
                 KeyboardRow row = new KeyboardRow();
                 row.add(key);
                 rows.add(row);
+                i = 0;
             }
-            i++;
         }
         markup.setKeyboard(rows);
         return markup;

@@ -1,11 +1,11 @@
 package org.lab.dental.controller.advice;
 
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.InternalServiceException;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
+import org.lab.exception.BadRequestCustomException;
+import org.lab.exception.ForbiddenCustomException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +20,8 @@ import java.util.List;
 public class MyControllerAdvice {
 
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> badRequestHandle(BadRequestException e) {
+    @ExceptionHandler(BadRequestCustomException.class)
+    public ResponseEntity<ErrorResponse> badRequestHandle(BadRequestCustomException e) {
         log.info(e.getMessage());
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         return ResponseEntity
@@ -73,8 +73,8 @@ public class MyControllerAdvice {
                 .body(new ErrorResponse(httpStatus.name(), httpStatus.getReasonPhrase()));
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> forbiddenHandle(ForbiddenException e) {
+    @ExceptionHandler(ForbiddenCustomException.class)
+    public ResponseEntity<ErrorResponse> forbiddenHandle(ForbiddenCustomException e) {
         log.warn(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
         return ResponseEntity

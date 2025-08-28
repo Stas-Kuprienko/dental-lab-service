@@ -3,6 +3,7 @@ package org.lab.telegram_bot.service;
 import org.dental.restclient.TelegramChatService;
 import org.lab.model.TelegramChat;
 import org.lab.request.NewTelegramOtpLink;
+import org.lab.request.OtpRequest;
 import org.springframework.http.HttpHeaders;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class TelegramChatServiceWrapper {
         telegramChatService.createLink(newTelegramOtpLink, httpHeadersConsumer);
     }
 
-    public UUID bindTelegram(String key, String otp) {
+    public UUID bindTelegram(String key, OtpRequest otp) {
         return telegramChatService.bindTelegram(key, otp, httpHeadersConsumer);
     }
 

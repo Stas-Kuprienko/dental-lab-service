@@ -81,6 +81,9 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
         if (path.matches("/api/v1/telegram_chat/\\d+") && method.equals(HttpMethod.GET)) {
             return true;
         }
+        if (path.startsWith("/api/v1/telegram_chat/link/") && method.equals(HttpMethod.POST)) {
+            return true;
+        }
         return false;
     }
 }

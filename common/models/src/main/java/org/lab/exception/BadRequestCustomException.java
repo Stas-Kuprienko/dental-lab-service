@@ -8,6 +8,9 @@ public class BadRequestCustomException extends RuntimeException {
         super(message);
     }
 
+    public BadRequestCustomException(Throwable cause) {
+        super(cause);
+    }
 
     public static BadRequestCustomException savedEntityHasId(Object entity) {
         return new BadRequestCustomException(ENTITY_TO_SAVE_HAS_ID.formatted(entity.toString()));
