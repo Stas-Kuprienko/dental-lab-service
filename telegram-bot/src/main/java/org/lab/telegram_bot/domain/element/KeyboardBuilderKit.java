@@ -126,7 +126,7 @@ public class KeyboardBuilderKit {
         return List.of(button);
     }
 
-    public InlineKeyboardButton navigationButton(ButtonKeys buttonKey, String callbackPrefix, Locale locale) {
+    public InlineKeyboardButton callbackButton(ButtonKeys buttonKey, String callbackPrefix, Locale locale) {
         String label = messageSource.getMessage(buttonKey.name(), null, locale);
         var button = new InlineKeyboardButton(label);
         button.setCallbackData(callbackPrefix + buttonKey.name());
@@ -134,12 +134,12 @@ public class KeyboardBuilderKit {
     }
 
     public List<InlineKeyboardButton> navigationButtonRow(String callbackPrefix, boolean isFirstPage, Locale locale) {
-        var backButton = navigationButton(ButtonKeys.BACK, callbackPrefix, locale);
-        var nextButton = navigationButton(ButtonKeys.NEXT, callbackPrefix, locale);
+        var backButton = callbackButton(ButtonKeys.BACK, callbackPrefix, locale);
+        var nextButton = callbackButton(ButtonKeys.NEXT, callbackPrefix, locale);
         if (isFirstPage) {
             return List.of(backButton, nextButton);
         } else {
-            var prevButton = navigationButton(ButtonKeys.PREVIOUS, callbackPrefix, locale);
+            var prevButton = callbackButton(ButtonKeys.PREVIOUS, callbackPrefix, locale);
             return List.of(backButton, prevButton, nextButton);
         }
     }

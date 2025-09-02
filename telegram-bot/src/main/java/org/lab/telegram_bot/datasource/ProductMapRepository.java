@@ -1,4 +1,4 @@
-package org.lab.uimvc.datasource.redis;
+package org.lab.telegram_bot.datasource;
 
 import org.lab.model.ProductMap;
 import java.util.Optional;

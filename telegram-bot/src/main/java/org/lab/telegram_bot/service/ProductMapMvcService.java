@@ -1,12 +1,10 @@
-package org.lab.uimvc.service;
+package org.lab.telegram_bot.service;
 
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.ProductMapService;
 import org.lab.exception.NotFoundCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
 import org.lab.request.NewProductType;
-import org.lab.uimvc.datasource.ProductMapRepository;
+import org.lab.telegram_bot.datasource.ProductMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -15,18 +13,18 @@ import java.util.UUID;
 @Service
 public class ProductMapMvcService {
 
-    private final ProductMapService productMapService;
+    private final ProductMapServiceWrapper productMapService;
     private final ProductMapRepository productMapRepository;
 
     @Autowired
-    public ProductMapMvcService(DentalLabRestClient dentalLabRestClient, ProductMapRepository productMapRepository) {
+    public ProductMapMvcService(DentalLabRestClientWrapper dentalLabRestClient, ProductMapRepository productMapRepository) {
         this.productMapService = dentalLabRestClient.PRODUCT_MAP;
         this.productMapRepository = productMapRepository;
     }
 
 
-    public ProductMap create(UUID userId, NewProductType newProductType) {
-        ProductType productType = productMapService.create(newProductType);
+    public ProductMap create(NewProductType newProductType, UUID userId) {
+        ProductType productType = productMapService.create(newProductType, userId);
         ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user '%s'".formatted(userId)));
         map.getEntries().add(productType);
         productMapRepository.save(map);
@@ -36,7 +34,7 @@ public class ProductMapMvcService {
     public ProductMap get(UUID userId) {
         Optional<ProductMap> optionalProductMap = productMapRepository.get(userId);
         if (optionalProductMap.isEmpty()) {
-            ProductMap map = productMapService.findAll();
+            ProductMap map = productMapService.findAll(userId);
             productMapRepository.save(map);
             return map;
         } else {
@@ -45,7 +43,7 @@ public class ProductMapMvcService {
     }
 
     public ProductMap update(UUID userId, UUID productTypeId, float newPrice) {
-        productMapService.updateProductType(productTypeId, newPrice);
+        productMapService.updatePrice(productTypeId, newPrice, userId);
         ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user " + userId));
         ProductType productType = map.get(productTypeId).orElseThrow(() -> new NotFoundCustomException("ProductType '%s' is not found for user '%s'".formatted(productTypeId, userId)));
         productType.setPrice(newPrice);
@@ -54,7 +52,7 @@ public class ProductMapMvcService {
     }
 
     public ProductMap delete(UUID userId, UUID productType) {
-        productMapService.delete(productType);
+        productMapService.delete(productType, userId);
         ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user " + userId));
         if (map.delete(productType)) {
             productMapRepository.save(map);

@@ -1,8 +1,8 @@
-package org.lab.uimvc.datasource;
+package org.lab.uimvc.datasource.redis;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lab.model.ProductMap;
-import org.lab.uimvc.datasource.redis.ProductMapRepository;
+import org.lab.uimvc.datasource.ProductMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
