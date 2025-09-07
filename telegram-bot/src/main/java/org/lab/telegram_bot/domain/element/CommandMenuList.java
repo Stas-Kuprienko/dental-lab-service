@@ -15,17 +15,17 @@ import java.util.Locale;
 public class CommandMenuList {
 
     private final MessageSource messageSource;
-    private final SetMyCommands botCommandListWithDefaultLocale;
+    private final SetMyCommands startBotCommandList;
 
     @Autowired
     public CommandMenuList(MessageSource messageSource) {
         this.messageSource = messageSource;
-        botCommandListWithDefaultLocale = getMenuForLocale(Locale.getDefault());
+        startBotCommandList = getMenuForLocale(Locale.getDefault());
     }
 
 
     public SetMyCommands getDefaultMenu() {
-        return botCommandListWithDefaultLocale;
+        return startBotCommandList;
     }
 
     public SetMyCommands getMenuForLocale(Locale locale) {
@@ -38,5 +38,18 @@ public class CommandMenuList {
                 })
                 .toList();
         return new SetMyCommands(commandList, new BotCommandScopeDefault(), locale.getLanguage());
+    }
+
+    public SetMyCommands startMenu() {
+        Locale locale = Locale.of("RU");
+        String description = messageSource.getMessage(BotCommands.START.value, null, locale);
+        BotCommand botCommand = new BotCommand(BotCommands.START.value, description);
+        return new SetMyCommands(List.of(botCommand), new BotCommandScopeDefault(), locale.getLanguage());
+    }
+
+    public SetMyCommands loginMenu(Locale locale) {
+        String description = messageSource.getMessage(BotCommands.LOGIN.value, null, locale);
+        BotCommand botCommand = new BotCommand(BotCommands.LOGIN.value, description);
+        return new SetMyCommands(List.of(botCommand), new BotCommandScopeDefault(), locale.getLanguage());
     }
 }

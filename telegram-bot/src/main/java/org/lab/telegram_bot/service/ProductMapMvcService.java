@@ -25,7 +25,7 @@ public class ProductMapMvcService {
 
     public ProductMap create(NewProductType newProductType, UUID userId) {
         ProductType productType = productMapService.create(newProductType, userId);
-        ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user '%s'".formatted(userId)));
+        ProductMap map = productMapRepository.get(userId).orElse(productMapService.findAll(userId));
         map.getEntries().add(productType);
         productMapRepository.save(map);
         return map;

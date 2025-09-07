@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -44,10 +44,9 @@ public class StartCommandHandler extends BotCommandHandler {
         String userName = ChatBotUtility.getUsername(message);
         Locale locale = ChatBotUtility.getLocale(message);
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
-        SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
+        SetMyCommands commands = commandMenuList.loginMenu(locale);
         executor.accept(commands);
-        ReplyKeyboard keyboard = keyboardBuilderKit.mainKeyboard(locale);
-        return createSendMessage(session.getChatId(), text, keyboard);
+        return createSendMessage(session.getChatId(), text);
     }
 
     @Override
@@ -57,10 +56,9 @@ public class StartCommandHandler extends BotCommandHandler {
         }
         String userName = ChatBotUtility.getUsername(callbackQuery);
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
-        SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
+        SetMyCommands commands = commandMenuList.loginMenu(locale);
         executor.accept(commands);
-        ReplyKeyboard keyboard = keyboardBuilderKit.mainKeyboard(locale);
-        return createSendMessage(session.getChatId(), text, keyboard);
+        return createSendMessage(session.getChatId(), text);
     }
 
     public void setMyCommandsExecutor(Consumer<SetMyCommands> executor) {
