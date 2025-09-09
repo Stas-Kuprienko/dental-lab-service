@@ -24,8 +24,12 @@ public class ChatSession {
         return new ChatSession(chatId, userId, new Context(null, new HashMap<>(), 0));
     }
 
-    public Map<String, String> getAttributes() {
-        return context.attributes;
+    public String getAttribute(String key) {
+        return context.attributes.get(key);
+    }
+
+    public void addAttribute(String key, String value) {
+        context.attributes.put(key, value);
     }
 
     public void setCommand(BotCommands command) {

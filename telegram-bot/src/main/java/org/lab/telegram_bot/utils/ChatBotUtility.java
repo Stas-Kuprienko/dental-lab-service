@@ -54,10 +54,18 @@ public final class ChatBotUtility {
                 getUsername(update.getCallbackQuery());
     }
 
-    public static String[] callBackData(CallbackQuery callbackQuery) {
+    public static String[] callBackQueryParse(CallbackQuery callbackQuery) {
         String[] callback = callbackQuery.getData().split(":");
         if (callback.length != 3) {
             throw new IllegalArgumentException("Incorrect callback query value: " + callbackQuery);
+        }
+        return callback;
+    }
+
+    public static String[] callBackQueryParse(String callbackQueryData) {
+        String[] callback = callbackQueryData.split(":");
+        if (callback.length != 3) {
+            throw new IllegalArgumentException("Incorrect callback query value: " + callbackQueryData);
         }
         return callback;
     }

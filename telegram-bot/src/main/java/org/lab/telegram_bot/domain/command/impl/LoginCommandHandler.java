@@ -6,10 +6,8 @@ import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
-import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.TelegramChatServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -26,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 @CommandHandler(command = BotCommands.LOGIN)
 public class LoginCommandHandler extends BotCommandHandler {
@@ -40,24 +36,20 @@ public class LoginCommandHandler extends BotCommandHandler {
 
     private final LinkingKeyGenerator keyGenerator;
     private final TelegramChatServiceWrapper telegramChatService;
-    private final CommandMenuList commandMenuList;
     private final MessageSource messageSource;
     private final ChatSessionService chatSessionService;
     private final String bindingPage;
     private final ConcurrentHashMap<Long, UserLink> userLinkMap;
-    private Consumer<SetMyCommands> executor;
 
 
     @Autowired
     public LoginCommandHandler(LinkingKeyGenerator keyGenerator,
                                DentalLabRestClientWrapper dentalLabRestClient,
-                               CommandMenuList commandMenuList,
                                MessageSource messageSource,
                                ChatSessionService chatSessionService,
                                @Value("${project.variables.dental-lab-site.url}") String serviceSiteUrl) {
         this.keyGenerator = keyGenerator;
         telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
-        this.commandMenuList = commandMenuList;
         this.messageSource = messageSource;
         this.chatSessionService = chatSessionService;
         this.bindingPage = serviceSiteUrl + "/telegram-bind/link/";
@@ -84,10 +76,6 @@ public class LoginCommandHandler extends BotCommandHandler {
         return createSendMessage(session.getChatId(), text);
     }
 
-    public void setMyCommandsExecutor(Consumer<SetMyCommands> executor) {
-        this.executor = executor;
-    }
-
 
     private SendMessage createLink(ChatSession session, Locale locale, String userName) {
         long chatId = session.getChatId();
@@ -107,9 +95,6 @@ public class LoginCommandHandler extends BotCommandHandler {
     }
 
     private SendMessage inputOtp(ChatSession session, Locale locale, String messageText, String userName) {
-        if (executor == null) {
-            throw new ConfigurationCustomException("The set commands executor 'Consumer<SetMyCommands>' is null");
-        }
         long chatId = session.getChatId();
         UserLink userLink = userLinkMap.get(chatId);
         String text;
@@ -121,8 +106,6 @@ public class LoginCommandHandler extends BotCommandHandler {
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
         }
         userLinkMap.remove(chatId);
-        SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
-        executor.accept(commands);
         return createSendMessage(chatId, text);
     }
 

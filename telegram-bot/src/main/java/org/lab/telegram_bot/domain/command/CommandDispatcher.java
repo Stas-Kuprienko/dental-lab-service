@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -60,12 +61,11 @@ public class CommandDispatcher {
         // Callback query pattern - ${COMMAND}:${STEP}:${DATA} (for example, PRODUCT_MAP:1:CERAMIC)
         ChatSession session = chatSessionService.get(callbackQuery.getFrom().getId());
         Locale locale = ChatBotUtility.getLocale(callbackQuery);
-        String[] callback = ChatBotUtility.callBackData(callbackQuery);
+        String[] callback = ChatBotUtility.callBackQueryParse(callbackQuery);
         BotCommands command = BotCommands.valueOf(callback[0]);
         int step = Integer.parseInt(callback[1]);
-        if (session.getStep() != step) {
-            session.setStep(step);
-        }
+        session.setCommand(command);
+        session.setStep(step);
         BotCommandHandler handler = commandHandlerStore.get(command.value);
         if (handler == null) {
             handler = commandHandlerStore.get(null);

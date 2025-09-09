@@ -4,7 +4,6 @@ import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.element.CommandMenuList;
-import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.exception.ConfigurationCustomException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -23,16 +21,14 @@ public class StartCommandHandler extends BotCommandHandler {
 
     private final MessageSource messageSource;
     private final CommandMenuList commandMenuList;
-    private final KeyboardBuilderKit keyboardBuilderKit;
     private Consumer<SetMyCommands> executor;
 
 
     @Autowired
     public StartCommandHandler(MessageSource messageSource,
-                               CommandMenuList commandMenuList, KeyboardBuilderKit keyboardBuilderKit) {
+                               CommandMenuList commandMenuList) {
         this.messageSource = messageSource;
         this.commandMenuList = commandMenuList;
-        this.keyboardBuilderKit = keyboardBuilderKit;
     }
 
 
@@ -44,7 +40,7 @@ public class StartCommandHandler extends BotCommandHandler {
         String userName = ChatBotUtility.getUsername(message);
         Locale locale = ChatBotUtility.getLocale(message);
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
-        SetMyCommands commands = commandMenuList.loginMenu(locale);
+        SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
         executor.accept(commands);
         return createSendMessage(session.getChatId(), text);
     }
@@ -56,7 +52,7 @@ public class StartCommandHandler extends BotCommandHandler {
         }
         String userName = ChatBotUtility.getUsername(callbackQuery);
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
-        SetMyCommands commands = commandMenuList.loginMenu(locale);
+        SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
         executor.accept(commands);
         return createSendMessage(session.getChatId(), text);
     }

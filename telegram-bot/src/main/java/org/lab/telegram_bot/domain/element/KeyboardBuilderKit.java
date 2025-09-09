@@ -126,6 +126,12 @@ public class KeyboardBuilderKit {
         return List.of(button);
     }
 
+    public InlineKeyboardButton callbackButton(String buttonLabel, String callbackData) {
+        var button = new InlineKeyboardButton(buttonLabel);
+        button.setCallbackData(callbackData);
+        return button;
+    }
+
     public InlineKeyboardButton callbackButton(ButtonKeys buttonKey, String callbackPrefix, Locale locale) {
         String label = messageSource.getMessage(buttonKey.name(), null, locale);
         var button = new InlineKeyboardButton(label);

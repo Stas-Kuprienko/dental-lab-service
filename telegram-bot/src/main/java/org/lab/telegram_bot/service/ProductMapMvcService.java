@@ -31,7 +31,7 @@ public class ProductMapMvcService {
         return map;
     }
 
-    public ProductMap get(UUID userId) {
+    public ProductMap findAll(UUID userId) {
         Optional<ProductMap> optionalProductMap = productMapRepository.get(userId);
         if (optionalProductMap.isEmpty()) {
             ProductMap map = productMapService.findAll(userId);
@@ -42,18 +42,23 @@ public class ProductMapMvcService {
         }
     }
 
-    public ProductMap update(UUID userId, UUID productTypeId, float newPrice) {
+    public ProductType findById(UUID id, UUID userId) {
+        ProductMap map = findAll(userId);
+        return map.get(id).orElseThrow(() -> new NotFoundCustomException("ProductType '%s' is not found for user '%s'".formatted(id, userId)));
+    }
+
+    public ProductMap updatePrice(UUID productTypeId, float newPrice, UUID userId) {
         productMapService.updatePrice(productTypeId, newPrice, userId);
-        ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user " + userId));
+        ProductMap map = productMapRepository.get(userId).orElse(productMapService.findAll(userId));
         ProductType productType = map.get(productTypeId).orElseThrow(() -> new NotFoundCustomException("ProductType '%s' is not found for user '%s'".formatted(productTypeId, userId)));
         productType.setPrice(newPrice);
         productMapRepository.save(map);
         return map;
     }
 
-    public ProductMap delete(UUID userId, UUID productType) {
+    public ProductMap delete(UUID productType, UUID userId) {
         productMapService.delete(productType, userId);
-        ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user " + userId));
+        ProductMap map = productMapRepository.get(userId).orElse(productMapService.findAll(userId));
         if (map.delete(productType)) {
             productMapRepository.save(map);
         }
