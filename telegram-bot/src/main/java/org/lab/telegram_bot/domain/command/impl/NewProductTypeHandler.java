@@ -51,8 +51,8 @@ public class NewProductTypeHandler extends BotCommandHandler {
         String messageText = message.getText();
         Steps step = getStep(session);
         return switch (step) {
-            case CREATE -> create(session, locale);
-            case INPUT -> input(session, locale, messageText);
+            case CREATE_NEW_PRODUCT_TYPE -> create(session, locale);
+            case INPUT_NEW_PRODUCT_TYPE -> input(session, locale, messageText);
         };
     }
 
@@ -65,7 +65,7 @@ public class NewProductTypeHandler extends BotCommandHandler {
 
     private SendMessage create(ChatSession session, Locale locale) {
         String text = messageSource.getMessage(BotCommands.NEW_PRODUCT_TYPE.name(), null, locale);
-        session.setStep(Steps.INPUT.ordinal());
+        session.setStep(Steps.INPUT_NEW_PRODUCT_TYPE.ordinal());
         session.setCommand(BotCommands.NEW_PRODUCT_TYPE);
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), text);
@@ -119,7 +119,7 @@ public class NewProductTypeHandler extends BotCommandHandler {
 
 
     enum Steps {
-        CREATE,
-        INPUT
+        CREATE_NEW_PRODUCT_TYPE,
+        INPUT_NEW_PRODUCT_TYPE
     }
 }

@@ -6,13 +6,15 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class NewDentalWork {
+public class NewDentalWork implements Serializable {
 
     @NotBlank
     @JsonProperty("clinic")

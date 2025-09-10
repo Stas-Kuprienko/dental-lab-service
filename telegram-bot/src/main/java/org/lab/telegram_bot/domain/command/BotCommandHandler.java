@@ -12,6 +12,9 @@ import java.util.Locale;
 
 public abstract class BotCommandHandler {
 
+    protected static final String CANCEL_RESPONSE = "CANCEL_RESPONSE";
+
+
     public abstract BotApiMethod<?> handle(Message message, ChatSession session);
 
     public abstract BotApiMethod<?> handle(CallbackQuery callbackQuery, ChatSession session, Locale locale);

@@ -2,6 +2,7 @@ package org.lab.telegram_bot.controller.advice;
 
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.exception.UnregisteredUserException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,13 @@ public class TelegramBotExceptionHandler {
         return buildMessage(chatId, locale, ILLEGAL_ARGUMENT);
     }
 
+    public SendMessage incorrectInputHandle(IncorrectInputException e, Update update) {
+        log.warn(e.getMessage());
+        Long chatId = ChatBotUtility.getChatId(update);
+        Locale locale = ChatBotUtility.getLocale(update);
+        return buildMessage(chatId, locale, INCORRECT_INPUT, e.getMessage());
+    }
+
     public SendMessage defaultHandle(Throwable e, Update update) {
         log.error(e.getMessage(), e);
         Long chatId = ChatBotUtility.getChatId(update);
@@ -85,11 +93,21 @@ public class TelegramBotExceptionHandler {
     }
 
 
+    private SendMessage buildMessage(long chatId, Locale locale, MessageTextKey textKey, Object... args) {
+        String text = messageSource
+                .getMessage(textKey.name(), args, locale);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(text);
+        return sendMessage;
+    }
+
+
     public enum MessageTextKey {
         UNREGISTERED,
         NOT_FOUND,
         ILLEGAL_ARGUMENT,
-
+        INCORRECT_INPUT,
         DEFAULT
     }
 
@@ -99,6 +117,7 @@ public class TelegramBotExceptionHandler {
         map.put(UnregisteredUserException.class.getSimpleName(), ((exception, update) -> this.unregisteredUserHandle((UnregisteredUserException) exception, update)));
         map.put(NotFoundException.class.getSimpleName(), ((exception, update) -> this.notFoundHandle((NotFoundException) exception, update)));
         map.put(IllegalArgumentException.class.getSimpleName(), ((exception, update) -> this.illegalArgumentHandle((IllegalArgumentException) exception, update)));
+        map.put(IncorrectInputException.class.getSimpleName(), ((exception, update) -> this.incorrectInputHandle((IncorrectInputException) exception, update)));
         map.put(null, (this::defaultHandle));
         return map;
     }
