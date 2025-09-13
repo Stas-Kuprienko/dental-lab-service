@@ -69,7 +69,7 @@ public class TelegramBotExceptionHandler {
     }
 
     public SendMessage incorrectInputHandle(IncorrectInputException e, Update update) {
-        log.warn(e.getMessage());
+        log.warn(e.getMessage(), e);
         Long chatId = ChatBotUtility.getChatId(update);
         Locale locale = ChatBotUtility.getLocale(update);
         return buildMessage(chatId, locale, INCORRECT_INPUT, e.getMessage());

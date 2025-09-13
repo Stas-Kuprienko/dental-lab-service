@@ -142,7 +142,6 @@ public class MyDentalWorkService implements DentalWorkService {
                 p.setCompleteAt(completeAt);
                 ProductEntity updated = productRepository.save(p);
                 log.info("Product '{}' updated for '{}'", updated, dentalWork);
-                return dentalWork;
             }
         }
         setCompleteAtIfIsLater(dentalWork, completeAt);

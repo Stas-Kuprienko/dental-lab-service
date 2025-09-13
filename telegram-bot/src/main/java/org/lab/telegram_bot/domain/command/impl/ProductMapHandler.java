@@ -107,7 +107,7 @@ public class ProductMapHandler extends BotCommandHandler {
         }
         UUID productTypeId = UUID.fromString(callbackData[2]);
         ProductType productType = productMapService.findById(productTypeId, session.getUserId());
-        session.addAttribute(Attributes.PRODUCT_TYPE_ID, productTypeId);
+        session.addAttribute(Attributes.PRODUCT_TYPE_ID.name(), productTypeId.toString());
         String text = messageSource.getMessage(Steps.SELECT_PRODUCT_TYPE_TO_UPDATE.name(), new Object[]{productType.getTitle()}, locale);
         session.setStep(Steps.UPDATE_PRODUCT_TYPE_INPUT.ordinal());
         session.setCommand(BotCommands.PRODUCT_MAP);
@@ -117,12 +117,12 @@ public class ProductMapHandler extends BotCommandHandler {
 
     private SendMessage updateInput(ChatSession session, Locale locale, String messageText) {
         float newPrice = Float.parseFloat(messageText);
-        UUID productTypeId = (UUID) session.getAttribute(Attributes.PRODUCT_TYPE_ID);
+        UUID productTypeId = UUID.fromString(session.getAttribute(Attributes.PRODUCT_TYPE_ID.name()));
         if (productTypeId == null) {
             throw new IllegalArgumentException("ChatSession attribute '%s' is null".formatted(Attributes.PRODUCT_TYPE_ID));
         }
         ProductMap productMap = productMapService.updatePrice(productTypeId, newPrice, session.getUserId());
-        session.removeAttribute(Attributes.PRODUCT_TYPE_ID);
+        session.removeAttribute(Attributes.PRODUCT_TYPE_ID.name());
         return sendProductMapAsMessage(productMap, session, locale);
     }
 

@@ -7,7 +7,6 @@ import org.lab.telegram_bot.utils.DentalWorkList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,15 +29,15 @@ public class RedisDentalWorkRepository implements DentalWorkRepository {
     public void save(DentalWork dentalWork) {
         log.info("DentalWork for user '{}' accepted to cache", dentalWork.getUserId());
         Optional<DentalWorkList> optionalDentalWorkList = getAll(dentalWork.getUserId());
-        DentalWorkList dentalWorks;
+        DentalWorkList dentalWorkList;
         if (optionalDentalWorkList.isPresent()) {
-            dentalWorks = optionalDentalWorkList.get();
-            dentalWorks.getDentalWorks().add(dentalWork);
+            dentalWorkList = optionalDentalWorkList.get();
+            dentalWorkList.add(dentalWork);
         } else {
-            dentalWorks = new DentalWorkList(List.of(dentalWork), dentalWork.getUserId());
+            dentalWorkList = DentalWorkList.create(dentalWork);
         }
-        redisTemplate.opsForHash().put(KEY, dentalWork.getUserId().toString(), dentalWorks);
-        log.info("DentalWorkList [size={}] for user '{}' is cached", dentalWorks.size(), dentalWork.getUserId());
+        redisTemplate.opsForHash().put(KEY, dentalWork.getUserId().toString(), dentalWorkList);
+        log.info("DentalWorkList [size={}] for user '{}' is cached", dentalWorkList.size(), dentalWork.getUserId());
     }
 
     @Override

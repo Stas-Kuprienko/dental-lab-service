@@ -24,15 +24,15 @@ public class ChatSession {
         return new ChatSession(chatId, userId, new Context(null, new HashMap<>(), 0));
     }
 
-    public Object getAttribute(Object key) {
+    public String getAttribute(String key) {
         return context.attributes.get(key);
     }
 
-    public void addAttribute(Object key, Object value) {
+    public void addAttribute(String key, String value) {
         context.attributes.put(key, value);
     }
 
-    public void removeAttribute(Object key) {
+    public void removeAttribute(String key) {
         context.attributes.remove(key);
     }
 
@@ -63,10 +63,10 @@ public class ChatSession {
     public static class Context {
 
         private BotCommands command;
-        private Map<Object, Object> attributes;
+        private Map<String, String> attributes;
         private int step;
 
-        public Context(BotCommands command, Map<Object, Object> attributes, int step) {
+        public Context(BotCommands command, Map<String, String> attributes, int step) {
             this.command = command;
             this.attributes = attributes;
             this.step = step;

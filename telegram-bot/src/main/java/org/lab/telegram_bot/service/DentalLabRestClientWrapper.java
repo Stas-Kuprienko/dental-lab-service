@@ -19,6 +19,7 @@ public class DentalLabRestClientWrapper {
     public final TelegramChatServiceWrapper TELEGRAM_CHATS;
     public final ProductMapServiceWrapper PRODUCT_MAP;
     public final DentalWorkServiceWrapper DENTAL_WORKS;
+    public final ProductServiceWrapper PRODUCTS;
 
 
     @Autowired
@@ -28,6 +29,7 @@ public class DentalLabRestClientWrapper {
         TELEGRAM_CHATS = new TelegramChatServiceWrapper(dentalLabRestClient.TELEGRAM_CHATS, httpHeadersConsumer());
         PRODUCT_MAP = new ProductMapServiceWrapper(dentalLabRestClient.PRODUCT_MAP, this::httpHeadersConsumer);
         DENTAL_WORKS = new DentalWorkServiceWrapper(dentalLabRestClient.DENTAL_WORKS, this::httpHeadersConsumer);
+        PRODUCTS = new ProductServiceWrapper(dentalLabRestClient.PRODUCTS, this::httpHeadersConsumer);
     }
 
 
