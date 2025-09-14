@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
-import org.lab.model.Product;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
 import org.lab.request.NewDentalWork;
@@ -30,25 +29,22 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @CommandHandler(command = BotCommands.NEW_DENTAL_WORK)
 public class NewDentalWorkHandler extends BotCommandHandler {
 
-    private static final DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final String DENTAL_WORK_TEMPLATE = "DENTAL_WORK_TEMPLATE";
-
     private final DentalWorkMvcService dentalWorkMvcService;
     private final ProductMapMvcService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
-    private final MessageSource messageSource;
     private final ChatSessionService chatSessionService;
     private final ObjectMapper objectMapper;
+    private Consumer<BotApiMethod<?>> executor;
 
 
     @Autowired
@@ -58,10 +54,10 @@ public class NewDentalWorkHandler extends BotCommandHandler {
                                 MessageSource messageSource,
                                 ChatSessionService chatSessionService,
                                 ObjectMapper objectMapper) {
+        super(messageSource);
         this.dentalWorkMvcService = dentalWorkMvcService;
         this.productMapService = productMapService;
         this.keyboardBuilderKit = keyboardBuilderKit;
-        this.messageSource = messageSource;
         this.chatSessionService = chatSessionService;
         this.objectMapper = objectMapper;
     }
@@ -74,12 +70,12 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         Steps steps = getStep(session);
         return switch (steps) {
             case CREATE_NEW_DENTAL_WORK -> create(session, locale);
-            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText);
+            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText, message.getMessageId());
             case SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK -> selectProductType(session, locale, messageText, message.getMessageId());
-            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText);
+            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText, message.getMessageId());
             case ADD_PRODUCT_TO_DENTAL_WORK -> addNewProduct(session, locale, messageText, message.getMessageId());
             case NEW_PRODUCT_TO_DENTAL_WORK -> selectNewProduct(session, locale, messageText, message.getMessageId());
-            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText);
+            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText, message.getMessageId());
         };
     }
 
@@ -89,13 +85,17 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         Steps steps = getStep(session);
         return switch (steps) {
             case CREATE_NEW_DENTAL_WORK -> create(session, locale);
-            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText);
+            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText, callbackQuery.getMessage().getMessageId());
             case SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK -> selectProductType(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText);
+            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText, callbackQuery.getMessage().getMessageId());
             case ADD_PRODUCT_TO_DENTAL_WORK -> addNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
             case NEW_PRODUCT_TO_DENTAL_WORK -> selectNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText);
+            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
         };
+    }
+
+    public void setExecutor(Consumer<BotApiMethod<?>> executor) {
+        this.executor = executor;
     }
 
 
@@ -107,15 +107,18 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         return createSendMessage(session.getChatId(), text);
     }
 
-    private SendMessage input(ChatSession session, Locale locale, String messageText) {
+    private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
+        if (executor == null) {
+            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+        }
         String[] values = messageText.split("\n");
         if (values.length < 3) {
             throw new BadRequestCustomException("Incorrect data has been entered: " + messageText);
         }
-        LocalDate completeAt = parseLocalDate(values[2]);
+        LocalDate completeAt = parseLocalDate(values[2].strip());
         NewDentalWork newDentalWork = NewDentalWork.builder()
-                .patient(values[0])
-                .clinic(values[1])
+                .patient(values[0].strip())
+                .clinic(values[1].strip())
                 .completeAt(completeAt)
                 .build();
         if (values.length == 4) {
@@ -129,6 +132,8 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         session.setStep(Steps.SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK.ordinal());
         chatSessionService.save(session);
+        executor.accept(deleteMessage(session.getChatId(), messageId));
+        executor.accept(deleteMessage(session.getChatId(), messageId - 1));
         return createSendMessage(session.getChatId(), text, keyboardMarkup);
     }
 
@@ -141,7 +146,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
             return editMessageText(session.getChatId(), messageId, text);
         }
         UUID productTypeId = UUID.fromString(callbackData[2]);
-        NewDentalWork newDentalWork = stringToNewDentalWork((String) session.getAttribute(Attributes.NEW_DENTAL_WORK.name()));
+        NewDentalWork newDentalWork = stringToNewDentalWork(session.getAttribute(Attributes.NEW_DENTAL_WORK.name()));
         newDentalWork.setProductId(productTypeId);
         session.addAttribute(Attributes.NEW_DENTAL_WORK.name(), newDentalWorkAsString(newDentalWork));
         ProductType productType = productMapService.findById(productTypeId, session.getUserId());
@@ -152,14 +157,17 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         return editMessageText(session.getChatId(), messageId, text);
     }
 
-    private SendMessage inputQuantity(ChatSession session, Locale locale, String messageText) {
+    private SendMessage inputQuantity(ChatSession session, Locale locale, String messageText, int messageId) {
+        if (executor == null) {
+            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+        }
         int quantity;
         try {
             quantity = Integer.parseInt(messageText);
         } catch (NumberFormatException e) {
             throw new IncorrectInputException(messageText, e);
         }
-        NewDentalWork newDentalWork = stringToNewDentalWork((String) session.getAttribute(Attributes.NEW_DENTAL_WORK.name()));
+        NewDentalWork newDentalWork = stringToNewDentalWork(session.getAttribute(Attributes.NEW_DENTAL_WORK.name()));
         if (newDentalWork == null) {
             throw new IllegalArgumentException("ChatSession attribute '%s' is null".formatted(Attributes.NEW_DENTAL_WORK));
         }
@@ -174,6 +182,8 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         session.setStep(Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal());
         chatSessionService.save(session);
+        executor.accept(deleteMessage(session.getChatId(), messageId));
+        executor.accept(deleteMessage(session.getChatId(), messageId - 1));
         return createSendMessage(session.getChatId(), text, inlineKeyboardMarkup);
     }
 
@@ -209,7 +219,10 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         return editMessageText(session.getChatId(), messageId, text);
     }
 
-    private SendMessage inputQuantityToNewProduct(ChatSession session, Locale locale, String messageText) {
+    private SendMessage inputQuantityToNewProduct(ChatSession session, Locale locale, String messageText, int messageId) {
+        if (executor == null) {
+            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+        }
         String[] values = messageText.split("\n");
         if (values.length != 2) {
             throw new BadRequestCustomException("Incorrect data has been entered: " + messageText);
@@ -234,6 +247,8 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         session.setStep(Steps.NEW_PRODUCT_TO_DENTAL_WORK.ordinal());
         chatSessionService.save(session);
+        executor.accept(deleteMessage(session.getChatId(), messageId));
+        executor.accept(deleteMessage(session.getChatId(), messageId - 1));
         return createSendMessage(session.getChatId(), text, inlineKeyboardMarkup);
     }
 
@@ -248,27 +263,6 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale);
         buttons.add(List.of(cancelButton));
         return keyboardBuilderKit.inlineKeyboard(buttons);
-    }
-
-    private String dentalWorkAsMessage(DentalWork dentalWork, Locale locale) {
-        String template = messageSource.getMessage(DENTAL_WORK_TEMPLATE, null, locale);
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Product p : dentalWork.getProducts()) {
-            stringBuilder.append('\t')
-                    .append(p.getTitle())
-                    .append(' ')
-                    .append('-')
-                    .append(' ')
-                    .append(p.getQuantity())
-                    .append('\n');
-        } stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        return template.formatted(
-                dentalWork.getPatient(),
-                dentalWork.getClinic(),
-                stringBuilder.toString(),
-                dentalWork.getCompleteAt().format(format),
-                dentalWork.getComment() == null ? "" : dentalWork.getComment(),
-                dentalWork.countPhoto());
     }
 
     private LocalDate parseLocalDate(String value) {

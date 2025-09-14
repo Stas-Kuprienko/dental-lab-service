@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.START)
 public class StartCommandHandler extends BotCommandHandler {
 
-    private final MessageSource messageSource;
     private final CommandMenuList commandMenuList;
     private Consumer<SetMyCommands> executor;
 
@@ -27,7 +26,7 @@ public class StartCommandHandler extends BotCommandHandler {
     @Autowired
     public StartCommandHandler(MessageSource messageSource,
                                CommandMenuList commandMenuList) {
-        this.messageSource = messageSource;
+        super(messageSource);
         this.commandMenuList = commandMenuList;
     }
 

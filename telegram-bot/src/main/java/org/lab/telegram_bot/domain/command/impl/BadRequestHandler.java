@@ -16,12 +16,12 @@ import java.util.Locale;
 @Component("badRequestHandler")
 public class BadRequestHandler extends BotCommandHandler {
 
-    private final MessageSource messageSource;
 
     @Autowired
     public BadRequestHandler(MessageSource messageSource) {
-        this.messageSource = messageSource;
+        super(messageSource);
     }
+
 
     @Override
     public BotApiMethod<?> handle(Message message, ChatSession session) {

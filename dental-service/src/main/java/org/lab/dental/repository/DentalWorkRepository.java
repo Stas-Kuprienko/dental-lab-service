@@ -55,6 +55,18 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             SELECT DISTINCT dw
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
+            WHERE dw.userId = :userId AND
+            dw.completeAt BETWEEN :from AND :to
+            """)
+    List<DentalWorkEntity> findAllForMonthAndNotPaidByUserId(@Param("userId") UUID userId,
+                                                             @Param("from") LocalDate from,
+                                                             @Param("to") LocalDate to);
+
+
+    @Query("""
+            SELECT DISTINCT dw
+            FROM DentalWorkEntity dw
+            LEFT JOIN FETCH dw.products p
             WHERE dw.clinic LIKE %:clinic%
             AND dw.userId = :userId
             """)

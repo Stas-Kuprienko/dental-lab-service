@@ -18,13 +18,12 @@ public class ClearCommandHandler extends BotCommandHandler {
 
     private static final String MESSAGE_KEY = "CLEAR";
 
-    private final MessageSource messageSource;
     private final ChatSessionService chatSessionService;
 
 
     @Autowired
     public ClearCommandHandler(MessageSource messageSource, ChatSessionService chatSessionService) {
-        this.messageSource = messageSource;
+        super(messageSource);
         this.chatSessionService = chatSessionService;
     }
 

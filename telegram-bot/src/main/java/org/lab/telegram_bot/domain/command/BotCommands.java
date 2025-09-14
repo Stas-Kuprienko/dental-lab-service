@@ -8,7 +8,7 @@ public enum BotCommands {
     NEW_PRODUCT_TYPE("/new_product_type", true),
     PRODUCT_MAP("/product_map", true),
     NEW_DENTAL_WORK("/new_dental_work", true),
-//    DENTAL_WORKS("/dental_works", true),
+    DENTAL_WORKS("/dental_works", true),
     WORK_FOR_TOMORROW("/work_for_tomorrow", true),
     SEARCH_BY("/search_by", true),
     GET_REPORT("/get_report", true),

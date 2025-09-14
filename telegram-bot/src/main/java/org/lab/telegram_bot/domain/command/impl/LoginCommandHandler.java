@@ -36,7 +36,6 @@ public class LoginCommandHandler extends BotCommandHandler {
 
     private final LinkingKeyGenerator keyGenerator;
     private final TelegramChatServiceWrapper telegramChatService;
-    private final MessageSource messageSource;
     private final ChatSessionService chatSessionService;
     private final String bindingPage;
     private final ConcurrentHashMap<Long, UserLink> userLinkMap;
@@ -48,9 +47,9 @@ public class LoginCommandHandler extends BotCommandHandler {
                                MessageSource messageSource,
                                ChatSessionService chatSessionService,
                                @Value("${project.variables.dental-lab-site.url}") String serviceSiteUrl) {
+        super(messageSource);
         this.keyGenerator = keyGenerator;
-        telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
-        this.messageSource = messageSource;
+        this.telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
         this.chatSessionService = chatSessionService;
         this.bindingPage = serviceSiteUrl + "/telegram-bind/link/";
         userLinkMap = new ConcurrentHashMap<>();

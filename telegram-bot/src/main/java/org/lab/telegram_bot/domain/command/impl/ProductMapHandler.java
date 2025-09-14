@@ -30,7 +30,6 @@ public class ProductMapHandler extends BotCommandHandler {
 
     private final ProductMapMvcService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
-    private final MessageSource messageSource;
     private final ChatSessionService chatSessionService;
 
 
@@ -39,9 +38,9 @@ public class ProductMapHandler extends BotCommandHandler {
                              KeyboardBuilderKit keyboardBuilderKit,
                              MessageSource messageSource,
                              ChatSessionService chatSessionService) {
+        super(messageSource);
         this.productMapService = productMapService;
         this.keyboardBuilderKit = keyboardBuilderKit;
-        this.messageSource = messageSource;
         this.chatSessionService = chatSessionService;
     }
 

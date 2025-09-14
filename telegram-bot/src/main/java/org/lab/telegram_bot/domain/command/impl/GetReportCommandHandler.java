@@ -4,6 +4,8 @@ import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -13,6 +15,11 @@ import java.util.Locale;
 @CommandHandler(command = BotCommands.GET_REPORT)
 public class GetReportCommandHandler extends BotCommandHandler {
 
+
+    @Autowired
+    public GetReportCommandHandler(MessageSource messageSource) {
+        super(messageSource);
+    }
 
     @Override
     public BotApiMethod<?> handle(Message message, ChatSession session) {

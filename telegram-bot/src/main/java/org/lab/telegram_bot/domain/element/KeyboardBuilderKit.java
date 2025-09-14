@@ -145,7 +145,7 @@ public class KeyboardBuilderKit {
         if (isFirstPage) {
             return List.of(backButton, nextButton);
         } else {
-            var prevButton = callbackButton(ButtonKeys.PREVIOUS, callbackPrefix, locale);
+            var prevButton = callbackButton(ButtonKeys.BACK, callbackPrefix, locale);
             return List.of(backButton, prevButton, nextButton);
         }
     }
