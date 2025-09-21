@@ -8,8 +8,10 @@ import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -55,6 +57,13 @@ public class TelegramBotExceptionHandler {
     }
 
     public SendMessage notFoundHandle(NotFoundException e, Update update) {
+        log.warn(e.getMessage());
+        Long chatId = ChatBotUtility.getChatId(update);
+        Locale locale = ChatBotUtility.getLocale(update);
+        return buildMessage(chatId, locale, NOT_FOUND);
+    }
+
+    public SendMessage notFoundHandle(HttpClientErrorException.NotFound e, Update update) {
         log.warn(e.getMessage());
         Long chatId = ChatBotUtility.getChatId(update);
         Locale locale = ChatBotUtility.getLocale(update);
@@ -116,6 +125,7 @@ public class TelegramBotExceptionHandler {
         Map<String, BiFunction<E, Update, SendMessage>> map = new HashMap<>();
         map.put(UnregisteredUserException.class.getSimpleName(), ((exception, update) -> this.unregisteredUserHandle((UnregisteredUserException) exception, update)));
         map.put(NotFoundException.class.getSimpleName(), ((exception, update) -> this.notFoundHandle((NotFoundException) exception, update)));
+        map.put(HttpClientErrorException.NotFound.class.getSimpleName(), ((exception, update) -> this.notFoundHandle((HttpClientErrorException.NotFound) exception, update)));
         map.put(IllegalArgumentException.class.getSimpleName(), ((exception, update) -> this.illegalArgumentHandle((IllegalArgumentException) exception, update)));
         map.put(IncorrectInputException.class.getSimpleName(), ((exception, update) -> this.incorrectInputHandle((IncorrectInputException) exception, update)));
         map.put(null, (this::defaultHandle));

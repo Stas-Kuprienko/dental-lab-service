@@ -10,6 +10,7 @@ import org.lab.request.NewDentalWork;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
+import org.lab.telegram_bot.domain.command.TextKeys;
 import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -69,13 +70,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         String messageText = message.getText();
         Steps steps = getStep(session);
         return switch (steps) {
-            case CREATE_NEW_DENTAL_WORK -> create(session, locale);
-            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText, message.getMessageId());
-            case SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK -> selectProductType(session, locale, messageText, message.getMessageId());
-            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText, message.getMessageId());
-            case ADD_PRODUCT_TO_DENTAL_WORK -> addNewProduct(session, locale, messageText, message.getMessageId());
-            case NEW_PRODUCT_TO_DENTAL_WORK -> selectNewProduct(session, locale, messageText, message.getMessageId());
-            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText, message.getMessageId());
+            case CREATE_NEW -> create(session, locale);
+            case INPUT_NEW -> input(session, locale, messageText, message.getMessageId());
+            case SELECT_PRODUCT_TYPE -> selectProductType(session, locale, messageText, message.getMessageId());
+            case INPUT_PRODUCT_QUANTITY -> inputQuantity(session, locale, messageText, message.getMessageId());
+            case ADD_PRODUCT -> addNewProduct(session, locale, messageText, message.getMessageId());
+            case NEW_PRODUCT -> selectNewProduct(session, locale, messageText, message.getMessageId());
+            case INPUT_QUANTITY_FOR_NEW_PRODUCT -> inputQuantityToNewProduct(session, locale, messageText, message.getMessageId());
         };
     }
 
@@ -84,13 +85,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         String messageText = callbackQuery.getData();
         Steps steps = getStep(session);
         return switch (steps) {
-            case CREATE_NEW_DENTAL_WORK -> create(session, locale);
-            case INPUT_NEW_DENTAL_WORK -> input(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK -> selectProductType(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK -> inputQuantity(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case ADD_PRODUCT_TO_DENTAL_WORK -> addNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case NEW_PRODUCT_TO_DENTAL_WORK -> selectNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK -> inputQuantityToNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case CREATE_NEW -> create(session, locale);
+            case INPUT_NEW -> input(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case SELECT_PRODUCT_TYPE -> selectProductType(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case INPUT_PRODUCT_QUANTITY -> inputQuantity(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case ADD_PRODUCT -> addNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case NEW_PRODUCT -> selectNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case INPUT_QUANTITY_FOR_NEW_PRODUCT -> inputQuantityToNewProduct(session, locale, messageText, callbackQuery.getMessage().getMessageId());
         };
     }
 
@@ -100,8 +101,8 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
 
     private SendMessage create(ChatSession session, Locale locale) {
-        String text = messageSource.getMessage(BotCommands.NEW_DENTAL_WORK.name(), null, locale);
-        session.setStep(Steps.INPUT_NEW_DENTAL_WORK.ordinal());
+        String text = messageSource.getMessage(TextKeys.NEW_DENTAL_WORK.name(), null, locale);
+        session.setStep(Steps.INPUT_NEW.ordinal());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), text);
@@ -124,13 +125,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         if (values.length == 4) {
             newDentalWork.setComment(values[3]);
         }
-        String text = messageSource.getMessage(Steps.INPUT_NEW_DENTAL_WORK.name(), null, locale);
+        String text = messageSource.getMessage(TextKeys.SELECT_PRODUCT_TYPE_FOR_WORK.name(), null, locale);
         ProductMap productMap = productMapService.findAll(session.getUserId());
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.SELECT_PRODUCT_TYPE.ordinal());
         InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(productMap, locale, callbackQueryPrefix);
         session.addAttribute(Attributes.NEW_DENTAL_WORK.name(), newDentalWorkAsString(newDentalWork));
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(Steps.SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK.ordinal());
+        session.setStep(Steps.SELECT_PRODUCT_TYPE.ordinal());
         chatSessionService.save(session);
         executor.accept(deleteMessage(session.getChatId(), messageId));
         executor.accept(deleteMessage(session.getChatId(), messageId - 1));
@@ -150,8 +151,8 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         newDentalWork.setProductId(productTypeId);
         session.addAttribute(Attributes.NEW_DENTAL_WORK.name(), newDentalWorkAsString(newDentalWork));
         ProductType productType = productMapService.findById(productTypeId, session.getUserId());
-        String text = messageSource.getMessage(Steps.SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK.name(), new Object[]{productType.getTitle()}, locale);
-        session.setStep(Steps.INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK.ordinal());
+        String text = messageSource.getMessage(TextKeys.INPUT_QUANTITY_FOR_PRODUCT.name(), new Object[]{productType.getTitle()}, locale);
+        session.setStep(Steps.INPUT_PRODUCT_QUANTITY.ordinal());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text);
@@ -174,13 +175,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         newDentalWork.setQuantity(quantity);
         DentalWork dentalWork = dentalWorkMvcService.createAndReturnSingle(newDentalWork, session.getUserId());
         String text = dentalWorkAsMessage(dentalWork, locale);
-        String buttonLabel = messageSource.getMessage(Steps.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal(), dentalWork.getId().toString());
+        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
         InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
         session.removeAttribute(Attributes.NEW_DENTAL_WORK.name());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal());
+        session.setStep(Steps.ADD_PRODUCT.ordinal());
         chatSessionService.save(session);
         executor.accept(deleteMessage(session.getChatId(), messageId));
         executor.accept(deleteMessage(session.getChatId(), messageId - 1));
@@ -191,12 +192,12 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
-        String text = messageSource.getMessage(Steps.INPUT_NEW_DENTAL_WORK.name(), null, locale);
+        String text = messageSource.getMessage(TextKeys.SELECT_PRODUCT_TYPE_FOR_WORK.name(), null, locale);
         ProductMap productMap = productMapService.findAll(session.getUserId());
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.NEW_PRODUCT_TO_DENTAL_WORK.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.NEW_PRODUCT.ordinal());
         InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(productMap, locale, callbackQueryPrefix);
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(Steps.NEW_PRODUCT_TO_DENTAL_WORK.ordinal());
+        session.setStep(Steps.NEW_PRODUCT.ordinal());
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
     }
@@ -211,9 +212,9 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         }
         UUID productTypeId = UUID.fromString(callbackData[2]);
         ProductType productType = productMapService.findById(productTypeId, session.getUserId());
-        String text = messageSource.getMessage(Steps.NEW_PRODUCT_TO_DENTAL_WORK.name(), new Object[]{productType.getTitle()}, locale);
+        String text = messageSource.getMessage(TextKeys.INPUT_QUANTITY_AND_COMPLETION_DATE_FOR_PRODUCT.name(), new Object[]{productType.getTitle()}, locale);
         session.addAttribute(Attributes.PRODUCT_TYPE_ID.name(), productTypeId.toString());
-        session.setStep(Steps.INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK.ordinal());
+        session.setStep(Steps.INPUT_QUANTITY_FOR_NEW_PRODUCT.ordinal());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text);
@@ -238,14 +239,14 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         UUID productTypeId = UUID.fromString(session.getAttribute(Attributes.PRODUCT_TYPE_ID.name()));
         DentalWork dentalWork = dentalWorkMvcService.addProduct(workId, productTypeId, quantity, completeAt, session.getUserId());
         String text = dentalWorkAsMessage(dentalWork, locale);
-        String buttonLabel = messageSource.getMessage(Steps.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal(), dentalWork.getId().toString());
+        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
         InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
         session.removeAttribute(Attributes.NEW_DENTAL_WORK.name());
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), dentalWork.getId().toString());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(Steps.NEW_PRODUCT_TO_DENTAL_WORK.ordinal());
+        session.setStep(Steps.NEW_PRODUCT.ordinal());
         chatSessionService.save(session);
         executor.accept(deleteMessage(session.getChatId(), messageId));
         executor.accept(deleteMessage(session.getChatId(), messageId - 1));
@@ -301,13 +302,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
 
     enum Steps {
-        CREATE_NEW_DENTAL_WORK,
-        INPUT_NEW_DENTAL_WORK,
-        SELECT_PRODUCT_TYPE_FOR_NEW_DENTAL_WORK,
-        INPUT_PRODUCT_QUANTITY_FOR_NEW_DENTAL_WORK,
-        ADD_PRODUCT_TO_DENTAL_WORK,
-        NEW_PRODUCT_TO_DENTAL_WORK,
-        INPUT_QUANTITY_FOR_NEW_PRODUCT_TO_DENTAL_WORK
+        CREATE_NEW,
+        INPUT_NEW,
+        SELECT_PRODUCT_TYPE,
+        INPUT_PRODUCT_QUANTITY,
+        ADD_PRODUCT,
+        NEW_PRODUCT,
+        INPUT_QUANTITY_FOR_NEW_PRODUCT
     }
 
     enum Attributes {

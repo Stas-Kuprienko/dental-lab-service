@@ -84,11 +84,13 @@ public abstract class BotCommandHandler {
                     .append(p.getQuantity())
                     .append('\n');
         } stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        String status = messageSource.getMessage(dentalWork.getStatus().name(), null, locale);
         return template.formatted(
                 dentalWork.getPatient(),
                 dentalWork.getClinic(),
                 stringBuilder.toString(),
                 dentalWork.getCompleteAt().format(format),
+                status,
                 dentalWork.getComment() == null ? "" : dentalWork.getComment(),
                 dentalWork.countPhoto());
     }

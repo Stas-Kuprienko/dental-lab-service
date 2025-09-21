@@ -6,6 +6,7 @@ import org.lab.model.Product;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
+import org.lab.telegram_bot.domain.command.TextKeys;
 import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -21,7 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,9 +59,9 @@ public class DentalWorksHandler extends BotCommandHandler {
         Steps steps = getStep(session);
         return switch (steps) {
             case GET_WORK_LIST -> getList(session, locale, message.getMessageId());
-            case WORK_LIST_PAGING -> paging(session, locale, messageText, message.getMessageId());
-            case SELECT_ITEM_FROM_WORK_LIST -> selectItem(session, locale, messageText, message.getMessageId());
-            case INPUT_WORK_ID_FOR_SELECT -> inputWorkId(session, locale, messageText, message.getMessageId());
+            case LIST_PAGING -> paging(session, locale, messageText, message.getMessageId());
+            case SELECT_ITEM -> selectItem(session, locale, messageText, message.getMessageId());
+            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, message.getMessageId());
         };
     }
 
@@ -71,9 +71,9 @@ public class DentalWorksHandler extends BotCommandHandler {
         Steps steps = getStep(session);
         return switch (steps) {
             case GET_WORK_LIST -> getList(session, locale, callbackQuery.getMessage().getMessageId());
-            case WORK_LIST_PAGING -> paging(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case SELECT_ITEM_FROM_WORK_LIST -> selectItem(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_WORK_ID_FOR_SELECT -> inputWorkId(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case LIST_PAGING -> paging(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case SELECT_ITEM -> selectItem(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, callbackQuery.getMessage().getMessageId());
         };
     }
 
@@ -90,7 +90,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         InlineKeyboardButton selectButton = buildSelectItemButton(locale, messageId);
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(nextButton), List.of(selectButton));
         session.setCommand(BotCommands.DENTAL_WORKS);
-        session.setStep(Steps.WORK_LIST_PAGING.ordinal());
+        session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), text, keyboardMarkup);
     }
@@ -116,19 +116,19 @@ public class DentalWorksHandler extends BotCommandHandler {
         }
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttons, List.of(selectButton));
         session.setCommand(BotCommands.DENTAL_WORKS);
-        session.setStep(Steps.WORK_LIST_PAGING.ordinal());
+        session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
     }
 
     private SendMessage selectItem(ChatSession session, Locale locale, String messageText, int messageId) {
-        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
-        String text = messageSource.getMessage(Steps.SELECT_ITEM_FROM_WORK_LIST.name(), null, locale);
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.INPUT_WORK_ID_FOR_SELECT.ordinal());
+//        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        String text = messageSource.getMessage(TextKeys.INPUT_WORK_ID_TO_OPEN.name(), null, locale);
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.INPUT_WORK_ID.ordinal());
         InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale);
         session.addAttribute(Attributes.MESSAGE_ID_TO_DELETE.name(), Integer.toString(messageId));
         session.setCommand(BotCommands.DENTAL_WORKS);
-        session.setStep(Steps.INPUT_WORK_ID_FOR_SELECT.ordinal());
+        session.setStep(Steps.INPUT_WORK_ID.ordinal());
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), text, keyboardBuilderKit.inlineKeyboard(List.of(cancelButton)));
     }
@@ -137,29 +137,35 @@ public class DentalWorksHandler extends BotCommandHandler {
         if (executor == null) {
             throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
-        try {
-            String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
-            if (callbackData[2].equals(ButtonKeys.CANCEL.name())) {
-                executor.accept(deleteMessage(session.getChatId(), messageId));
-                return getList(session, locale, messageId);
-            }
-        } catch (IllegalArgumentException ignored) {}
+        if (isCancel(session, messageText, messageId)) {
+            return getList(session, locale, messageId);
+        }
         int messageToDelete = Integer.parseInt(session.getAttribute(Attributes.MESSAGE_ID_TO_DELETE.name()));
         long workId = Long.parseLong(messageText);
         DentalWork dentalWork = dentalWorkMvcService.getById(workId, session.getUserId());
         String text = dentalWorkAsMessage(dentalWork, locale);
-        String buttonLabel = messageSource.getMessage(NewDentalWorkHandler.Steps.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, NewDentalWorkHandler.Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal(), dentalWork.getId().toString());
+        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, NewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
         InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
-        session.removeAttribute(NewDentalWorkHandler.Attributes.NEW_DENTAL_WORK.name());
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(NewDentalWorkHandler.Steps.ADD_PRODUCT_TO_DENTAL_WORK.ordinal());
+        session.setStep(NewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal());
         chatSessionService.save(session);
         executor.accept(deleteMessage(session.getChatId(), messageToDelete));
         executor.accept(deleteMessage(session.getChatId(), messageId));
         executor.accept(deleteMessage(session.getChatId(), messageId - 1));
         return createSendMessage(session.getChatId(), text, inlineKeyboardMarkup);
+    }
+
+    private boolean isCancel(ChatSession session, String messageText, int messageId) {
+        try {
+            String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+            if (callbackData[2].equals(ButtonKeys.CANCEL.name())) {
+                executor.accept(deleteMessage(session.getChatId(), messageId));
+                return true;
+            }
+        } catch (IllegalArgumentException ignored) {}
+        return false;
     }
 
     private String workListToMessage(List<DentalWork> dentalWorks, Locale locale) {
@@ -206,21 +212,21 @@ public class DentalWorksHandler extends BotCommandHandler {
     }
 
     private InlineKeyboardButton buildNextButton(Locale locale, int nextPageNumber) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.WORK_LIST_PAGING.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.LIST_PAGING.ordinal());
         String callbackQueryData = callbackQueryPrefix + nextPageNumber;
         String callbackLabel = messageSource.getMessage(ButtonKeys.NEXT.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
     private InlineKeyboardButton buildPreviousButton(Locale locale, int previousPageNumber) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.WORK_LIST_PAGING.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.LIST_PAGING.ordinal());
         String callbackQueryData = callbackQueryPrefix + previousPageNumber;
         String callbackLabel = messageSource.getMessage(ButtonKeys.BACK.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
     private InlineKeyboardButton buildSelectItemButton(Locale locale, int messageId) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.SELECT_ITEM_FROM_WORK_LIST.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.SELECT_ITEM.ordinal());
         String callbackQueryData = callbackQueryPrefix + messageId;
         String callbackLabel = messageSource.getMessage(ButtonKeys.SELECT_ITEM.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
@@ -233,9 +239,9 @@ public class DentalWorksHandler extends BotCommandHandler {
 
     enum Steps {
         GET_WORK_LIST,
-        WORK_LIST_PAGING,
-        SELECT_ITEM_FROM_WORK_LIST,
-        INPUT_WORK_ID_FOR_SELECT
+        LIST_PAGING,
+        SELECT_ITEM,
+        INPUT_WORK_ID
     }
 
     enum Attributes {

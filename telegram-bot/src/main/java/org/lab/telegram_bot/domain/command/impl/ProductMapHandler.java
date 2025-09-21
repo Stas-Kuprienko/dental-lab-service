@@ -5,6 +5,7 @@ import org.lab.model.ProductType;
 import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
+import org.lab.telegram_bot.domain.command.TextKeys;
 import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -51,12 +52,12 @@ public class ProductMapHandler extends BotCommandHandler {
         String messageText = message.getText();
         Steps step = getStep(session);
         return switch (step) {
-            case GET_PRODUCT_TYPES -> get(session, locale);
-            case PRODUCT_TYPE_LIST_FOR_UPDATE -> updateList(session, locale, message.getMessageId());
-            case SELECT_PRODUCT_TYPE_TO_UPDATE -> selectToUpdate(session, locale, messageText, message.getMessageId());
-            case UPDATE_PRODUCT_TYPE_INPUT -> updateInput(session, locale, messageText);
-            case PRODUCT_TYPE_LIST_FOR_DELETE -> deleteList(session, locale, message.getMessageId());
-            case SELECT_PRODUCT_TYPE_TO_DELETE -> selectToDelete(session, locale, messageText, message.getMessageId());
+            case GET_MAP -> get(session, locale);
+            case LIST_FOR_UPDATE -> updateList(session, locale, message.getMessageId());
+            case SELECT_TO_UPDATE -> selectToUpdate(session, locale, messageText, message.getMessageId());
+            case UPDATE_INPUT -> updateInput(session, locale, messageText);
+            case LIST_FOR_DELETE -> deleteList(session, locale, message.getMessageId());
+            case SELECT_TO_DELETE -> selectToDelete(session, locale, messageText, message.getMessageId());
         };
     }
 
@@ -65,13 +66,13 @@ public class ProductMapHandler extends BotCommandHandler {
         String messageText = callbackQuery.getData();
         Steps step = getStep(session);
         return switch (step) {
-            case GET_PRODUCT_TYPES -> get(session, locale);
-            case PRODUCT_TYPE_LIST_FOR_UPDATE -> updateList(session, locale, callbackQuery.getMessage().getMessageId());
-            case SELECT_PRODUCT_TYPE_TO_UPDATE ->
+            case GET_MAP -> get(session, locale);
+            case LIST_FOR_UPDATE -> updateList(session, locale, callbackQuery.getMessage().getMessageId());
+            case SELECT_TO_UPDATE ->
                     selectToUpdate(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case UPDATE_PRODUCT_TYPE_INPUT -> updateInput(session, locale, messageText);
-            case PRODUCT_TYPE_LIST_FOR_DELETE -> deleteList(session, locale, callbackQuery.getMessage().getMessageId());
-            case SELECT_PRODUCT_TYPE_TO_DELETE ->
+            case UPDATE_INPUT -> updateInput(session, locale, messageText);
+            case LIST_FOR_DELETE -> deleteList(session, locale, callbackQuery.getMessage().getMessageId());
+            case SELECT_TO_DELETE ->
                     selectToDelete(session, locale, messageText, callbackQuery.getMessage().getMessageId());
         };
     }
@@ -88,9 +89,9 @@ public class ProductMapHandler extends BotCommandHandler {
     }
 
     private EditMessageText updateList(ChatSession session, Locale locale, int messageId) {
-        String text = messageSource.getMessage(Steps.PRODUCT_TYPE_LIST_FOR_UPDATE.name(), null, locale);
-        InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(session, locale, Steps.SELECT_PRODUCT_TYPE_TO_UPDATE);
-        session.setStep(Steps.SELECT_PRODUCT_TYPE_TO_UPDATE.ordinal());
+        String text = messageSource.getMessage(TextKeys.SELECT_PRODUCT_TYPE_TO_UPDATE.name(), null, locale);
+        InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(session, locale, Steps.SELECT_TO_UPDATE);
+        session.setStep(Steps.SELECT_TO_UPDATE.ordinal());
         session.setCommand(BotCommands.PRODUCT_MAP);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
@@ -107,8 +108,8 @@ public class ProductMapHandler extends BotCommandHandler {
         UUID productTypeId = UUID.fromString(callbackData[2]);
         ProductType productType = productMapService.findById(productTypeId, session.getUserId());
         session.addAttribute(Attributes.PRODUCT_TYPE_ID.name(), productTypeId.toString());
-        String text = messageSource.getMessage(Steps.SELECT_PRODUCT_TYPE_TO_UPDATE.name(), new Object[]{productType.getTitle()}, locale);
-        session.setStep(Steps.UPDATE_PRODUCT_TYPE_INPUT.ordinal());
+        String text = messageSource.getMessage(TextKeys.INPUT_NEW_PRICE_FOR_PRODUCT_TYPE.name(), new Object[]{productType.getTitle()}, locale);
+        session.setStep(Steps.UPDATE_INPUT.ordinal());
         session.setCommand(BotCommands.PRODUCT_MAP);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text);
@@ -126,9 +127,9 @@ public class ProductMapHandler extends BotCommandHandler {
     }
 
     private EditMessageText deleteList(ChatSession session, Locale locale, int messageId) {
-        String text = messageSource.getMessage(Steps.PRODUCT_TYPE_LIST_FOR_DELETE.name(), null, locale);
-        InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(session, locale, Steps.SELECT_PRODUCT_TYPE_TO_DELETE);
-        session.setStep(Steps.SELECT_PRODUCT_TYPE_TO_DELETE.ordinal());
+        String text = messageSource.getMessage(TextKeys.SELECT_PRODUCT_TYPE_TO_DELETE.name(), null, locale);
+        InlineKeyboardMarkup keyboardMarkup = productMapAsCallbackQuery(session, locale, Steps.SELECT_TO_DELETE);
+        session.setStep(Steps.SELECT_TO_DELETE.ordinal());
         session.setCommand(BotCommands.PRODUCT_MAP);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
@@ -146,9 +147,9 @@ public class ProductMapHandler extends BotCommandHandler {
 
     private SendMessage sendProductMapAsMessage(ProductMap productMap, ChatSession session, Locale locale) {
         String text = productMapAsMessageText(productMap);
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.PRODUCT_TYPE_LIST_FOR_UPDATE.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.LIST_FOR_UPDATE.ordinal());
         InlineKeyboardButton update = keyboardBuilderKit.callbackButton(ButtonKeys.UPDATE, callbackQueryPrefix, locale);
-        callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.PRODUCT_TYPE_LIST_FOR_DELETE.ordinal());
+        callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.LIST_FOR_DELETE.ordinal());
         InlineKeyboardButton delete = keyboardBuilderKit.callbackButton(ButtonKeys.DELETE, callbackQueryPrefix, locale);
         var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete));
         session.setStep(0);
@@ -159,9 +160,9 @@ public class ProductMapHandler extends BotCommandHandler {
 
     private EditMessageText sendProductMapAsMessage(ProductMap productMap, ChatSession session, Locale locale, int messageId) {
         String text = productMapAsMessageText(productMap);
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.PRODUCT_TYPE_LIST_FOR_UPDATE.ordinal());
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.LIST_FOR_UPDATE.ordinal());
         InlineKeyboardButton update = keyboardBuilderKit.callbackButton(ButtonKeys.UPDATE, callbackQueryPrefix, locale);
-        callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.PRODUCT_TYPE_LIST_FOR_DELETE.ordinal());
+        callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.LIST_FOR_DELETE.ordinal());
         InlineKeyboardButton delete = keyboardBuilderKit.callbackButton(ButtonKeys.DELETE, callbackQueryPrefix, locale);
         var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete));
         session.setStep(0);
@@ -206,12 +207,12 @@ public class ProductMapHandler extends BotCommandHandler {
 
 
     enum Steps {
-        GET_PRODUCT_TYPES,
-        PRODUCT_TYPE_LIST_FOR_UPDATE,
-        SELECT_PRODUCT_TYPE_TO_UPDATE,
-        UPDATE_PRODUCT_TYPE_INPUT,
-        PRODUCT_TYPE_LIST_FOR_DELETE,
-        SELECT_PRODUCT_TYPE_TO_DELETE
+        GET_MAP,
+        LIST_FOR_UPDATE,
+        SELECT_TO_UPDATE,
+        UPDATE_INPUT,
+        LIST_FOR_DELETE,
+        SELECT_TO_DELETE
     }
 
     enum Attributes {

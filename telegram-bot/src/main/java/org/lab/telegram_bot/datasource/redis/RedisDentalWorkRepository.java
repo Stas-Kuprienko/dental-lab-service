@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.datasource.redis;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.model.DentalWork;
 import org.lab.telegram_bot.datasource.DentalWorkRepository;
@@ -7,6 +8,9 @@ import org.lab.telegram_bot.utils.DentalWorkList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +26,14 @@ public class RedisDentalWorkRepository implements DentalWorkRepository {
     @Autowired
     public RedisDentalWorkRepository(RedisTemplate<String, DentalWorkList> redisTemplate) {
         this.redisTemplate = redisTemplate;
+    }
+
+
+    @PostConstruct
+    public void init() {
+        Duration duration = Duration.of(15, ChronoUnit.MINUTES);
+        redisTemplate.expire(KEY, duration);
+        log.info("Cache duration for {} key is set to {}", KEY, duration);
     }
 
 
