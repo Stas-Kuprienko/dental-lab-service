@@ -2,11 +2,8 @@ package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.lab.model.ProductMap;
-import org.lab.model.ProductType;
 import org.lab.uimvc.service.ProductMapMvcService;
 import org.springframework.ui.Model;
-
-import java.util.List;
 import java.util.UUID;
 
 public abstract class MvcControllerUtil {

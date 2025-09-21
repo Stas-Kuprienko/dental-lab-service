@@ -73,9 +73,8 @@ public class MyDentalWorkService implements DentalWorkService {
     public List<DentalWorkEntity> getAllForCurrentMonthByUserId(UUID userId) {
         YearMonth yearMonth = YearMonth.now();
         LocalDate from = yearMonth.atDay(1);
-        LocalDate to = yearMonth.atEndOfMonth();
-        List<DentalWorkEntity> dentalWorks = dentalWorkRepository.findAllForMonthByUserId(userId, from, to);
-        log.info("Found {} DentalWorks by parameters: userId='{}', yearMonth='{}'", dentalWorks.size(), userId, yearMonth);
+        List<DentalWorkEntity> dentalWorks = dentalWorkRepository.findAllFromMonthByUserId(userId, from);
+        log.info("Found {} DentalWorks for current month by parameters: userId='{}'", dentalWorks.size(), userId);
         return dentalWorks;
     }
 
@@ -142,6 +141,9 @@ public class MyDentalWorkService implements DentalWorkService {
                 p.setCompleteAt(completeAt);
                 ProductEntity updated = productRepository.save(p);
                 log.info("Product '{}' updated for '{}'", updated, dentalWork);
+                setCompleteAtIfIsLater(dentalWork, completeAt);
+                log.info("Product '{}' added to '{}'", product, dentalWork);
+                return dentalWork;
             }
         }
         setCompleteAtIfIsLater(dentalWork, completeAt);
