@@ -1,9 +1,8 @@
-package org.lab.telegram_bot.domain.command.impl;
+package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.model.Product;
-import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -56,24 +55,26 @@ public class DentalWorksHandler extends BotCommandHandler {
     public BotApiMethod<?> handle(Message message, ChatSession session) {
         Locale locale = ChatBotUtility.getLocale(message);
         String messageText = message.getText();
-        Steps steps = getStep(session);
-        return switch (steps) {
-            case GET_WORK_LIST -> getList(session, locale, message.getMessageId());
-            case LIST_PAGING -> paging(session, locale, messageText, message.getMessageId());
-            case SELECT_ITEM -> selectItem(session, locale, messageText, message.getMessageId());
-            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, message.getMessageId());
+        int messageId = message.getMessageId();
+        Steps step = getStep(session);
+        return switch (step) {
+            case GET_WORK_LIST -> getList(session, locale, messageId);
+            case LIST_PAGING -> paging(session, locale, messageText, messageId);
+            case SELECT_ITEM -> selectItem(session, locale, messageText, messageId);
+            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
         };
     }
 
     @Override
     public BotApiMethod<?> handle(CallbackQuery callbackQuery, ChatSession session, Locale locale) {
         String messageText = callbackQuery.getData();
-        Steps steps = getStep(session);
-        return switch (steps) {
-            case GET_WORK_LIST -> getList(session, locale, callbackQuery.getMessage().getMessageId());
-            case LIST_PAGING -> paging(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case SELECT_ITEM -> selectItem(session, locale, messageText, callbackQuery.getMessage().getMessageId());
-            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, callbackQuery.getMessage().getMessageId());
+        int messageId = callbackQuery.getMessage().getMessageId();
+        Steps step = getStep(session);
+        return switch (step) {
+            case GET_WORK_LIST -> getList(session, locale, messageId);
+            case LIST_PAGING -> paging(session, locale, messageText, messageId);
+            case SELECT_ITEM -> selectItem(session, locale, messageText, messageId);
+            case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
         };
     }
 
@@ -143,18 +144,14 @@ public class DentalWorksHandler extends BotCommandHandler {
         int messageToDelete = Integer.parseInt(session.getAttribute(Attributes.MESSAGE_ID_TO_DELETE.name()));
         long workId = Long.parseLong(messageText);
         DentalWork dentalWork = dentalWorkMvcService.getById(workId, session.getUserId());
-        String text = dentalWorkAsMessage(dentalWork, locale);
-        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.NEW_DENTAL_WORK, NewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
-        InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
-        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
-        session.setCommand(BotCommands.NEW_DENTAL_WORK);
-        session.setStep(NewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal());
-        chatSessionService.save(session);
-        executor.accept(deleteMessage(session.getChatId(), messageToDelete));
-        executor.accept(deleteMessage(session.getChatId(), messageId));
-        executor.accept(deleteMessage(session.getChatId(), messageId - 1));
-        return createSendMessage(session.getChatId(), text, inlineKeyboardMarkup);
+        return viewDentalWork(
+                keyboardBuilderKit,
+                chatSessionService,
+                session,
+                locale,
+                dentalWork,
+                executor,
+                messageToDelete, messageId, messageId - 1);
     }
 
     private boolean isCancel(ChatSession session, String messageText, int messageId) {

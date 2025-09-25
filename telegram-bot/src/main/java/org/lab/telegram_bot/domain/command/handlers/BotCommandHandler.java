@@ -1,8 +1,17 @@
-package org.lab.telegram_bot.domain.command;
+package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.model.DentalWork;
 import org.lab.model.Product;
+import org.lab.model.ProductMap;
+import org.lab.model.ProductType;
+import org.lab.telegram_bot.domain.command.BotCommands;
+import org.lab.telegram_bot.domain.command.TextKeys;
+import org.lab.telegram_bot.domain.element.ButtonKeys;
+import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
+import org.lab.telegram_bot.domain.session.ChatSessionService;
+import org.lab.telegram_bot.exception.IncorrectInputException;
+import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.context.MessageSource;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,8 +21,14 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public abstract class BotCommandHandler {
 
@@ -72,6 +87,27 @@ public abstract class BotCommandHandler {
         return deleteMessage;
     }
 
+    protected SendMessage viewDentalWork(KeyboardBuilderKit keyboardBuilderKit,
+                                         ChatSessionService chatSessionService,
+                                         ChatSession session,
+                                         Locale locale,
+                                         DentalWork dentalWork,
+                                         Consumer<BotApiMethod<?>> executor,
+                                         int... messageIdToDelete) {
+        String text = dentalWorkAsMessage(dentalWork, locale);
+        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
+        InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
+        session.setCommand(BotCommands.VIEW_DENTAL_WORK);
+        session.setStep(ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal());
+        chatSessionService.save(session);
+        for (int id : messageIdToDelete) {
+            executor.accept(deleteMessage(session.getChatId(), id));
+        }
+        return createSendMessage(session.getChatId(), text, inlineKeyboardMarkup);
+    }
+
     protected String dentalWorkAsMessage(DentalWork dentalWork, Locale locale) {
         String template = messageSource.getMessage(DENTAL_WORK_TEMPLATE, null, locale);
         StringBuilder stringBuilder = new StringBuilder();
@@ -93,5 +129,35 @@ public abstract class BotCommandHandler {
                 status,
                 dentalWork.getComment() == null ? "" : dentalWork.getComment(),
                 dentalWork.countPhoto());
+    }
+
+    protected InlineKeyboardMarkup productMapAsCallbackQuery(KeyboardBuilderKit keyboardBuilderKit,
+                                                             ProductMap productMap,
+                                                             Locale locale,
+                                                             String callbackQueryPrefix) {
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        for (ProductType p : productMap.getEntries()) {
+            var button = keyboardBuilderKit
+                    .callbackButton(p.getTitle() + " : " + p.getPrice(), callbackQueryPrefix + p.getId());
+            buttons.add(new ArrayList<>());
+            buttons.getLast().add(button);
+        }
+        InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale);
+        buttons.add(List.of(cancelButton));
+        return keyboardBuilderKit.inlineKeyboard(buttons);
+    }
+
+    protected LocalDate parseLocalDate(String value) {
+        LocalDate completeAt;
+        try {
+            String dateValue = value;
+            if (dateValue.split("\\.").length == 2) {
+                dateValue += "." + LocalDate.now().getYear();
+            }
+            completeAt = LocalDate.parse(dateValue, format);
+        } catch (DateTimeParseException e) {
+            throw new IncorrectInputException(value, e);
+        }
+        return completeAt;
     }
 }

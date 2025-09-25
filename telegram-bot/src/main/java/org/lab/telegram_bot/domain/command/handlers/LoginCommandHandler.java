@@ -1,9 +1,8 @@
-package org.lab.telegram_bot.domain.command.impl;
+package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.request.NewTelegramOtpLink;
 import org.lab.request.OtpRequest;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
-import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;

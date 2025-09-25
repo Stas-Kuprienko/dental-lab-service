@@ -1,11 +1,10 @@
-package org.lab.telegram_bot.domain.command.impl;
+package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
 import org.lab.request.NewProductType;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
-import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.element.ButtonKeys;

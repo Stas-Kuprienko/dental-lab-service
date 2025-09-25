@@ -1,6 +1,7 @@
 package org.lab.telegram_bot.domain.command;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lab.telegram_bot.domain.command.handlers.BotCommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.UnregisteredUserException;

@@ -4,9 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandDispatcher;
-import org.lab.telegram_bot.domain.command.impl.DentalWorksHandler;
-import org.lab.telegram_bot.domain.command.impl.NewDentalWorkHandler;
-import org.lab.telegram_bot.domain.command.impl.StartCommandHandler;
+import org.lab.telegram_bot.domain.command.handlers.DentalWorksHandler;
+import org.lab.telegram_bot.domain.command.handlers.NewDentalWorkHandler;
+import org.lab.telegram_bot.domain.command.handlers.StartCommandHandler;
+import org.lab.telegram_bot.domain.command.handlers.ViewDentalWorkHandler;
 import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,8 @@ public class TelegramBotController extends TelegramLongPollingBot {
         newDentalWorkHandler.setExecutor(this::execute);
         DentalWorksHandler dentalWorksHandler = (DentalWorksHandler) commandDispatcher.getCommandHandler(BotCommands.DENTAL_WORKS);
         dentalWorksHandler.setExecutor(this::execute);
+        ViewDentalWorkHandler viewDentalWorkHandler = (ViewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.VIEW_DENTAL_WORK);
+        viewDentalWorkHandler.setExecutor(this::execute);
     }
 
 

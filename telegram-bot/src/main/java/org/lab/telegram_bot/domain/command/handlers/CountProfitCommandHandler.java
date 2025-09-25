@@ -1,6 +1,5 @@
-package org.lab.telegram_bot.domain.command.impl;
+package org.lab.telegram_bot.domain.command.handlers;
 
-import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -12,12 +11,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.Locale;
 
-@CommandHandler(command = BotCommands.GET_REPORT)
-public class GetReportCommandHandler extends BotCommandHandler {
+@CommandHandler(command = BotCommands.COUNT_PROFIT)
+public class CountProfitCommandHandler extends BotCommandHandler {
 
 
     @Autowired
-    public GetReportCommandHandler(MessageSource messageSource) {
+    public CountProfitCommandHandler(MessageSource messageSource) {
         super(messageSource);
     }
 

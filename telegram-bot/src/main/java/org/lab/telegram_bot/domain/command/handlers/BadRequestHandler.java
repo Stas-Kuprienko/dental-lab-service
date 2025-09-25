@@ -1,7 +1,6 @@
-package org.lab.telegram_bot.domain.command.impl;
+package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
-import org.lab.telegram_bot.domain.command.BotCommandHandler;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
