@@ -33,19 +33,19 @@ public class DentalWorksHandler extends BotCommandHandler {
     private static final String ITEM_DELIMITER = "\n******************\n";
     private static final int PAGE_ITEMS = 10;
 
-    private final DentalWorkMvcService dentalWorkMvcService;
+    private final DentalWorkMvcService dentalWorkService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private Consumer<BotApiMethod<?>> executor;
 
 
     @Autowired
-    public DentalWorksHandler(DentalWorkMvcService dentalWorkMvcService,
+    public DentalWorksHandler(DentalWorkMvcService dentalWorkService,
                               KeyboardBuilderKit keyboardBuilderKit,
                               MessageSource messageSource,
                               ChatSessionService chatSessionService) {
         super(messageSource);
-        this.dentalWorkMvcService = dentalWorkMvcService;
+        this.dentalWorkService = dentalWorkService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -84,7 +84,7 @@ public class DentalWorksHandler extends BotCommandHandler {
 
 
     private SendMessage getList(ChatSession session, Locale locale, int messageId) {
-        List<DentalWork> dentalWorks = dentalWorkMvcService.getAll(session.getUserId());
+        List<DentalWork> dentalWorks = dentalWorkService.getAll(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, 1);
         String text = workListToMessage(listPage.dentalWorks, locale);
         InlineKeyboardButton nextButton = buildNextButton(locale, 2);
@@ -99,12 +99,12 @@ public class DentalWorksHandler extends BotCommandHandler {
     private BotApiMethod<?> paging(ChatSession session, Locale locale, String messageText, int messageId) {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         if (callbackData[2].equals(ButtonKeys.CANCEL.name())) {
-            session.clear();
+            session.reset();
             chatSessionService.save(session);
             return deleteMessage(session.getChatId(), messageId);
         }
         int page = Integer.parseInt(callbackData[2]);
-        List<DentalWork> dentalWorks = dentalWorkMvcService.getAll(session.getUserId());
+        List<DentalWork> dentalWorks = dentalWorkService.getAll(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, page);
         String text = workListToMessage(listPage.dentalWorks, locale);
         InlineKeyboardButton selectButton = buildSelectItemButton(locale, messageId);
@@ -143,7 +143,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         }
         int messageToDelete = Integer.parseInt(session.getAttribute(Attributes.MESSAGE_ID_TO_DELETE.name()));
         long workId = Long.parseLong(messageText);
-        DentalWork dentalWork = dentalWorkMvcService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
         return viewDentalWork(
                 keyboardBuilderKit,
                 chatSessionService,

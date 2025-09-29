@@ -182,6 +182,7 @@ public class MyDentalWorkService implements DentalWorkService {
     @Override
     public DentalWorkEntity updateProductCompletion(Long id, UUID userId, UUID productId, LocalDate completeAt) {
         productRepository.updateCompleteAt(productId, id, completeAt);
+        dentalWorkRepository.updateCompleteAt(id, userId, completeAt);
         log.info("Product with ID='{}' updated 'completeAt' on '{}' for DentalWork with ID={} and userID='{}'", productId, completeAt, id, userId);
         return getByIdAndUserId(id, userId);
     }

@@ -58,6 +58,14 @@ public class DentalWorkList implements Serializable {
         }
     }
 
+    public boolean isContains(DentalWork dentalWork) {
+        return dentalWorks.containsKey(dentalWork.getId());
+    }
+
+    public void remove(long id) {
+        dentalWorks.remove(id);
+    }
+
     public List<DentalWork> toList() {
         return dentalWorks.values().stream().toList();
     }

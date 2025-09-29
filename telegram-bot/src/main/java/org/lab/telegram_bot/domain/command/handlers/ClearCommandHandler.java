@@ -31,7 +31,7 @@ public class ClearCommandHandler extends BotCommandHandler {
     public BotApiMethod<?> handle(Message message, ChatSession session) {
         Locale locale = ChatBotUtility.getLocale(message);
         String text = messageSource.getMessage(MESSAGE_KEY, null, locale);
-        session.clear();
+        session.reset();
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), text);
     }
@@ -39,7 +39,7 @@ public class ClearCommandHandler extends BotCommandHandler {
     @Override
     public BotApiMethod<?> handle(CallbackQuery callbackQuery, ChatSession session, Locale locale) {
         String textToSend = messageSource.getMessage(MESSAGE_KEY, null, locale);
-        session.clear();
+        session.reset();
         chatSessionService.save(session);
         return createSendMessage(session.getChatId(), textToSend);
     }

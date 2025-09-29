@@ -64,6 +64,17 @@ public class DentalWorkMvcService {
         }
     }
 
+    public DentalWork update(DentalWork updatable, UUID userId) {
+        DentalWork dentalWork = dentalWorkService.update(updatable, userId);
+        dentalWorkRepository.updateIfContains(dentalWork);
+        return dentalWork;
+    }
+
+    public void delete(long workId, UUID userId) {
+        dentalWorkService.delete(workId, userId);
+        dentalWorkRepository.delete(workId, userId);
+    }
+
     public DentalWork addProduct(long workId, UUID productTypeId, int quantity, LocalDate completeAt, UUID userId) {
         NewProduct newProduct = NewProduct.builder()
                 .product(productTypeId)
@@ -76,6 +87,18 @@ public class DentalWorkMvcService {
             dentalWorks.add(dentalWork);
             dentalWorkRepository.save(dentalWorks);
         }
+        return dentalWork;
+    }
+
+    public DentalWork updateProductCompletion(long workId, UUID userId, UUID productId, LocalDate completeAt) {
+        DentalWork dentalWork = productService.updateCompletion(workId, productId, completeAt, userId);
+        dentalWorkRepository.updateIfContains(dentalWork);
+        return dentalWork;
+    }
+
+    public DentalWork deleteProduct(long workId, UUID userId, UUID productId) {
+        DentalWork dentalWork = productService.deleteProduct(workId, productId, userId);
+        dentalWorkRepository.updateIfContains(dentalWork);
         return dentalWork;
     }
 

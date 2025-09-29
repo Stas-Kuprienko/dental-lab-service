@@ -36,6 +36,10 @@ public class ChatSession {
         context.attributes.remove(key);
     }
 
+    public void clearAttributes() {
+        context.attributes.clear();
+    }
+
     public void setCommand(BotCommands command) {
         context.setCommand(command);
     }
@@ -52,7 +56,7 @@ public class ChatSession {
         return context.getStep();
     }
 
-    public void clear() {
+    public void reset() {
         context.setCommand(null);
         context.setStep(0);
         context.attributes.clear();

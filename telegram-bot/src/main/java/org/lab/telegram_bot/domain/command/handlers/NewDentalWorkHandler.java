@@ -133,7 +133,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         if (callbackData[2].equals(ButtonKeys.CANCEL.name())) {
             String text = messageSource.getMessage(CANCEL_RESPONSE, null, locale);
-            session.clear();
+            session.reset();
             chatSessionService.save(session);
             return editMessageText(session.getChatId(), messageId, text);
         }

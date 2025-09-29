@@ -38,21 +38,6 @@ public class RedisDentalWorkRepository implements DentalWorkRepository {
 
 
     @Override
-    public void save(DentalWork dentalWork) {
-        log.info("DentalWork for user '{}' accepted to cache", dentalWork.getUserId());
-        Optional<DentalWorkList> optionalDentalWorkList = getAll(dentalWork.getUserId());
-        DentalWorkList dentalWorkList;
-        if (optionalDentalWorkList.isPresent()) {
-            dentalWorkList = optionalDentalWorkList.get();
-            dentalWorkList.add(dentalWork);
-        } else {
-            dentalWorkList = DentalWorkList.create(dentalWork);
-        }
-        redisTemplate.opsForHash().put(KEY, dentalWork.getUserId().toString(), dentalWorkList);
-        log.info("DentalWorkList [size={}] for user '{}' is cached", dentalWorkList.size(), dentalWork.getUserId());
-    }
-
-    @Override
     public void save(DentalWorkList dentalWorks) {
         log.info("DentalWorkList for user '{}' accepted to cache", dentalWorks.getUserId());
         redisTemplate.opsForHash().put(KEY, dentalWorks.getUserId().toString(), dentalWorks);
@@ -68,5 +53,25 @@ public class RedisDentalWorkRepository implements DentalWorkRepository {
         DentalWorkList dentalWorks = (DentalWorkList) found;
         log.info("Found DentalWorkList [size={}] for user '{}'", dentalWorks.size(), userId);
         return Optional.of(dentalWorks);
+    }
+
+    @Override
+    public void updateIfContains(DentalWork dentalWork) {
+        log.info("DentalWork for user '{}' accepted to update if contains", dentalWork.getUserId());
+        Optional<DentalWorkList> optionalDentalWorkList = getAll(dentalWork.getUserId());
+        DentalWorkList dentalWorks;
+        if (optionalDentalWorkList.isPresent()) {
+            dentalWorks = optionalDentalWorkList.get();
+            if (dentalWorks.isContains(dentalWork)) {
+                dentalWorks.add(dentalWork);
+                redisTemplate.opsForHash().put(KEY, dentalWorks.getUserId().toString(), dentalWorks);
+                log.info("DentalWork with ID={} for user '{}' is updated", dentalWork.getId(), dentalWork.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public void delete(long workId, UUID userId) {
+        getAll(userId).ifPresent(dentalWorkList -> dentalWorkList.remove(workId));
     }
 }

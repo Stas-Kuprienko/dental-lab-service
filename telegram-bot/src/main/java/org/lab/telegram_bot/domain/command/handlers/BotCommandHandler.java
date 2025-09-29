@@ -95,12 +95,23 @@ public abstract class BotCommandHandler {
                                          Consumer<BotApiMethod<?>> executor,
                                          int... messageIdToDelete) {
         String text = dentalWorkAsMessage(dentalWork, locale);
-        String buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), dentalWork.getId().toString());
+        String workId = dentalWork.getId().toString();
+        //create 'update' button
+        String buttonLabel = messageSource.getMessage(ButtonKeys.UPDATE.name(), null, locale);
+        String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.UPDATE_DENTAL_WORK.ordinal(), workId);
+        InlineKeyboardButton updateButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        //create 'add product' button
+        buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), workId);
         InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
-        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(addProductButton));
+        //create 'delete product' button
+        buttonLabel = messageSource.getMessage(TextKeys.DELETE_PRODUCT_FROM_DENTAL_WORK.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.DELETE_PRODUCT.ordinal(), workId);
+        InlineKeyboardButton deleteProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(updateButton), List.of(addProductButton), List.of(deleteProductButton));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
-        session.setStep(ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal());
+        session.clearAttributes();
         chatSessionService.save(session);
         for (int id : messageIdToDelete) {
             executor.accept(deleteMessage(session.getChatId(), id));
@@ -150,7 +161,7 @@ public abstract class BotCommandHandler {
     protected LocalDate parseLocalDate(String value) {
         LocalDate completeAt;
         try {
-            String dateValue = value;
+            String dateValue = value.strip();
             if (dateValue.split("\\.").length == 2) {
                 dateValue += "." + LocalDate.now().getYear();
             }
