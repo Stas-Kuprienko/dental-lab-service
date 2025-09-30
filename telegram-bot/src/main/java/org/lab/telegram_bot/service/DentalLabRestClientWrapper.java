@@ -20,6 +20,7 @@ public class DentalLabRestClientWrapper {
     public final ProductMapServiceWrapper PRODUCT_MAP;
     public final DentalWorkServiceWrapper DENTAL_WORKS;
     public final ProductServiceWrapper PRODUCTS;
+    public final ReportServiceWrapper REPORTS;
 
 
     @Autowired
@@ -30,6 +31,7 @@ public class DentalLabRestClientWrapper {
         PRODUCT_MAP = new ProductMapServiceWrapper(dentalLabRestClient.PRODUCT_MAP, this::httpHeadersConsumer);
         DENTAL_WORKS = new DentalWorkServiceWrapper(dentalLabRestClient.DENTAL_WORKS, this::httpHeadersConsumer);
         PRODUCTS = new ProductServiceWrapper(dentalLabRestClient.PRODUCTS, this::httpHeadersConsumer);
+        REPORTS = new ReportServiceWrapper(dentalLabRestClient.REPORTS, this::httpHeadersConsumer);
     }
 
 

@@ -4,15 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandDispatcher;
-import org.lab.telegram_bot.domain.command.handlers.DentalWorksHandler;
-import org.lab.telegram_bot.domain.command.handlers.NewDentalWorkHandler;
-import org.lab.telegram_bot.domain.command.handlers.StartCommandHandler;
-import org.lab.telegram_bot.domain.command.handlers.ViewDentalWorkHandler;
+import org.lab.telegram_bot.domain.command.handlers.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.Serializable;
@@ -44,6 +43,8 @@ public class TelegramBotController extends TelegramLongPollingBot {
         dentalWorksHandler.setExecutor(this::execute);
         ViewDentalWorkHandler viewDentalWorkHandler = (ViewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.VIEW_DENTAL_WORK);
         viewDentalWorkHandler.setExecutor(this::execute);
+        GetReportCommandHandler getReportCommandHandler = (GetReportCommandHandler) commandDispatcher.getCommandHandler(BotCommands.GET_REPORT);
+        getReportCommandHandler.setSendDocumentExecutor(this::executeSendDocument);
     }
 
 
@@ -84,6 +85,16 @@ public class TelegramBotController extends TelegramLongPollingBot {
     public <T extends Serializable, Method extends BotApiMethod<T>> CompletableFuture<T> executeAsync(Method method) {
         try {
             return super.executeAsync(method);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage(), e);
+            //TODO
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Message executeSendDocument(SendDocument method) {
+        try {
+            return super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
             //TODO
