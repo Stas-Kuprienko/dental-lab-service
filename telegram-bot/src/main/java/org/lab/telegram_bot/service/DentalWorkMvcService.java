@@ -82,11 +82,7 @@ public class DentalWorkMvcService {
                 .completeAt(completeAt)
                 .build();
         DentalWork dentalWork = productService.addProduct(workId, newProduct, userId);
-        if (isCurrentMonth(dentalWork)) {
-            DentalWorkList dentalWorks = getDentalWorkList(userId);
-            dentalWorks.add(dentalWork);
-            dentalWorkRepository.save(dentalWorks);
-        }
+        dentalWorkRepository.updateIfContains(dentalWork);
         return dentalWork;
     }
 
@@ -109,6 +105,9 @@ public class DentalWorkMvcService {
     }
 
     private boolean isCurrentMonth(DentalWork dentalWork) {
-        return dentalWork.getCompleteAt().getMonth().equals(LocalDate.now().getMonth());
+        LocalDate completeAt = dentalWork.getCompleteAt();
+        LocalDate now = LocalDate.now();
+        return completeAt.getYear() > now.getYear() ||
+                completeAt.getMonthValue() >= now.getMonthValue();
     }
 }

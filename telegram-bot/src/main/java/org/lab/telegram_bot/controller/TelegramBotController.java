@@ -8,7 +8,6 @@ import org.lab.telegram_bot.domain.command.handlers.DentalWorksHandler;
 import org.lab.telegram_bot.domain.command.handlers.NewDentalWorkHandler;
 import org.lab.telegram_bot.domain.command.handlers.StartCommandHandler;
 import org.lab.telegram_bot.domain.command.handlers.ViewDentalWorkHandler;
-import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,8 +28,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
 
 
     @Autowired
-    public TelegramBotController(CommandMenuList commandMenuList,
-                                 CommandDispatcher commandDispatcher,
+    public TelegramBotController(CommandDispatcher commandDispatcher,
                                  TelegramBotExceptionHandler exceptionHandler,
                                  @Value("${project.variables.telegram.username}") String username,
                                  @Value("${project.variables.telegram.botToken}") String botToken) {
@@ -38,7 +36,6 @@ public class TelegramBotController extends TelegramLongPollingBot {
         this.username = username;
         this.commandDispatcher = commandDispatcher;
         this.exceptionHandler = exceptionHandler;
-        this.execute(commandMenuList.startMenu());
         StartCommandHandler startCommandHandler = (StartCommandHandler) commandDispatcher.getCommandHandler(BotCommands.START);
         startCommandHandler.setMyCommandsExecutor(this::execute);
         NewDentalWorkHandler newDentalWorkHandler = (NewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.NEW_DENTAL_WORK);
@@ -59,12 +56,15 @@ public class TelegramBotController extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage() && update.getMessage().hasText()) {
+                log.info(update.getMessage().toString());
                 this.execute(commandDispatcher.apply(update.getMessage()));
 
             } else if (update.hasCallbackQuery()) {
+                log.info(update.getCallbackQuery().toString());
                 this.execute(commandDispatcher.apply(update.getCallbackQuery()));
             }
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             this.execute(exceptionHandler.apply(e, update));
         }
     }

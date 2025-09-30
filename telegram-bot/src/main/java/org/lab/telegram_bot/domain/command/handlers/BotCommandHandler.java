@@ -108,8 +108,16 @@ public abstract class BotCommandHandler {
         buttonLabel = messageSource.getMessage(TextKeys.DELETE_PRODUCT_FROM_DENTAL_WORK.name(), null, locale);
         callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.DELETE_PRODUCT.ordinal(), workId);
         InlineKeyboardButton deleteProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        //create 'delete work' button
+        buttonLabel = messageSource.getMessage(ButtonKeys.DELETE.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.CONFIRM_DELETE_DENTAL_WORK.ordinal(), workId);
+        InlineKeyboardButton deleteWorkButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(updateButton), List.of(addProductButton), List.of(deleteProductButton));
+        InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(
+                List.of(updateButton),
+                List.of(addProductButton),
+                List.of(deleteProductButton),
+                List.of(deleteWorkButton));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         session.clearAttributes();
         chatSessionService.save(session);

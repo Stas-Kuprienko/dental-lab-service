@@ -1,7 +1,5 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.lab.enums.WorkStatus;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
@@ -43,7 +41,6 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
     private final DentalWorkMvcService dentalWorkService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
-    private final ObjectMapper objectMapper;
     private Consumer<BotApiMethod<?>> executor;
 
 
@@ -52,14 +49,12 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
                                  ProductMapMvcService productMapService,
                                  DentalWorkMvcService dentalWorkService,
                                  KeyboardBuilderKit keyboardBuilderKit,
-                                 ChatSessionService chatSessionService,
-                                 ObjectMapper objectMapper) {
+                                 ChatSessionService chatSessionService) {
         super(messageSource);
         this.productMapService = productMapService;
         this.dentalWorkService = dentalWorkService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
-        this.objectMapper = objectMapper;
     }
 
 
@@ -87,6 +82,8 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
             case INPUT_STATUS -> inputStatus(session, locale, messageText, messageId);
             case INPUT_COMMENT -> inputComment(session, locale, messageText, messageId);
             case INPUT_COMPLETION -> inputCompletion(session, locale, messageText, messageId);
+            case CONFIRM_DELETE_DENTAL_WORK -> confirmDeleteDentalWork(session, locale, messageText, messageId);
+            case DELETING_DENTAL_WORK -> deletingDentalWork(session, locale, messageText, messageId);
         };
     }
 
@@ -113,6 +110,8 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
             case INPUT_STATUS -> inputStatus(session, locale, messageText, messageId);
             case INPUT_COMMENT -> inputComment(session, locale, messageText, messageId);
             case INPUT_COMPLETION -> inputCompletion(session, locale, messageText, messageId);
+            case CONFIRM_DELETE_DENTAL_WORK -> confirmDeleteDentalWork(session, locale, messageText, messageId);
+            case DELETING_DENTAL_WORK -> deletingDentalWork(session, locale, messageText, messageId);
         };
     }
 
@@ -301,7 +300,20 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
     }
 
     private SendMessage inputStatus(ChatSession session, Locale locale, String messageText, int messageId) {
-        return inputField(session, locale, messageText, messageId, TextKeys.WorkFields.STATUS);
+        long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
+        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        String messageData = ChatBotUtility.callBackQueryParse(messageText)[2];
+        dentalWork.setStatus(WorkStatus.valueOf(messageData.toUpperCase()));
+        dentalWork = dentalWorkService.update(dentalWork, session.getUserId());
+        int messageToDelete = Integer.parseInt(session.getAttribute(DentalWorksHandler.Attributes.MESSAGE_ID_TO_DELETE.name()));
+        return viewDentalWork(
+                keyboardBuilderKit,
+                chatSessionService,
+                session,
+                locale,
+                dentalWork,
+                executor,
+                messageId, messageToDelete);
     }
 
     private SendMessage inputComment(ChatSession session, Locale locale, String messageText, int messageId) {
@@ -314,7 +326,10 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         switch (field) {
             case PATIENT -> dentalWork.setPatient(messageText.strip());
             case CLINIC -> dentalWork.setClinic(messageText.strip());
-            case STATUS -> dentalWork.setStatus(WorkStatus.valueOf(messageText.strip().toUpperCase()));
+            case STATUS -> {
+                String messageData = ChatBotUtility.callBackQueryParse(messageText)[2];
+                dentalWork.setStatus(WorkStatus.valueOf(messageData.toUpperCase()));
+            }
             case COMMENT -> dentalWork.setComment(messageText.strip());
             default -> throw new ConfigurationCustomException("Argument 'field' is not expected: " + field);
         }
@@ -346,50 +361,96 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
                 messageId, messageId - 1, messageToDelete);
     }
 
+    private SendMessage confirmDeleteDentalWork(ChatSession session, Locale locale, String messageText, int messageId) {
+        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        long workId = Long.parseLong(callbackData[2]);
+        session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
+        session.addAttribute(Attributes.MESSAGE_ID_TO_DELETE.name(), Integer.toString(messageId));
+        String text = messageSource.getMessage(TextKeys.DELETE_DENTAL_WORK.name(), null, locale);
+        String callbackPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.VIEW_DENTAL_WORK, Steps.DELETING_DENTAL_WORK.ordinal());
+        InlineKeyboardButton yesButton = keyboardBuilderKit.callbackButton(ButtonKeys.YES, callbackPrefix, locale);
+        InlineKeyboardButton noButton = keyboardBuilderKit.callbackButton(ButtonKeys.NO, callbackPrefix, locale);
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(yesButton, noButton));
+        session.setCommand(BotCommands.VIEW_DENTAL_WORK);
+        session.setStep(Steps.DELETING_DENTAL_WORK.ordinal());
+        chatSessionService.save(session);
+        return createSendMessage(session.getChatId(), text, keyboardMarkup);
+    }
+
+    private BotApiMethod<?> deletingDentalWork(ChatSession session, Locale locale, String messageText, int messageId) {
+        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        ButtonKeys response = ButtonKeys.valueOf(callbackData[2]);
+        long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
+        int messageIdToDelete = Integer.parseInt(session.getAttribute(Attributes.MESSAGE_ID_TO_DELETE.name()));
+        switch (response) {
+            case NO -> {
+                DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+                return viewDentalWork(
+                        keyboardBuilderKit,
+                        chatSessionService,
+                        session,
+                        locale,
+                        dentalWork,
+                        executor,
+                        messageIdToDelete, messageId);
+            }
+            case YES -> {
+                dentalWorkService.delete(workId, session.getUserId());
+                String text = messageSource.getMessage(TextKeys.DENTAL_WORK_IS_DELETED.name(), null, locale);
+                session.reset();
+                chatSessionService.save(session);
+                executor.accept(deleteMessage(session.getChatId(), messageIdToDelete));
+                return editMessageText(session.getChatId(), messageId, text);
+            }
+            default -> throw new BadRequestCustomException("Not expected response: " + response);
+        }
+    }
+
     private InlineKeyboardMarkup dentalWorkAsKeyboard(DentalWork dentalWork, Locale locale) {
         String workId = dentalWork.getId().toString();
-        List<InlineKeyboardButton> buttons = new ArrayList<>();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         //create 'patient' button
         Object[] args = new Object[]{dentalWork.getPatient()};
         String buttonLabel = messageSource.getMessage(Steps.UPDATE_PATIENT.name(), args, locale);
         String callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_PATIENT.ordinal(), workId);
-        buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'clinic' button
         args[0] = dentalWork.getClinic();
         buttonLabel = messageSource.getMessage(Steps.UPDATE_CLINIC.name(), args, locale);
         callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_CLINIC.ordinal(), workId);
-        buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'status' button
-        args[0] = dentalWork.getStatus();
+        String statusForLocal = messageSource.getMessage(dentalWork.getStatus().name(), null, locale);
+        args[0] = statusForLocal;
         buttonLabel = messageSource.getMessage(Steps.UPDATE_STATUS.name(), args, locale);
         callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_STATUS.ordinal(), workId);
-        buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'completion' button
-        args[0] = dentalWork.getCompleteAt();
+        args[0] = dentalWork.getCompleteAt().format(format);
         buttonLabel = messageSource.getMessage(Steps.UPDATE_COMPLETION.name(), args, locale);
         callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_COMPLETION.ordinal(), workId);
-        buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'comment' button
-        args[0] = dentalWork.getComment();
+        args[0] = dentalWork.getComment() == null ? "" : dentalWork.getComment();
         buttonLabel = messageSource.getMessage(Steps.UPDATE_COMMENT.name(), args, locale);
         callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_COMMENT.ordinal(), workId);
-        buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //build keyboard
         return keyboardBuilderKit.inlineKeyboard(buttons);
     }
 
     private InlineKeyboardMarkup statusesAsKeyboard(Locale locale) {
-        List<InlineKeyboardButton> buttons = new ArrayList<>();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         int step = Steps.INPUT_STATUS.ordinal();
         String buttonLabel;
         String callbackData;
         for (WorkStatus status : WorkStatus.values()) {
             buttonLabel = messageSource.getMessage(status.name(), null, locale);
             callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, step, status.name());
-            buttons.add(keyboardBuilderKit.callbackButton(buttonLabel, callbackData));
+            buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         }
         String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CLEAR, 0);
-        buttons.add(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale));
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale)));
         return keyboardBuilderKit.inlineKeyboard(buttons);
     }
 
@@ -404,22 +465,6 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, ChatBotUtility.callBackQueryPrefix(BotCommands.CLEAR, 0), locale);
         buttons.add(List.of(cancelButton));
         return keyboardBuilderKit.inlineKeyboard(buttons);
-    }
-
-    private String dentalWorkAsString(DentalWork dentalWork) {
-        try {
-            return objectMapper.writeValueAsString(dentalWork);
-        } catch (JsonProcessingException e) {
-            throw new ConfigurationCustomException(e);
-        }
-    }
-
-    private DentalWork stringToDentalWork(String json) {
-        try {
-            return objectMapper.readValue(json, DentalWork.class);
-        } catch (JsonProcessingException e) {
-            throw new ConfigurationCustomException(e);
-        }
     }
 
     private Steps getStep(ChatSession session) {
@@ -444,7 +489,9 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         INPUT_STATUS,
         SELECT_PRODUCT_FOR_UPDATE_COMPLETION,
         INPUT_COMPLETION,
-        INPUT_COMMENT
+        INPUT_COMMENT,
+        CONFIRM_DELETE_DENTAL_WORK,
+        DELETING_DENTAL_WORK
     }
 
     enum Attributes {
