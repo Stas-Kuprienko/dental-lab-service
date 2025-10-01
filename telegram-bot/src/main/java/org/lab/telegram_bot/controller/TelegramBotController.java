@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.Serializable;
@@ -45,6 +44,8 @@ public class TelegramBotController extends TelegramLongPollingBot {
         viewDentalWorkHandler.setExecutor(this::execute);
         GetReportCommandHandler getReportCommandHandler = (GetReportCommandHandler) commandDispatcher.getCommandHandler(BotCommands.GET_REPORT);
         getReportCommandHandler.setSendDocumentExecutor(this::executeSendDocument);
+        CountProfitCommandHandler countProfitCommandHandler = (CountProfitCommandHandler) commandDispatcher.getCommandHandler(BotCommands.COUNT_PROFIT);
+        countProfitCommandHandler.setExecutor(this::execute);
     }
 
 
@@ -92,9 +93,9 @@ public class TelegramBotController extends TelegramLongPollingBot {
         }
     }
 
-    public Message executeSendDocument(SendDocument method) {
+    public void executeSendDocument(SendDocument method) {
         try {
-            return super.execute(method);
+            super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
             //TODO

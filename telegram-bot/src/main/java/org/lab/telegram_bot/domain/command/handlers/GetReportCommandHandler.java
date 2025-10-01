@@ -64,7 +64,7 @@ public class GetReportCommandHandler extends BotCommandHandler {
         return switch (step) {
             case SELECT_MONTH -> selectMonth(session, locale);
             case INPUT_MONTH -> inputMonth(session, locale, messageText, messageId);
-            case ANOTHER_MONTH -> anotherMonth(session, locale, messageText, messageId);
+            case ANOTHER_MONTH -> anotherMonth(session, messageText, messageId);
         };
     }
 
@@ -76,7 +76,7 @@ public class GetReportCommandHandler extends BotCommandHandler {
         return switch (step) {
             case SELECT_MONTH -> selectMonth(session, locale);
             case INPUT_MONTH -> inputMonth(session, locale, messageText, messageId);
-            case ANOTHER_MONTH -> anotherMonth(session, locale, messageText, messageId);
+            case ANOTHER_MONTH -> anotherMonth(session, messageText, messageId);
         };
     }
 
@@ -113,12 +113,12 @@ public class GetReportCommandHandler extends BotCommandHandler {
                 chatSessionService.save(session);
                 return editMessageText(session.getChatId(), messageId, text);
             } else {
-                throw new BadRequestCustomException("Not expected response: " + callbackData[2]);
+                throw new BadRequestCustomException("Unexpected response: " + callbackData[2]);
             }
         }
     }
 
-    private BotApiMethod<?> anotherMonth(ChatSession session, Locale locale, String messageText, int messageId) {
+    private BotApiMethod<?> anotherMonth(ChatSession session, String messageText, int messageId) {
         String[] dateValue = messageText.strip().split("\\.");
         if (dateValue.length > 2) {
             throw new BadRequestCustomException("Incorrect value inputted: " + messageText);
