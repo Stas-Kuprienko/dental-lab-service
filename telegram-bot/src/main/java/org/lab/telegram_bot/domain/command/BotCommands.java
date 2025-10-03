@@ -13,7 +13,8 @@ public enum BotCommands {
     WORK_FOR_TOMORROW("/work_for_tomorrow", true),
     SEARCH_BY("/search_by", true),
     GET_REPORT("/get_report", true),
-    COUNT_PROFIT("/count_profit", true);
+    COUNT_PROFIT("/count_profit", true),
+    PHOTO_FILES("/photo_files", false);
 
 
     public final String value;

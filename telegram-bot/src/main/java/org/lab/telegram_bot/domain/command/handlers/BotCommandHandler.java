@@ -22,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -35,6 +36,8 @@ public abstract class BotCommandHandler {
     protected static final DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     protected static final String DENTAL_WORK_TEMPLATE = "DENTAL_WORK_TEMPLATE";
     protected static final String CANCEL_RESPONSE = "CANCEL_RESPONSE";
+    protected static final String WORK_LIST_TEMPLATE = "WORK_LIST_TEMPLATE";
+    protected static final String ITEM_DELIMITER = "\n******************\n";
 
     protected final MessageSource messageSource;
 
@@ -87,6 +90,39 @@ public abstract class BotCommandHandler {
         return deleteMessage;
     }
 
+    protected String workListToMessage(List<DentalWork> dentalWorks, Locale locale) {
+        if (dentalWorks == null || dentalWorks.isEmpty()) {
+            return messageSource.getMessage(TextKeys.EMPTY.name(), null, locale);
+        }
+        String template = messageSource.getMessage(WORK_LIST_TEMPLATE, null, locale);
+        StringBuilder workStringBuilder = new StringBuilder();
+        StringBuilder productStringBuilder = new StringBuilder();
+        for (DentalWork dw : dentalWorks) {
+            for (Product p : dw.getProducts()) {
+                productStringBuilder.append('\t')
+                        .append(p.getTitle())
+                        .append(' ')
+                        .append('-')
+                        .append(' ')
+                        .append(p.getQuantity())
+                        .append('\n');
+            }
+            productStringBuilder.deleteCharAt(productStringBuilder.length() - 1);
+            String item = template.formatted(
+                    dw.getId(),
+                    dw.getPatient(),
+                    dw.getClinic(),
+                    productStringBuilder.toString(),
+                    dw.getCompleteAt().format(format));
+            workStringBuilder.append(item)
+                    .append('\n')
+                    .append(ITEM_DELIMITER)
+                    .append('\n');
+            productStringBuilder.setLength(0);
+        }
+        return workStringBuilder.toString();
+    }
+
     protected SendMessage viewDentalWork(KeyboardBuilderKit keyboardBuilderKit,
                                          ChatSessionService chatSessionService,
                                          ChatSession session,
@@ -100,14 +136,10 @@ public abstract class BotCommandHandler {
         String buttonLabel = messageSource.getMessage(ButtonKeys.UPDATE.name(), null, locale);
         String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.UPDATE_DENTAL_WORK.ordinal(), workId);
         InlineKeyboardButton updateButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
-        //create 'add product' button
-        buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), workId);
-        InlineKeyboardButton addProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
-        //create 'delete product' button
-        buttonLabel = messageSource.getMessage(TextKeys.DELETE_PRODUCT_FROM_DENTAL_WORK.name(), null, locale);
-        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.DELETE_PRODUCT.ordinal(), workId);
-        InlineKeyboardButton deleteProductButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        //create 'add photo' button
+        buttonLabel = messageSource.getMessage(ButtonKeys.UPDATE.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.UPDATE_DENTAL_WORK.ordinal(), workId);
+        InlineKeyboardButton addPhotoButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         //create 'delete work' button
         buttonLabel = messageSource.getMessage(ButtonKeys.DELETE.name(), null, locale);
         callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.CONFIRM_DELETE_DENTAL_WORK.ordinal(), workId);
@@ -115,8 +147,7 @@ public abstract class BotCommandHandler {
 
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(
                 List.of(updateButton),
-                List.of(addProductButton),
-                List.of(deleteProductButton),
+                List.of(addPhotoButton),
                 List.of(deleteWorkButton));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         session.clearAttributes();

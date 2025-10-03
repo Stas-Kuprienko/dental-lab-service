@@ -37,7 +37,11 @@ public class CommandDispatcher {
         BotCommandHandler handler;
         ChatSession session;
         try {
-            handler = commandHandlerStore.get(message.getText());
+            if (message.hasPhoto()) {
+                handler = commandHandlerStore.get(BotCommands.PHOTO_FILES.value);
+            } else {
+                handler = commandHandlerStore.get(message.getText());
+            }
             session = chatSessionService.get(message.getChatId());
             if (handler != null) {
                 session.setStep(0);

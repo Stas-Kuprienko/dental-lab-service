@@ -2,7 +2,6 @@ package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
-import org.lab.model.Product;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -29,8 +28,6 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.DENTAL_WORKS)
 public class DentalWorksHandler extends BotCommandHandler {
 
-    private static final String WORK_LIST_TEMPLATE = "WORK_LIST_TEMPLATE";
-    private static final String ITEM_DELIMITER = "\n******************\n";
     private static final int PAGE_ITEMS = 10;
 
     private final DentalWorkMvcService dentalWorkService;
@@ -163,36 +160,6 @@ public class DentalWorksHandler extends BotCommandHandler {
             }
         } catch (IllegalArgumentException ignored) {}
         return false;
-    }
-
-    private String workListToMessage(List<DentalWork> dentalWorks, Locale locale) {
-        String template = messageSource.getMessage(WORK_LIST_TEMPLATE, null, locale);
-        StringBuilder workStringBuilder = new StringBuilder();
-        StringBuilder productStringBuilder = new StringBuilder();
-        for (DentalWork dw : dentalWorks) {
-            for (Product p : dw.getProducts()) {
-                productStringBuilder.append('\t')
-                        .append(p.getTitle())
-                        .append(' ')
-                        .append('-')
-                        .append(' ')
-                        .append(p.getQuantity())
-                        .append('\n');
-            }
-            productStringBuilder.deleteCharAt(productStringBuilder.length() - 1);
-            String item = template.formatted(
-                    dw.getId(),
-                    dw.getPatient(),
-                    dw.getClinic(),
-                    productStringBuilder.toString(),
-                    dw.getCompleteAt().format(format));
-            workStringBuilder.append(item)
-                    .append('\n')
-                    .append(ITEM_DELIMITER)
-                    .append('\n');
-            productStringBuilder.setLength(0);
-        }
-        return workStringBuilder.toString();
     }
 
     private ListPage getSubListForPage(List<DentalWork> dentalWorks, int page) {

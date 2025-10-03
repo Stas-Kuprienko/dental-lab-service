@@ -435,6 +435,14 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         buttonLabel = messageSource.getMessage(Steps.UPDATE_COMMENT.name(), args, locale);
         callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.UPDATE_COMMENT.ordinal(), workId);
         buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
+        //create 'add product' button
+        buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
+        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), workId);
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
+        //create 'delete product' button
+        buttonLabel = messageSource.getMessage(TextKeys.DELETE_PRODUCT_FROM_DENTAL_WORK.name(), null, locale);
+        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.DELETE_PRODUCT.ordinal(), workId);
+        buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //build keyboard
         return keyboardBuilderKit.inlineKeyboard(buttons);
     }
