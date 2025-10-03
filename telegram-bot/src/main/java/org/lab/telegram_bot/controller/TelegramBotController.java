@@ -34,18 +34,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
         this.username = username;
         this.commandDispatcher = commandDispatcher;
         this.exceptionHandler = exceptionHandler;
-        StartCommandHandler startCommandHandler = (StartCommandHandler) commandDispatcher.getCommandHandler(BotCommands.START);
-        startCommandHandler.setMyCommandsExecutor(this::execute);
-        NewDentalWorkHandler newDentalWorkHandler = (NewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.NEW_DENTAL_WORK);
-        newDentalWorkHandler.setExecutor(this::execute);
-        DentalWorksHandler dentalWorksHandler = (DentalWorksHandler) commandDispatcher.getCommandHandler(BotCommands.DENTAL_WORKS);
-        dentalWorksHandler.setExecutor(this::execute);
-        ViewDentalWorkHandler viewDentalWorkHandler = (ViewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.VIEW_DENTAL_WORK);
-        viewDentalWorkHandler.setExecutor(this::execute);
-        GetReportCommandHandler getReportCommandHandler = (GetReportCommandHandler) commandDispatcher.getCommandHandler(BotCommands.GET_REPORT);
-        getReportCommandHandler.setSendDocumentExecutor(this::executeSendDocument);
-        CountProfitCommandHandler countProfitCommandHandler = (CountProfitCommandHandler) commandDispatcher.getCommandHandler(BotCommands.COUNT_PROFIT);
-        countProfitCommandHandler.setExecutor(this::execute);
+        setExecutorsToHandlers(commandDispatcher);
     }
 
 
@@ -101,5 +90,23 @@ public class TelegramBotController extends TelegramLongPollingBot {
             //TODO
             throw new RuntimeException(e);
         }
+    }
+
+
+    private void setExecutorsToHandlers(CommandDispatcher commandDispatcher) {
+        StartCommandHandler startCommandHandler = (StartCommandHandler) commandDispatcher.getCommandHandler(BotCommands.START);
+        startCommandHandler.setMyCommandsExecutor(this::execute);
+        NewDentalWorkHandler newDentalWorkHandler = (NewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.NEW_DENTAL_WORK);
+        newDentalWorkHandler.setExecutor(this::execute);
+        DentalWorksHandler dentalWorksHandler = (DentalWorksHandler) commandDispatcher.getCommandHandler(BotCommands.DENTAL_WORKS);
+        dentalWorksHandler.setExecutor(this::execute);
+        ViewDentalWorkHandler viewDentalWorkHandler = (ViewDentalWorkHandler) commandDispatcher.getCommandHandler(BotCommands.VIEW_DENTAL_WORK);
+        viewDentalWorkHandler.setExecutor(this::execute);
+        GetReportCommandHandler getReportCommandHandler = (GetReportCommandHandler) commandDispatcher.getCommandHandler(BotCommands.GET_REPORT);
+        getReportCommandHandler.setSendDocumentExecutor(this::executeSendDocument);
+        CountProfitCommandHandler countProfitCommandHandler = (CountProfitCommandHandler) commandDispatcher.getCommandHandler(BotCommands.COUNT_PROFIT);
+        countProfitCommandHandler.setExecutor(this::execute);
+        PhotoFilesCommandHandler photoFilesCommandHandler = (PhotoFilesCommandHandler) commandDispatcher.getCommandHandler(BotCommands.PHOTO_FILES);
+        photoFilesCommandHandler.setExecutor(this::execute);
     }
 }

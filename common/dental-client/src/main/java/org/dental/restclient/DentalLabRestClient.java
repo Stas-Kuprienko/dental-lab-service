@@ -11,6 +11,7 @@ public class DentalLabRestClient {
     public final DentalWorkService DENTAL_WORKS;
     public final ProductService PRODUCTS;
     public final ReportService REPORTS;
+    public final WorkPhotoLinkService PHOTO_LINKS;
 
 
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder) {
@@ -21,6 +22,7 @@ public class DentalLabRestClient {
         DENTAL_WORKS = new DentalWorkService(baseUrl, restClientBuilder);
         PRODUCTS = new ProductService(baseUrl, restClientBuilder);
         REPORTS = new ReportService(baseUrl, restClientBuilder);
+        PHOTO_LINKS = new WorkPhotoLinkService(baseUrl, restClientBuilder);
     }
 
 

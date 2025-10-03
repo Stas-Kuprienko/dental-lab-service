@@ -25,7 +25,7 @@ public class WorkPhotoLinkController {
     @PostMapping
     public ResponseEntity<String> create(@RequestHeader("X-USER-ID") UUID userId,
                                          @PathVariable("work_id") Long workId,
-                                         @RequestParam("file") MultipartFile file) {
+                                         @RequestBody MultipartFile file) {
 
         log.info("From user '{}' received request to upload file '{}' for DentalWork ID={}", userId, file.getOriginalFilename(), workId);
         String filename = workPhotoLinkService.create(file, workId);

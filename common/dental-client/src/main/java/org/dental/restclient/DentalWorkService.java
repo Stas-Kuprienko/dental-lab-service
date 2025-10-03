@@ -1,6 +1,5 @@
 package org.dental.restclient;
 
-import org.lab.exception.NotFoundCustomException;
 import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.core.ParameterizedTypeReference;
@@ -44,36 +43,20 @@ public class DentalWorkService {
     }
 
     public DentalWork findById(Long id) {
-        ResponseEntity<DentalWork> response = restClient
+        return restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(id))
                 .retrieve()
-                .toEntity(DentalWork.class);
-        if (response.getStatusCode().value() == 200) {
-            return response.getBody();
-        } else if (response.getStatusCode().value() == 404) {
-            throw NotFoundCustomException.byId(DentalWork.class.getSimpleName(), id);
-        } else {
-            //TODO
-            throw new RuntimeException();
-        }
+                .body(DentalWork.class);
     }
 
     public DentalWork findById(Long id, Consumer<HttpHeaders> headersConsumer) {
-        ResponseEntity<DentalWork> response = restClient
+        return restClient
                 .get()
                 .uri(DentalLabRestClient.uriById(id))
                 .headers(headersConsumer)
                 .retrieve()
-                .toEntity(DentalWork.class);
-        if (response.getStatusCode().value() == 200) {
-            return response.getBody();
-        } else if (response.getStatusCode().value() == 404) {
-            throw NotFoundCustomException.byId(DentalWork.class.getSimpleName(), id);
-        } else {
-            //TODO
-            throw new RuntimeException();
-        }
+                .body(DentalWork.class);
     }
 
     public List<DentalWork> findAll() {
