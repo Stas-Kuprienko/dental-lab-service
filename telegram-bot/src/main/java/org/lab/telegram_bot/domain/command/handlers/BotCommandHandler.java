@@ -137,9 +137,13 @@ public abstract class BotCommandHandler {
         String callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.UPDATE_DENTAL_WORK.ordinal(), workId);
         InlineKeyboardButton updateButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         //create 'add photo' button
-        buttonLabel = messageSource.getMessage(ButtonKeys.UPDATE.name(), null, locale);
-        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.UPDATE_DENTAL_WORK.ordinal(), workId);
+        buttonLabel = messageSource.getMessage(ButtonKeys.ADD_PHOTO.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.PHOTO_FILES, PhotoFilesCommandHandler.Steps.START_UPLOADING.ordinal(), workId);
         InlineKeyboardButton addPhotoButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        //create 'open photo' button
+        buttonLabel = messageSource.getMessage(ButtonKeys.OPEN_PHOTO.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.PHOTO_FILES, PhotoFilesCommandHandler.Steps.OPEN_PHOTOS.ordinal(), workId);
+        InlineKeyboardButton openPhotoButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
         //create 'delete work' button
         buttonLabel = messageSource.getMessage(ButtonKeys.DELETE.name(), null, locale);
         callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.CONFIRM_DELETE_DENTAL_WORK.ordinal(), workId);
@@ -148,6 +152,7 @@ public abstract class BotCommandHandler {
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(
                 List.of(updateButton),
                 List.of(addPhotoButton),
+                List.of(openPhotoButton),
                 List.of(deleteWorkButton));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         session.clearAttributes();

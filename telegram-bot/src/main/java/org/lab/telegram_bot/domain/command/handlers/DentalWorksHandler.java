@@ -84,9 +84,12 @@ public class DentalWorksHandler extends BotCommandHandler {
         List<DentalWork> dentalWorks = dentalWorkService.getAll(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, 1);
         String text = workListToMessage(listPage.dentalWorks, locale);
-        InlineKeyboardButton nextButton = buildNextButton(locale, 2);
-        InlineKeyboardButton selectButton = buildSelectItemButton(locale, messageId);
-        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(nextButton), List.of(selectButton));
+        List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
+        buttonLists.add(List.of(buildNextButton(locale, 2)));
+        if (!dentalWorks.isEmpty()) {
+            buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+        }
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
@@ -104,7 +107,6 @@ public class DentalWorksHandler extends BotCommandHandler {
         List<DentalWork> dentalWorks = dentalWorkService.getAll(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, page);
         String text = workListToMessage(listPage.dentalWorks, locale);
-        InlineKeyboardButton selectButton = buildSelectItemButton(locale, messageId);
         List<InlineKeyboardButton> buttons = new ArrayList<>();
         if (!listPage.isLast) {
             buttons.add(buildNextButton(locale, page + 1));
@@ -112,7 +114,12 @@ public class DentalWorksHandler extends BotCommandHandler {
         if (page > 1) {
             buttons.add(buildPreviousButton(locale, page - 1));
         }
-        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttons, List.of(selectButton));
+        List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
+        buttonLists.add(buttons);
+        if (!dentalWorks.isEmpty()) {
+            buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+        }
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);

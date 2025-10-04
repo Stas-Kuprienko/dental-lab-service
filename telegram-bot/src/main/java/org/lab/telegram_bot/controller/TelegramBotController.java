@@ -108,5 +108,6 @@ public class TelegramBotController extends TelegramLongPollingBot {
         countProfitCommandHandler.setExecutor(this::execute);
         PhotoFilesCommandHandler photoFilesCommandHandler = (PhotoFilesCommandHandler) commandDispatcher.getCommandHandler(BotCommands.PHOTO_FILES);
         photoFilesCommandHandler.setExecutor(this::execute);
+        photoFilesCommandHandler.setPhotoSender(this::executeAsync);
     }
 }
