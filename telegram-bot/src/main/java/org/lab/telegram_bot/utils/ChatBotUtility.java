@@ -63,6 +63,9 @@ public final class ChatBotUtility {
     }
 
     public static String[] callBackQueryParse(String callbackQueryData) {
+        if (callbackQueryData == null) {
+            throw new IllegalArgumentException("CallbackQuery data is null");
+        }
         String[] callback = callbackQueryData.split(":");
         if (callback.length != 3) {
             throw new IllegalArgumentException("Incorrect callback query value: " + callbackQueryData);

@@ -37,20 +37,20 @@ public class CommandDispatcher {
         BotCommandHandler handler;
         ChatSession session;
         try {
+            session = chatSessionService.get(message.getChatId());
             if (message.hasPhoto()) {
                 handler = commandHandlerStore.get(BotCommands.PHOTO_FILES.value);
             } else {
                 handler = commandHandlerStore.get(message.getText());
-            }
-            session = chatSessionService.get(message.getChatId());
-            if (handler != null) {
-                session.setStep(0);
-            } else {
-                BotCommands sessionContextCommand = session.getCommand();
-                if (sessionContextCommand != null) {
-                    handler = commandHandlerStore.get(sessionContextCommand.value);
+                if (handler != null) {
+                    session.setStep(0);
                 } else {
-                    handler = commandHandlerStore.get(null);
+                    BotCommands sessionContextCommand = session.getCommand();
+                    if (sessionContextCommand != null) {
+                        handler = commandHandlerStore.get(sessionContextCommand.value);
+                    } else {
+                        handler = commandHandlerStore.get(null);
+                    }
                 }
             }
         } catch (UnregisteredUserException e) {

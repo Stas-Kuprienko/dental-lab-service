@@ -3,6 +3,7 @@ package org.lab.dental.controller.v1;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.WorkPhotoLinkService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,12 +23,12 @@ public class WorkPhotoLinkController {
     }
 
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> create(@RequestHeader("X-USER-ID") UUID userId,
                                          @PathVariable("work_id") Long workId,
-                                         @RequestBody MultipartFile file) {
+                                         @RequestParam("file") MultipartFile file) {
 
-        log.info("From user '{}' received request to upload file '{}' for DentalWork ID={}", userId, file.getOriginalFilename(), workId);
+        log.info("From user '{}' received request to upload file for DentalWork ID={}", userId, workId);
         String filename = workPhotoLinkService.create(file, workId);
         return ResponseEntity.ok(filename);
     }

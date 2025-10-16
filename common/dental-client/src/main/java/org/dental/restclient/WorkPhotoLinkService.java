@@ -1,7 +1,11 @@
 package org.dental.restclient;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.function.Consumer;
@@ -26,7 +30,8 @@ public class WorkPhotoLinkService {
         return restClient
                 .post()
                 .uri(URI_TEMPLATE.formatted(workId))
-                .body(fileBytes)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(resourceToRequest(workId, fileBytes))
                 .retrieve()
                 .body(String.class);
     }
@@ -35,8 +40,9 @@ public class WorkPhotoLinkService {
         return restClient
                 .post()
                 .uri(URI_TEMPLATE.formatted(workId))
+                .contentType(MediaType.MULTIPART_FORM_DATA)
                 .headers(headersConsumer)
-                .body(fileBytes)
+                .body(resourceToRequest(workId, fileBytes))
                 .retrieve()
                 .body(String.class);
     }
@@ -90,5 +96,19 @@ public class WorkPhotoLinkService {
                 .headers(headersConsumer)
                 .retrieve()
                 .body(Void.class);
+    }
+
+    public MultiValueMap<String, Object> resourceToRequest(long workId, byte[] fileBytes) {
+        String filename = workId + "_" + System.currentTimeMillis() + ".jpg";
+        ByteArrayResource resource = new ByteArrayResource(fileBytes) {
+            @Override
+            public String getFilename() {
+                return filename;
+            }
+        };
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", resource);
+        body.add("description", "This is a test file upload.");
+        return body;
     }
 }

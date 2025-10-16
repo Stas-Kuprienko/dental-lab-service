@@ -89,7 +89,8 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         Steps step = getStep(session);
         return switch (step) {
             case START_UPLOADING -> startUploading(session, locale, messageText, messageId);
-            case WAITING_UPLOADING -> throw new BadRequestCustomException("Unexpected callback query: " + callbackQuery);
+            case WAITING_UPLOADING ->
+                    throw new BadRequestCustomException("Unexpected callback query: " + callbackQuery);
             case OPEN_PHOTOS -> openPhoto(session, locale, messageText, messageId);
         };
     }
@@ -108,6 +109,8 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         long workId = Long.parseLong(callbackData[2]);
         DentalWork dw = dentalWorkService.getById(workId, session.getUserId());
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
+        session.addAttribute(Attributes.PATIENT.name(), dw.getPatient());
+        session.addAttribute(Attributes.CLINIC.name(), dw.getClinic());
         String text = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), new Object[]{dw.getClinic(), dw.getPatient()}, locale);
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(cancelButton(locale));
         session.setCommand(BotCommands.PHOTO_FILES);
@@ -127,30 +130,19 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                 .max(Comparator.comparing(PhotoSize::getFileSize))
                 .orElseThrow(() -> new ConfigurationCustomException("Photo files does not contents"))
                 .getFileId();
-        GetFile getFileMethod = new GetFile();
-        getFileMethod.setFileId(photoId);
-        File file = executor.apply(getFileMethod);
-        String filePath = file.getFilePath();
-        String fileUrl = telegramApiPath + botToken + '/' + filePath;
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        URL url;
-        try {
-            url = URI.create(fileUrl).toURL();
-            try (InputStream inputStream = url.openStream()) {
-                byte[] bytes = inputStream.readAllBytes();
-                workPhotoLinkService.create(workId, bytes, session.getUserId());
-                String photoIsAddedText = messageSource.getMessage(TextKeys.PHOTO_IS_ADDED.name(), null, locale);
-                String uploadPhotoText = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), null, locale);
-                String text = photoIsAddedText + '\n' + uploadPhotoText;
-                InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(cancelButton(locale));
-                session.setCommand(BotCommands.PHOTO_FILES);
-                session.setStep(Steps.WAITING_UPLOADING.ordinal());
-                chatSessionService.save(session);
-                return createSendMessage(session.getChatId(), text, keyboardMarkup);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        byte[] bytes = downloadPhoto(photoId);
+        workPhotoLinkService.create(workId, bytes, session.getUserId());
+        String patient = session.getAttribute(Attributes.PATIENT.name());
+        String clinic = session.getAttribute(Attributes.CLINIC.name());
+        String photoIsAddedText = messageSource.getMessage(TextKeys.PHOTO_IS_ADDED.name(), null, locale);
+        String uploadPhotoText = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), new Object[]{clinic, patient}, locale);
+        String text = photoIsAddedText + '\n' + uploadPhotoText;
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(cancelButton(locale));
+        session.setCommand(BotCommands.PHOTO_FILES);
+        session.setStep(Steps.WAITING_UPLOADING.ordinal());
+        chatSessionService.save(session);
+        return createSendMessage(session.getChatId(), text, keyboardMarkup);
     }
 
     private SendMessage openPhoto(ChatSession session, Locale locale, String messageText, int messageId) {
@@ -168,6 +160,21 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         return List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale));
     }
 
+    private byte[] downloadPhoto(String fileId) {
+        GetFile getFile = new GetFile(fileId);
+        File file = executor.apply(getFile);
+        String fileUrl = telegramApiPath + botToken + '/' + file.getFilePath();
+        URL url;
+        try {
+            url = URI.create(fileUrl).toURL();
+            try (InputStream in = url.openStream()) {
+                return in.readAllBytes();
+            }
+        } catch (IOException e) {
+            throw new ConfigurationCustomException(e);
+        }
+    }
+
     private Steps getStep(ChatSession session) {
         return Steps.values()[session.getStep()];
     }
@@ -180,6 +187,8 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     }
 
     enum Attributes {
-        DENTAL_WORK_ID
+        DENTAL_WORK_ID,
+        PATIENT,
+        CLINIC
     }
 }
