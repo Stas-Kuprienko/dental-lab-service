@@ -98,6 +98,12 @@ public class DentalWorkMvcService {
         return dentalWork;
     }
 
+    public DentalWork updateInCache(long workId, UUID userId) {
+        DentalWork dentalWork = dentalWorkService.findById(workId, userId);
+        dentalWorkRepository.updateIfContains(dentalWork);
+        return dentalWork;
+    }
+
 
     private DentalWorkList getDentalWorkList(UUID userId) {
         Optional<DentalWorkList> optionalDentalWorkList = dentalWorkRepository.getAll(userId);

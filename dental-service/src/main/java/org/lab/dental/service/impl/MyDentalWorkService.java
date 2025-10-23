@@ -57,6 +57,7 @@ public class MyDentalWorkService implements DentalWorkService {
                 .orElseThrow(() -> NotFoundCustomException
                         .byParams("DentalWork", Map.of("id", id, "userId", userId)));
         log.info("Entity is found: {}", dentalWork);
+
         return dentalWork;
     }
 

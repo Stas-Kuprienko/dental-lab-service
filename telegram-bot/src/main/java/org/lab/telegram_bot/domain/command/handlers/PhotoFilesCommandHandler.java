@@ -2,6 +2,7 @@ package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
+import org.lab.model.WorkPhotoFileData;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -22,12 +23,10 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -109,8 +108,6 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         long workId = Long.parseLong(callbackData[2]);
         DentalWork dw = dentalWorkService.getById(workId, session.getUserId());
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
-        session.addAttribute(Attributes.PATIENT.name(), dw.getPatient());
-        session.addAttribute(Attributes.CLINIC.name(), dw.getClinic());
         String text = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), new Object[]{dw.getClinic(), dw.getPatient()}, locale);
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(cancelButton(locale));
         session.setCommand(BotCommands.PHOTO_FILES);
@@ -131,10 +128,11 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                 .orElseThrow(() -> new ConfigurationCustomException("Photo files does not contents"))
                 .getFileId();
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        byte[] bytes = downloadPhoto(photoId);
+        byte[] bytes = pullPhotoFile(photoId);
         workPhotoLinkService.create(workId, bytes, session.getUserId());
-        String patient = session.getAttribute(Attributes.PATIENT.name());
-        String clinic = session.getAttribute(Attributes.CLINIC.name());
+        DentalWork dw = dentalWorkService.updateInCache(workId, session.getUserId());
+        String patient = dw.getPatient();
+        String clinic = dw.getClinic();
         String photoIsAddedText = messageSource.getMessage(TextKeys.PHOTO_IS_ADDED.name(), null, locale);
         String uploadPhotoText = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), new Object[]{clinic, patient}, locale);
         String text = photoIsAddedText + '\n' + uploadPhotoText;
@@ -145,14 +143,15 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         return createSendMessage(session.getChatId(), text, keyboardMarkup);
     }
 
-    private SendMessage openPhoto(ChatSession session, Locale locale, String messageText, int messageId) {
-
-//        SendPhoto sendPhoto = new SendPhoto();
-//        sendPhoto.setChatId(session.getChatId());
-//
-//        photoSender.accept(sendPhoto);
-
-        return createSendMessage(session.getChatId(), "НИХУЯ!");
+    private EditMessageText openPhoto(ChatSession session, Locale locale, String messageText, int messageId) {
+        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        long workId = Long.parseLong(callbackData[2]);
+        List<WorkPhotoFileData> photoFiles = workPhotoLinkService.downloadAllById(workId, session.getUserId());
+        sendAllPhoto(photoFiles, session.getChatId());
+        String text = messageSource.getMessage(TextKeys.OPEN_PHOTO_FOR_WORK.name(), null, locale);
+        session.reset();
+        chatSessionService.save(session);
+        return editMessageText(session.getChatId(), messageId, text);
     }
 
     private List<InlineKeyboardButton> cancelButton(Locale locale) {
@@ -160,7 +159,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         return List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale));
     }
 
-    private byte[] downloadPhoto(String fileId) {
+    private byte[] pullPhotoFile(String fileId) {
         GetFile getFile = new GetFile(fileId);
         File file = executor.apply(getFile);
         String fileUrl = telegramApiPath + botToken + '/' + file.getFilePath();
@@ -172,6 +171,26 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
             }
         } catch (IOException e) {
             throw new ConfigurationCustomException(e);
+        }
+    }
+
+    private void sendAllPhoto(List<WorkPhotoFileData> photoFileDataList, long chatId) {
+        for (WorkPhotoFileData photo : photoFileDataList) {
+            InputFile inputFile = new InputFile(
+                    new ByteArrayInputStream(photo.getData()),
+                    photo.getFilename()
+            );
+            SendPhoto sendPhoto = SendPhoto.builder()
+                    .chatId(chatId)
+                    .photo(inputFile)
+                    .caption(photo.getFilename())
+                    .build();
+            try {
+                photoSender.accept(sendPhoto);
+            } catch (Exception e) {
+                //TODO
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -188,7 +207,5 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
 
     enum Attributes {
         DENTAL_WORK_ID,
-        PATIENT,
-        CLINIC
     }
 }

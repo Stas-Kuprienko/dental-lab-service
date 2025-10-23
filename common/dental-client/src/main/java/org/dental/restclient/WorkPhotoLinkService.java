@@ -1,5 +1,6 @@
 package org.dental.restclient;
 
+import org.lab.model.WorkPhotoFileData;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +32,7 @@ public class WorkPhotoLinkService {
                 .post()
                 .uri(URI_TEMPLATE.formatted(workId))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(resourceToRequest(workId, fileBytes))
+                .body(resourceToRequest(fileBytes))
                 .retrieve()
                 .body(String.class);
     }
@@ -42,7 +43,7 @@ public class WorkPhotoLinkService {
                 .uri(URI_TEMPLATE.formatted(workId))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .headers(headersConsumer)
-                .body(resourceToRequest(workId, fileBytes))
+                .body(resourceToRequest(fileBytes))
                 .retrieve()
                 .body(String.class);
     }
@@ -81,6 +82,42 @@ public class WorkPhotoLinkService {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
+    public WorkPhotoFileData download(long workId, String filename) {
+        return restClient
+                .get()
+                .uri(URI_TEMPLATE.formatted(workId) + "/download" + DentalLabRestClient.uriById(filename))
+                .retrieve()
+                .body(WorkPhotoFileData.class);
+    }
+
+    public WorkPhotoFileData download(long workId, String filename, Consumer<HttpHeaders> headersConsumer) {
+        return restClient
+                .get()
+                .uri(URI_TEMPLATE.formatted(workId) + "/download" + DentalLabRestClient.uriById(filename))
+                .headers(headersConsumer)
+                .retrieve()
+                .body(WorkPhotoFileData.class);
+    }
+
+    public List<WorkPhotoFileData> downloadAllById(long workId) {
+        return restClient
+                .get()
+                .uri(URI_TEMPLATE.formatted(workId) + "/download")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public List<WorkPhotoFileData> downloadAllById(long workId, Consumer<HttpHeaders> headersConsumer) {
+        return restClient
+                .get()
+                .uri(URI_TEMPLATE.formatted(workId) + "/download")
+                .accept(MediaType.APPLICATION_JSON)
+                .headers(headersConsumer)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
     public void deleteByIdAndFilename(long workId, String filename) {
         restClient
                 .delete()
@@ -98,8 +135,8 @@ public class WorkPhotoLinkService {
                 .body(Void.class);
     }
 
-    public MultiValueMap<String, Object> resourceToRequest(long workId, byte[] fileBytes) {
-        String filename = workId + "_" + System.currentTimeMillis() + ".jpg";
+    public MultiValueMap<String, Object> resourceToRequest(byte[] fileBytes) {
+        String filename = System.currentTimeMillis() + ".jpg";
         ByteArrayResource resource = new ByteArrayResource(fileBytes) {
             @Override
             public String getFilename() {

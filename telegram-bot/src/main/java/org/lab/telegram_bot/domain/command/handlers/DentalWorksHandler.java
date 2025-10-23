@@ -85,15 +85,21 @@ public class DentalWorksHandler extends BotCommandHandler {
         ListPage listPage = getSubListForPage(dentalWorks, 1);
         String text = workListToMessage(listPage.dentalWorks, locale);
         List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
-        buttonLists.add(List.of(buildNextButton(locale, 2)));
+        if (!listPage.isLast) {
+            buttonLists.add(List.of(buildNextButton(locale, 2)));
+        }
         if (!dentalWorks.isEmpty()) {
             buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
         }
-        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
-        return createSendMessage(session.getChatId(), text, keyboardMarkup);
+        if (buttonLists.isEmpty()) {
+            return createSendMessage(session.getChatId(), text);
+        } else {
+            InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
+            return createSendMessage(session.getChatId(), text, keyboardMarkup);
+        }
     }
 
     private BotApiMethod<?> paging(ChatSession session, Locale locale, String messageText, int messageId) {
@@ -178,7 +184,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         } else if (lastIndex > size) {
             return new ListPage(dentalWorks.subList(firstIndex, size), true);
         } else {
-            return new ListPage(dentalWorks.subList(firstIndex, lastIndex), false);
+            return new ListPage(dentalWorks.subList(firstIndex, lastIndex), dentalWorks.size() <= PAGE_ITEMS);
         }
     }
 

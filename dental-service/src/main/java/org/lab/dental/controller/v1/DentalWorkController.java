@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.service.DentalWorkService;
+import org.lab.dental.service.WorkPhotoFileService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dental.util.RequestParamsConverter;
 import org.lab.enums.WorkStatus;
@@ -27,12 +28,16 @@ public class DentalWorkController {
 
     private final DentalWorkService dentalWorkService;
     private final DentalWorkConverter dentalWorkConverter;
+    private final WorkPhotoFileService workPhotoFileService;
 
 
     @Autowired
-    public DentalWorkController(DentalWorkService dentalWorkService, DentalWorkConverter dentalWorkConverter) {
+    public DentalWorkController(DentalWorkService dentalWorkService,
+                                DentalWorkConverter dentalWorkConverter,
+                                WorkPhotoFileService workPhotoFileService) {
         this.dentalWorkService = dentalWorkService;
         this.dentalWorkConverter = dentalWorkConverter;
+        this.workPhotoFileService = workPhotoFileService;
         URL = RequestMappingReader.read(this.getClass());
     }
 
@@ -59,7 +64,10 @@ public class DentalWorkController {
 
         log.info("From user '{}' received request with parameter: id={}", userId, id);
         DentalWorkEntity entity = dentalWorkService.getByIdAndUserId(id, userId);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+        List<String> photoFilenameList = workPhotoFileService.getAllFilenamesByWorkId(id);
+        DentalWork dw = dentalWorkConverter.toDto(entity);
+        dw.setPhotoLinks(photoFilenameList);
+        return ResponseEntity.ok(dw);
     }
 
 
@@ -68,7 +76,7 @@ public class DentalWorkController {
 
         log.info("From user '{}' received request to get all DentalWorks for current month", userId);
         List<DentalWorkEntity> entities = dentalWorkService.getAllForCurrentMonthByUserId(userId);
-        return entities.stream().map(dentalWorkConverter::toDto).toList();
+        return convertAndSetPhotoLinks(entities);
     }
 
 
@@ -80,7 +88,7 @@ public class DentalWorkController {
         log.info("From user '{}' received request with parameter: year={}, month={}", userId, year, month);
         List<DentalWorkEntity> entities = dentalWorkService
                 .getAllForMonthByUserId(userId, RequestParamsConverter.converToYearMonth(year, month));
-        return entities.stream().map(dentalWorkConverter::toDto).toList();
+        return convertAndSetPhotoLinks(entities);
     }
 
 
@@ -91,7 +99,7 @@ public class DentalWorkController {
 
         log.info("From user '{}' received request with parameter: clinic={}, patient={}", userId, clinic, patient);
         List<DentalWorkEntity> entities = dentalWorkService.getAllByClinicAndPatientAndUserId(userId, clinic, patient);
-        return entities.stream().map(dentalWorkConverter::toDto).toList();
+        return convertAndSetPhotoLinks(entities);
     }
 
 
@@ -104,7 +112,9 @@ public class DentalWorkController {
         DentalWorkEntity entity = dentalWorkConverter.toEntity(updatable);
         entity.setId(id);
         entity = dentalWorkService.update(entity);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+        DentalWork dw = dentalWorkConverter.toDto(entity);
+        dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(id));
+        return ResponseEntity.ok(dw);
     }
 
 
@@ -115,7 +125,9 @@ public class DentalWorkController {
 
         log.info("From user '{}' received request to set 'status': {}", userId, status);
         DentalWorkEntity dentalWork = dentalWorkService.updateStatus(id, userId, status);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
+        DentalWork dw = dentalWorkConverter.toDto(dentalWork);
+        dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(id));
+        return ResponseEntity.ok(dw);
     }
 
 
@@ -126,5 +138,17 @@ public class DentalWorkController {
         log.info("From user '{}' received request to delete by ID={}", userId, id);
         dentalWorkService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+
+    private List<DentalWork> convertAndSetPhotoLinks(List<DentalWorkEntity> dentalWorkEntities) {
+        return dentalWorkEntities
+                .stream()
+                .map(e -> {
+                    DentalWork dw = dentalWorkConverter.toDto(e);
+                    dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(dw.getId()));
+                    return dw;
+                })
+                .toList();
     }
 }

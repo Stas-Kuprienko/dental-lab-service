@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.UUID;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,9 +35,7 @@ public class MinIOS3ClientService implements S3ClientService {
 
 
     @Override
-    public String uploadPhoto(MultipartFile file) {
-        String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-
+    public void uploadPhoto(MultipartFile file, String filename) {
         try (InputStream inputStream = file.getInputStream()) {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
             if (!found) {
@@ -47,10 +47,9 @@ public class MinIOS3ClientService implements S3ClientService {
                     .stream(inputStream, file.getSize(), -1)
                     .contentType(file.getContentType())
                     .build());
-            return filename;
         } catch (MinioException | IOException | GeneralSecurityException e) {
             //TODO
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
@@ -65,6 +64,21 @@ public class MinIOS3ClientService implements S3ClientService {
         try {
             return minioClient.getPresignedObjectUrl(args);
         } catch (MinioException | IOException | GeneralSecurityException e) {
+            //TODO
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public InputStream download(String filename) {
+        try {
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(filename)
+                            .build()
+            );
+        } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
             //TODO
             throw new RuntimeException(e);
         }

@@ -1,6 +1,7 @@
 package org.lab.telegram_bot.service;
 
 import org.dental.restclient.WorkPhotoLinkService;
+import org.lab.model.WorkPhotoFileData;
 import org.springframework.http.HttpHeaders;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,14 @@ public class WorkPhotoLinkServiceWrapper {
 
     public List<String> findAllById(long workId, UUID userId) {
         return workPhotoLinkService.findAllById(workId, httpHeaderConsumerFunction.apply(userId));
+    }
+
+    public WorkPhotoFileData download(long workId, String filename, UUID userId) {
+        return workPhotoLinkService.download(workId, filename, httpHeaderConsumerFunction.apply(userId));
+    }
+
+    public List<WorkPhotoFileData> downloadAllById(long workId, UUID userId) {
+        return workPhotoLinkService.downloadAllById(workId, httpHeaderConsumerFunction.apply(userId));
     }
 
     public void deleteByIdAndFilename(long workId, String filename, UUID userId) {

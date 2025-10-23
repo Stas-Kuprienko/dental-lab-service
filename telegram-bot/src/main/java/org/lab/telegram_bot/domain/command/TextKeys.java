@@ -26,6 +26,7 @@ public enum TextKeys {
     UPLOAD_PHOTO_TO_CHAT,
     PHOTO_IS_ADDED,
     PHOTO_IS_FAILED,
+    OPEN_PHOTO_FOR_WORK,
     EMPTY;
 
 
