@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 
 public abstract class BotCommandHandler {
 
+    protected static final String LOG_MESSAGE_FOR_STEP_HANDLING = "Handling case for the step '{}' is switched";
     protected static final DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     protected static final String DENTAL_WORK_TEMPLATE = "DENTAL_WORK_TEMPLATE";
     protected static final String CANCEL_RESPONSE = "CANCEL_RESPONSE";

@@ -4,11 +4,11 @@ import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
 import org.lab.dental.service.S3ClientService;
+import org.lab.exception.InternalCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -48,8 +48,7 @@ public class MinIOS3ClientService implements S3ClientService {
                     .contentType(file.getContentType())
                     .build());
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            //TODO
-            throw new RuntimeException(e);
+            throw new InternalCustomException(e);
         }
     }
 
@@ -64,8 +63,7 @@ public class MinIOS3ClientService implements S3ClientService {
         try {
             return minioClient.getPresignedObjectUrl(args);
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            //TODO
-            throw new RuntimeException(e);
+            throw new InternalCustomException(e);
         }
     }
 
@@ -79,8 +77,7 @@ public class MinIOS3ClientService implements S3ClientService {
                             .build()
             );
         } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
-            //TODO
-            throw new RuntimeException(e);
+            throw new InternalCustomException(e);
         }
     }
 
@@ -92,8 +89,7 @@ public class MinIOS3ClientService implements S3ClientService {
                     .object(filename)
                     .build());
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            //TODO
-            throw new RuntimeException(e);
+            throw new InternalCustomException(e);
         }
     }
 }

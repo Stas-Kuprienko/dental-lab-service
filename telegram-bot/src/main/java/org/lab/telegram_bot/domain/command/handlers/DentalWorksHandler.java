@@ -9,7 +9,7 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.service.DentalWorkMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +146,7 @@ public class DentalWorksHandler extends BotCommandHandler {
 
     private BotApiMethod<?> inputWorkId(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         if (isCancel(session, messageText, messageId)) {
             return getList(session, locale, messageId);

@@ -14,7 +14,7 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.service.DentalWorkMvcService;
 import org.lab.telegram_bot.service.ProductMapMvcService;
@@ -101,7 +101,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
     private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         String[] values = messageText.split("\n");
         if (values.length < 3) {
@@ -151,7 +151,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
     private SendMessage inputQuantity(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         int quantity;
         try {
@@ -180,7 +180,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         try {
             return objectMapper.writeValueAsString(newDentalWork);
         } catch (JsonProcessingException e) {
-            throw new ConfigurationCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -188,7 +188,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
         try {
             return objectMapper.readValue(json, NewDentalWork.class);
         } catch (JsonProcessingException e) {
-            throw new ConfigurationCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 

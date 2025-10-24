@@ -4,7 +4,7 @@ import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.lab.telegram_bot.domain.session.ChatSession;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -33,7 +33,7 @@ public class StartCommandHandler extends BotCommandHandler {
     @Override
     public BotApiMethod<?> handle(Message message, ChatSession session) {
         if (executor == null) {
-            throw new ConfigurationCustomException("The set commands executor 'Consumer<SetMyCommands>' is null");
+            throw new ApplicationCustomException("The set commands executor 'Consumer<SetMyCommands>' is null");
         }
         String userName = ChatBotUtility.getUsername(message);
         Locale locale = ChatBotUtility.getLocale(message);
@@ -46,7 +46,7 @@ public class StartCommandHandler extends BotCommandHandler {
     @Override
     public BotApiMethod<?> handle(CallbackQuery callbackQuery, ChatSession session, Locale locale) {
         if (executor == null) {
-            throw new ConfigurationCustomException("The set commands executor 'Consumer<SetMyCommands>' is null");
+            throw new ApplicationCustomException("The set commands executor 'Consumer<SetMyCommands>' is null");
         }
         String userName = ChatBotUtility.getUsername(callbackQuery);
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);

@@ -9,7 +9,7 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.ReportServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
@@ -92,7 +92,7 @@ public class CountProfitCommandHandler extends BotCommandHandler {
 
     private BotApiMethod<?> inputMonth(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         Month month;
@@ -117,7 +117,7 @@ public class CountProfitCommandHandler extends BotCommandHandler {
 
     private SendMessage anotherMonth(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         String[] dateValue = messageText.strip().split("\\.");
         if (dateValue.length > 2) {

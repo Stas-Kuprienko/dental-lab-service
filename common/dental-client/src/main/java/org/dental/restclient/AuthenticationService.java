@@ -31,7 +31,6 @@ public class AuthenticationService extends ClientExceptionDispatcher {
                 .retrieve()
                 .toEntity(AuthToken.class);
         check(response);
-        //TODO
         return getBodyOrThrowNotFoundEx(response, "authentication error");
     }
 
@@ -43,7 +42,6 @@ public class AuthenticationService extends ClientExceptionDispatcher {
                 .retrieve()
                 .toEntity(LoginCredential.class);
         check(response);
-        //TODO
         return getBodyOrThrowNotFoundEx(response, "authentication error");
     }
 
@@ -55,7 +53,6 @@ public class AuthenticationService extends ClientExceptionDispatcher {
                 .retrieve()
                 .toEntity(AuthToken.class);
         check(response);
-        //TODO
         return getBodyOrThrowNotFoundEx(response, "refresh token error");
     }
 }

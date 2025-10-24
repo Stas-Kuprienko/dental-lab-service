@@ -8,6 +8,7 @@ import org.lab.dental.repository.UserRepository;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.UserService;
 import org.lab.enums.UserStatus;
+import org.lab.exception.InternalCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -44,9 +45,8 @@ public class MyUserService implements UserService {
                     .build();
             return userRepository.save(user);
         } catch (Exception e) {
-            //TODO
             credentialService.deleteUser(login);
-            throw e;
+            throw new InternalCustomException(e);
         }
     }
 

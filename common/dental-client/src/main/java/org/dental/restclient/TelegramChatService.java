@@ -27,7 +27,6 @@ public class TelegramChatService {
 
 
     public void createLink(NewTelegramOtpLink newTelegramOtpLink) {
-        //TODO
         restClient
                 .post()
                 .body(newTelegramOtpLink)
@@ -36,7 +35,6 @@ public class TelegramChatService {
     }
 
     public void createLink(NewTelegramOtpLink newTelegramOtpLink, Consumer<HttpHeaders> headersConsumer) {
-        //TODO
         restClient
                 .post()
                 .headers(headersConsumer)
@@ -46,7 +44,6 @@ public class TelegramChatService {
     }
 
     public void setUserId(String key) {
-        //TODO
         restClient
                 .put()
                 .uri("/link" + DentalLabRestClient.uriById(key))

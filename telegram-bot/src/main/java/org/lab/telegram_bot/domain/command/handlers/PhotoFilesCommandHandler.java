@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.model.WorkPhotoFileData;
@@ -10,7 +11,7 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.DentalWorkMvcService;
 import org.lab.telegram_bot.service.WorkPhotoLinkServiceWrapper;
@@ -37,6 +38,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Slf4j
 @CommandHandler(command = BotCommands.PHOTO_FILES)
 public class PhotoFilesCommandHandler extends BotCommandHandler {
 
@@ -104,6 +106,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
 
 
     private EditMessageText startUploading(ChatSession session, Locale locale, String messageText, int messageId) {
+        log.info(LOG_MESSAGE_FOR_STEP_HANDLING, Steps.START_UPLOADING);
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
         DentalWork dw = dentalWorkService.getById(workId, session.getUserId());
@@ -117,15 +120,16 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     }
 
     private SendMessage savePhoto(Message message, ChatSession session, Locale locale) {
+        log.info(LOG_MESSAGE_FOR_STEP_HANDLING, Steps.WAITING_UPLOADING);
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         if (!message.hasPhoto()) {
-            throw new ConfigurationCustomException("Photo files does not contents");
+            throw new ApplicationCustomException("Photo files does not contents");
         }
         String photoId = message.getPhoto().stream()
                 .max(Comparator.comparing(PhotoSize::getFileSize))
-                .orElseThrow(() -> new ConfigurationCustomException("Photo files does not contents"))
+                .orElseThrow(() -> new ApplicationCustomException("Photo files does not contents"))
                 .getFileId();
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
         byte[] bytes = pullPhotoFile(photoId);
@@ -144,6 +148,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     }
 
     private EditMessageText openPhoto(ChatSession session, Locale locale, String messageText, int messageId) {
+        log.info(LOG_MESSAGE_FOR_STEP_HANDLING, Steps.START_UPLOADING);
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
         List<WorkPhotoFileData> photoFiles = workPhotoLinkService.downloadAllById(workId, session.getUserId());
@@ -170,7 +175,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                 return in.readAllBytes();
             }
         } catch (IOException e) {
-            throw new ConfigurationCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -188,8 +193,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
             try {
                 photoSender.accept(sendPhoto);
             } catch (Exception e) {
-                //TODO
-                throw new RuntimeException(e);
+                throw new ApplicationCustomException(e);
             }
         }
     }

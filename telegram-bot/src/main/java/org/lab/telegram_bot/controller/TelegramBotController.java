@@ -5,6 +5,7 @@ import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandDispatcher;
 import org.lab.telegram_bot.domain.command.handlers.*;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -66,8 +67,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             return super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            //TODO
-            throw new RuntimeException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -77,8 +77,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             return super.executeAsync(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            //TODO
-            throw new RuntimeException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -87,8 +86,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            //TODO
-            throw new RuntimeException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 

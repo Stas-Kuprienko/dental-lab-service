@@ -13,7 +13,7 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.exception.ConfigurationCustomException;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.service.DentalWorkMvcService;
 import org.lab.telegram_bot.service.ProductMapMvcService;
@@ -189,7 +189,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
 
     private SendMessage inputQuantityToNewProduct(ChatSession session, Locale locale, String messageText, int messageId) {
         if (executor == null) {
-            throw new ConfigurationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
+            throw new ApplicationCustomException("Executor for %s is null".formatted(this.getClass().getSimpleName()));
         }
         String[] values = messageText.split("\n");
         if (values.length != 2) {
@@ -331,7 +331,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
                 dentalWork.setStatus(WorkStatus.valueOf(messageData.toUpperCase()));
             }
             case COMMENT -> dentalWork.setComment(messageText.strip());
-            default -> throw new ConfigurationCustomException("Argument 'field' is not expected: " + field);
+            default -> throw new ApplicationCustomException("Argument 'field' is not expected: " + field);
         }
         dentalWork = dentalWorkService.update(dentalWork, session.getUserId());
         int messageToDelete = Integer.parseInt(session.getAttribute(DentalWorksHandler.Attributes.MESSAGE_ID_TO_DELETE.name()));

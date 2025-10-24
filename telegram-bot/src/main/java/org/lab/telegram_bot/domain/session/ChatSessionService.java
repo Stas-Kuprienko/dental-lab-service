@@ -2,6 +2,7 @@ package org.lab.telegram_bot.domain.session;
 
 import org.lab.model.TelegramChat;
 import org.lab.telegram_bot.datasource.ChatSessionRepository;
+import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.UnregisteredUserException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.TelegramChatServiceWrapper;
@@ -27,8 +28,7 @@ public class ChatSessionService {
         if (repository.save(session)) {
             return session;
         } else {
-            //TODO
-            throw new RuntimeException();
+            throw new ApplicationCustomException("Caching error");
         }
     }
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ProductMapService {
+public class ProductMapService extends ClientExceptionDispatcher {
 
     private static final String RESOURCE = "/product_map";
 
@@ -48,13 +48,11 @@ public class ProductMapService {
                 .uri(DentalLabRestClient.uriById(id))
                 .retrieve()
                 .toEntity(ProductType.class);
-        if (response.getStatusCode().value() == 200) {
-            return Optional.of(response.getBody());
-        } else if (response.getStatusCode().value() == 404) {
+        if (response.getStatusCode().value() == 404) {
             return Optional.empty();
         } else {
-            //TODO
-            throw new RuntimeException();
+            check(response);
+            return Optional.of(response.getBody());
         }
     }
 
@@ -65,13 +63,11 @@ public class ProductMapService {
                 .headers(headersConsumer)
                 .retrieve()
                 .toEntity(ProductType.class);
-        if (response.getStatusCode().value() == 200) {
-            return Optional.of(response.getBody());
-        } else if (response.getStatusCode().value() == 404) {
+        if (response.getStatusCode().value() == 404) {
             return Optional.empty();
         } else {
-            //TODO
-            throw new RuntimeException();
+            check(response);
+            return Optional.of(response.getBody());
         }
     }
 
@@ -97,10 +93,7 @@ public class ProductMapService {
                 .body(newPrice)
                 .retrieve()
                 .toBodilessEntity();
-        if (response.getStatusCode().value() != 200) {
-            //TODO
-            throw new RuntimeException(response.toString());
-        }
+        check(response);
     }
 
     public void updateProductType(UUID id, float newPrice, Consumer<HttpHeaders> headersConsumer) {
@@ -111,10 +104,7 @@ public class ProductMapService {
                 .body(newPrice)
                 .retrieve()
                 .toBodilessEntity();
-        if (response.getStatusCode().value() != 200) {
-            //TODO
-            throw new RuntimeException(response.toString());
-        }
+        check(response);
     }
 
     public void delete(UUID id) {
