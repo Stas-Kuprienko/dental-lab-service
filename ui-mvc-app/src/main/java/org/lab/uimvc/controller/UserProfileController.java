@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/main/profile")
+@RequestMapping("/main/user")
 public class UserProfileController extends MvcControllerUtil {
 
     private final UserService userService;

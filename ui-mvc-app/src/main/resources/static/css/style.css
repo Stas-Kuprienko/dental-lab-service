@@ -220,6 +220,13 @@ select {
     cursor: pointer;
 }
 
+.small-button {
+    font-size: 15px;
+    min-height: 24px;
+    width: auto;
+    cursor: pointer;
+}
+
 .btn-main {
     font-size: 16px;
     padding: 10px 24px;
