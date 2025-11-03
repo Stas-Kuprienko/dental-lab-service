@@ -2,23 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ</title>
+    <title>DENTAL MECHANIC</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
+<!-- 🔝 Навигация -->
+<div th:replace="fragments/nav :: nav"></div>
 
-<!-- Меню -->
-<div th:replace="fragments/nav :: main-menu"></div>
+<section style="font-size:20px; width:70%; margin:auto;">
 
-<section>
+    <h2 style="text-align:center;">Профиль пользователя</h2>
+    <br>
 
-    <!-- Имя пользователя -->
+    <div th:if="${message}" class="alert" th:text="${message}"></div>
+
+    <!-- Имя -->
     <div class="work">
-        <label style="font-size: 80%;">имя:</label><br>
-        <label style="font-size: 120%;" id="name-label" th:text="${user.name}">Иван Иванов</label>
+        <label style="font-size:80%;">имя:</label><br>
+        <label style="font-size: 120%;" id="name-label" th:text="${user.name}">Имя</label>
 
         <form id="name-form" th:action="@{/main/user/update-name}" method="post" style="display: none;">
             <input type="text" name="name" th:value="${user.name}" required />
@@ -29,26 +32,36 @@
 
     <!-- Email -->
     <div class="work">
-        <label style="font-size: 80%;">email:</label><br>
-        <span style="font-size: 110%;" th:text="${user.login}">example@email.com</span><br>...<br>
-        <form method="post" th:action="@{/main/user/request-email-change}"
-              onsubmit="return confirm('Вы действительно хотите сменить email?')">
-            <button type="submit" class="small-button">Сменить email</button>
+        <label style="font-size:80%;">email:</label><br>
+        <label id="email-label" style="font-size: 110%;" th:text="${user.login}">user@mail.com</label>
+
+        <div id="email-actions" style="display:none; margin-top:6px;">
+            <button id="change-email-btn" type="button" class="small-button">Сменить email</button>
+            <button id="no-access-btn" type="button" class="small-button">Нет доступа к email?</button>
+        </div>
+    </div>
+
+    <!-- Смена пароля -->
+    <div class="work">
+        <button id="change-password-btn" type="button" class="small-button">Сменить пароль</button>
+
+        <form id="password-form" th:action="@{'/main/user/change-password'}" method="post" style="display:none; margin-top:8px;">
+            <label>Старый пароль:</label><br>
+            <input type="password" name="old-password" required /><br>
+            <label>Новый пароль:</label><br>
+            <input type="password" name="new-password" required /><br>
+            <label>Повторите новый пароль:</label><br>
+            <input type="password" name="confirm-password" required /><br>
+            <br>
+            <input type="submit" value="Сохранить" />
+            <button type="button" id="cancel-password-btn" class="small-button">Отмена</button>
         </form>
     </div>
 
-    <!-- Пароль -->
+    <!-- Зарегистрирован -->
     <div class="work">
-        <form method="post" th:action="@{/main/user/request-password-change}"
-              onsubmit="return confirm('Вы действительно хотите сменить пароль?')">
-            <button type="submit" class="small-button">Сменить пароль</button>
-        </form>
-    </div>
-
-    <!-- Дата регистрации -->
-    <div class="work">
-        <label style="font-size: 80%;">зарегистрирован:</label><br>
-        <span style="font-size: 110%;" th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy')}">01-01-2024</span>
+        <label style="font-size:80%;">зарегистрирован:</label><br>
+        <span th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy')}">01-01-2024</span>
     </div>
 
     <!-- Удалить аккаунт -->
@@ -59,26 +72,95 @@
     </div>
 </section>
 
+<!-- ⚙️ JS -->
 <script>
-    function hideForm(labelId, formId) {
-      document.getElementById(labelId).style.display = 'block';
-      document.getElementById(formId).style.display = 'none';
+    // Универсальные функции показа / скрытия формы
+    function setupToggle(labelId, formId) {
+        const label = document.getElementById(labelId);
+        const form = document.getElementById(formId);
+        if (label && form) {
+            label.addEventListener('click', () => {
+                label.style.display = 'none';
+                form.style.display = 'block';
+            });
+        }
     }
 
-    function setupToggle(labelId, formId) {
-      const label = document.getElementById(labelId);
-      const form = document.getElementById(formId);
-      if (label && form) {
-        label.addEventListener('click', () => {
-          label.style.display = 'none';
-          form.style.display = 'block';
-        });
-      }
+    function hideForm(labelId, formId) {
+        const label = document.getElementById(labelId);
+        const form = document.getElementById(formId);
+        if (label && form) {
+            label.style.display = 'block';
+            form.style.display = 'none';
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      setupToggle('name-label', 'name-form');
+        // Имя редактирование
+        setupToggle('name-label', 'name-form');
+
+        // Email — показать кнопки при клике
+        const emailLabel = document.getElementById('email-label');
+        const emailActions = document.getElementById('email-actions');
+        emailLabel.addEventListener('click', () => {
+            emailActions.style.display = 'block';
+        });
+
+        // Таймер на 60 секунд
+        function startTimer(buttons) {
+            buttons.forEach(btn => btn.disabled = true);
+            let remaining = 60;
+            const originalText = buttons[0].textContent;
+            const timer = setInterval(() => {
+                remaining--;
+                buttons.forEach(btn => btn.textContent = `Подождите (${remaining})`);
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.textContent = originalText;
+                    });
+                }
+            }, 1000);
+        }
+
+        // Смена email
+        const changeEmailBtn = document.getElementById('change-email-btn');
+        const noAccessBtn = document.getElementById('no-access-btn');
+
+        changeEmailBtn.addEventListener('click', () => {
+            if (confirm('Вы действительно хотите сменить email? Вам придёт письмо со ссылкой для подтверждения.')) {
+                fetch('/main/user/email-request', { method: 'POST' });
+                alert('Письмо отправлено на ваш email!');
+                startTimer([changeEmailBtn, noAccessBtn]);
+            }
+        });
+
+        // Нет доступа к email
+        noAccessBtn.addEventListener('click', () => {
+            if (confirm('Нет доступа к почте? На ваш Telegram будет отправлен код.')) {
+                fetch('/main/user/email-otp', { method: 'POST' });
+                alert('Код отправлен в Telegram!');
+                startTimer([changeEmailBtn, noAccessBtn]);
+            }
+        });
+
+        // Смена пароля — показать форму
+        const passwordBtn = document.getElementById('change-password-btn');
+        const passwordForm = document.getElementById('password-form');
+        const cancelBtn = document.getElementById('cancel-password-btn');
+
+        passwordBtn.addEventListener('click', () => {
+            passwordForm.style.display = 'block';
+            passwordBtn.style.display = 'none';
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            passwordForm.style.display = 'none';
+            passwordBtn.style.display = 'inline-block';
+        });
     });
 </script>
+
 </body>
 </html>

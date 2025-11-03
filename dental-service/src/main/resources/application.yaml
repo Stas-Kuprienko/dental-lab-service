@@ -39,9 +39,26 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   kafka:
+    topic: event-topic
     bootstrap-servers: ${project.variables.kafka.url}
     partitions: 3
     replicas: 3
+  mail:
+    host: ${project.variables.mail.smtp.host}
+    port: ${project.variables.mail.port}
+    username: ${project.variables.mail.service.user}
+    password: ${project.variables.mail.service.password}
+    protocol: ${project.variables.mail.protocol}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 
 eureka:
   client:

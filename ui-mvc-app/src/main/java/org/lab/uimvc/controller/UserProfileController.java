@@ -3,8 +3,13 @@ package org.lab.uimvc.controller;
 import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
+import org.dental.restclient.VerificationService;
+import org.lab.model.ErrorResponse;
 import org.lab.model.User;
+import org.lab.request.UpdatePasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -19,11 +24,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/main/user")
 public class UserProfileController extends MvcControllerUtil {
 
+    private static final String CHANGE_EMAIL_LINK_SENT = "CHANGE_EMAIL_LINK_SENT";
+    private static final String WRONG_TOKEN = "WRONG_TOKEN";
+    private static final String EMAIL_IS_UPDATED = "EMAIL_IS_UPDATED";
+    private static final String TOKEN_FOR_CHANGE_EMAIL_NOT_VERIFIED = "TOKEN_FOR_CHANGE_EMAIL_NOT_VERIFIED";
+    private static final String PASSWORDS_NOT_CONFIRMED = "PASSWORDS_NOT_CONFIRMED";
+    private static final String NEW_AND_OLD_PASSWORDS_EQUALS = "NEW_AND_OLD_PASSWORDS_EQUALS";
+    private static final String WRONG_PASSWORD = "WRONG_PASSWORD";
+    private static final String PASSWORD_IS_UPDATED = "PASSWORD_IS_UPDATED";
+
     private final UserService userService;
+    private final VerificationService verificationService;
+    private final MessageSource messageSource;
+
 
     @Autowired
-    public UserProfileController(DentalLabRestClient dentalLabRestClient) {
+    public UserProfileController(DentalLabRestClient dentalLabRestClient, MessageSource messageSource) {
         userService = dentalLabRestClient.USERS;
+        verificationService = dentalLabRestClient.VERIFICATION;
+        this.messageSource = messageSource;
     }
 
 
@@ -35,94 +54,116 @@ public class UserProfileController extends MvcControllerUtil {
     }
 
     @PostMapping("/update-name")
-    public String updateName(@RequestParam String name, Model model) {
+    public String updateName(@RequestParam("name") String name, RedirectAttributes redirect) {
         User user = userService.updateName(name);
-        model.addAttribute("user", user);
+        redirect.addAttribute("user", user);
         return REDIRECT + USER_PROFILE_PAGE;
     }
 
     @PostMapping("/delete")
     public String deleteProfile() {
         userService.delete();
-        return "redirect:/logout";
+        return REDIRECT + LOGOUT;
+    }
+
+    @GetMapping("/verify")
+    public String verifyEmail(@RequestParam("token") String token) {
+        boolean result = verificationService.verifyUserEmail(token, false);
+        
+        return REDIRECT + MAIN_PAGE;
+    }
+
+
+    @PostMapping("/change-email")
+    public String sendChangeEmailLink(HttpSession session, RedirectAttributes redirect) {
+        String email = getEmail(session);
+        verificationService.sendVerificationLink(email, true);
+        User user = userService.get();
+        String message = messageSource.getMessage(CHANGE_EMAIL_LINK_SENT, null, DEFAULT_LOCALE);
+        redirect.addFlashAttribute("message", message);
+        redirect.addAttribute("user", user);
+        return REDIRECT + USER_PROFILE_PAGE;
     }
 
     @GetMapping("/change-email")
-    public String changeEmailPage(Model model) {
-        model.addAttribute("step", 1);
-        return "change-email";
-    }
-
-    @PostMapping("/change-email")
-    public String requestEmailChange(RedirectAttributes redirect) {
-        userService.changeEmail();
-        redirect.addFlashAttribute("message", "Код отправлен в Telegram");
-        return "redirect:/main/user/change-email";
-    }
-
-    @PostMapping("/main/user/verify-email-code")
-    public String verifyEmailCode(@RequestParam String code,
-                                  HttpSession session,
-                                  Model model,
-                                  RedirectAttributes redirect) {
-        if (userService.verifyEmailChangeCode(code)) {
-            session.setAttribute("emailVerified", true);
-            model.addAttribute("step", 2);
+    public String changeEmailPage(@RequestParam("token") String token, Model model) {
+        boolean result = verificationService.verifyUserEmail(token, true);
+        if (result) {
             return "change-email";
         } else {
-            redirect.addFlashAttribute("error", "Неверный код");
-            return "redirect:/main/user/change-email";
+            String message = messageSource.getMessage(WRONG_TOKEN, null, DEFAULT_LOCALE);
+            ErrorResponse error = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .message(message)
+                    .build();
+            model.addAttribute("error", error);
+            return "error";
         }
     }
 
-    @PostMapping("/main/user/save-email")
-    public String saveNewEmail(@RequestParam String newEmail,
-                               HttpSession session,
-                               @AuthenticationPrincipal UserDetails user,
-                               RedirectAttributes redirect) {
-        if (!Boolean.TRUE.equals(session.getAttribute("emailVerified"))) {
-            redirect.addFlashAttribute("error", "Сначала введите код из Telegram");
-            return "redirect:/main/user/change-email";
+    @PostMapping("/update-email")
+    public String updateEmail(@RequestParam("new-email") String newEmail,
+                              HttpSession session,
+                              RedirectAttributes redirect) {
+        boolean result = verificationService.isVerified(getEmail(session));
+        String messageKey;
+        if (result) {
+            User user = userService.updateEmail(newEmail);
+            session.setAttribute(ATTRIBUTE_KEY_USER_EMAIL, user.getLogin());
+            messageKey = EMAIL_IS_UPDATED;
+            redirect.addAttribute("user", user);
+        } else {
+            messageKey = TOKEN_FOR_CHANGE_EMAIL_NOT_VERIFIED;
         }
-
-        userService.changeEmail();
-        session.removeAttribute("emailVerified");
-
-        redirect.addFlashAttribute("message", "Email успешно обновлён");
-        return "redirect:/main/user";
+        String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
+        redirect.addFlashAttribute("message", message);
+        return REDIRECT + USER_PROFILE_PAGE;
     }
 
-    @PostMapping("/main/user/request-password-reset")
+    @PostMapping("/change-email-otp")
+    public String sendEmailOtp(RedirectAttributes redirect) {
+        redirect.addFlashAttribute("message", "Иди ты нахуй");
+        return REDIRECT + USER_PROFILE_PATH;
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(HttpSession session,
+                                 @RequestParam("old-password") String oldPassword,
+                                 @RequestParam("new-password") String newPassword,
+                                 @RequestParam("confirm-password") String confirmPassword,
+                                 RedirectAttributes redirect) {
+        String messageKey;
+        if (!newPassword.equals(confirmPassword)) {
+            messageKey = PASSWORDS_NOT_CONFIRMED;
+        } else if (oldPassword.equals(newPassword)) {
+            messageKey = NEW_AND_OLD_PASSWORDS_EQUALS;
+        } else {
+            UpdatePasswordRequest request = UpdatePasswordRequest.builder()
+                    .email(getEmail(session))
+                    .oldPassword(oldPassword)
+                    .newPassword(newPassword)
+                    .build();
+            boolean result = userService.updatePassword(request);
+            if (result) {
+                messageKey = PASSWORD_IS_UPDATED;
+            } else {
+                messageKey = WRONG_PASSWORD;
+            }
+        }
+        String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
+        redirect.addFlashAttribute("message", message);
+        User user = userService.get();
+        redirect.addAttribute("user", user);
+        return REDIRECT + USER_PROFILE_PAGE;
+    }
+
+    @PostMapping("/reset-password")
     public String requestPasswordReset(@AuthenticationPrincipal UserDetails user,
                                        RedirectAttributes redirect) {
 //        String token = passwordService.generateResetToken(user.getUsername());
 //        mailService.sendPasswordResetLink(user.getUsername(), token);
 
         redirect.addFlashAttribute("message", "Ссылка для смены пароля отправлена на почту");
-        return "redirect:/main/user";
-    }
-
-    @GetMapping("/change-password")
-    public String changePasswordPage(@RequestParam String token, Model model) {
-//        if (!passwordService.isTokenValid(token)) {
-//            model.addAttribute("error", "Неверный или устаревший токен");
-//            return "reset-password";
-//        }
-//        model.addAttribute("token", token);
-        return "change-password";
-    }
-
-    @PostMapping("/main/user/save-new-password")
-    public String saveNewPassword(@RequestParam String token,
-                                  @RequestParam String newPassword,
-                                  RedirectAttributes redirect) {
-//        if (!passwordService.isTokenValid(token)) {
-//            redirect.addFlashAttribute("error", "Неверный токен");
-//            return "redirect:/main/user/reset-password?token=" + token;
-//        }
-
-//        passwordService.resetPassword(token, newPassword);
-//        redirect.addFlashAttribute("message", "Пароль успешно обновлён");
         return "redirect:/main/user";
     }
 }

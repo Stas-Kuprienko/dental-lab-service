@@ -3,7 +3,7 @@ package org.lab.dental.service.impl;
 import org.lab.dental.entity.TelegramOtpLinkEntity;
 import org.lab.dental.repository.TelegramOtpLinkRepository;
 import org.lab.dental.service.TelegramOtpLinkService;
-import org.lab.dental.util.NumericCodeGenerator;
+import org.lab.dental.util.CodeGenerator;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.NotFoundCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +19,11 @@ public class MyTelegramOtpLinkService implements TelegramOtpLinkService {
     private static final int otpLength = 5;
 
     private final TelegramOtpLinkRepository repository;
-    private final NumericCodeGenerator codeGenerator;
+    private final CodeGenerator codeGenerator;
 
 
     @Autowired
-    public MyTelegramOtpLinkService(TelegramOtpLinkRepository repository, NumericCodeGenerator codeGenerator) {
+    public MyTelegramOtpLinkService(TelegramOtpLinkRepository repository, CodeGenerator codeGenerator) {
         this.repository = repository;
         this.codeGenerator = codeGenerator;
     }

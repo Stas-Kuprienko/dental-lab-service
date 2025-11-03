@@ -7,8 +7,10 @@ import org.dental.restclient.DentalLabRestClient;
 import org.lab.model.ProductMap;
 import org.lab.uimvc.configuration.auth.TokenRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +19,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 @Configuration
@@ -85,4 +89,15 @@ public class UiMvcConfig {
         return template;
     }
     // ******************* /\
+
+    // MESSAGES *********** \/
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        return messageSource;
+    }
+    // /\ ***************** /\
 }

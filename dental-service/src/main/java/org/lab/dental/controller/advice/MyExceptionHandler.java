@@ -1,11 +1,11 @@
 package org.lab.dental.controller.advice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.exception.InternalServiceException;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
+import org.lab.exception.InternalCustomException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
-public class MyControllerAdvice {
+public class MyExceptionHandler {
 
 
     @ExceptionHandler(BadRequestCustomException.class)
@@ -70,7 +70,7 @@ public class MyControllerAdvice {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         return ResponseEntity
                 .status(httpStatus.value())
-                .body(new ErrorResponse(httpStatus.name(), httpStatus.getReasonPhrase()));
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
     @ExceptionHandler(ForbiddenCustomException.class)
@@ -79,11 +79,11 @@ public class MyControllerAdvice {
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
         return ResponseEntity
                 .status(httpStatus.value())
-                .body(new ErrorResponse(httpStatus.name(), httpStatus.getReasonPhrase()));
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
-    @ExceptionHandler(InternalServiceException.class)
-    public ResponseEntity<ErrorResponse> internalServiceExceptionHandle(InternalServiceException e) {
+    @ExceptionHandler(InternalCustomException.class)
+    public ResponseEntity<ErrorResponse> internalCustomExceptionHandle(InternalCustomException e) {
         log.error(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity

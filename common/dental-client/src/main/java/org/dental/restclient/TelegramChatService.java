@@ -124,4 +124,18 @@ public class TelegramChatService {
             return Optional.empty();
         }
     }
+
+    public Optional<TelegramChat> getByUserId() {
+        try {
+            TelegramChat response = restClient
+                    .get()
+                    .uri("/user")
+                    .retrieve()
+                    .toEntity(TelegramChat.class)
+                    .getBody();
+            return Optional.of(response);
+        } catch (HttpClientErrorException.NotFound e) {
+            return Optional.empty();
+        }
+    }
 }

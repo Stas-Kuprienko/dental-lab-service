@@ -1,5 +1,6 @@
 package org.lab.dental.service.impl;
 
+import jakarta.persistence.PersistenceException;
 import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.UserEntity;
 import org.lab.dental.exception.NotFoundCustomException;
@@ -12,28 +13,29 @@ import org.lab.exception.InternalCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class MyUserService implements UserService {
 
-    private final UserRepository userRepository;
     private final CredentialService credentialService;
+    private final UserRepository userRepository;
     private final TelegramChatRepository telegramChatRepository;
 
 
     @Autowired
-    public MyUserService(UserRepository userRepository,
-                         CredentialService credentialService,
+    public MyUserService(CredentialService credentialService,
+                         UserRepository userRepository,
                          TelegramChatRepository telegramChatRepository) {
-        this.userRepository = userRepository;
         this.credentialService = credentialService;
+        this.userRepository = userRepository;
         this.telegramChatRepository = telegramChatRepository;
     }
 
 
     @Override
-    public UserEntity create(String login, String password, String name) {
+    public UserEntity create(String login, String name, String password) {
         UUID id = credentialService.signUp(login, password, name);
         try {
             UserEntity user = UserEntity.builder()
@@ -41,11 +43,11 @@ public class MyUserService implements UserService {
                     .login(login)
                     .name(name)
                     .createdAt(LocalDate.now())
-                    .status(UserStatus.ENABLED)
+                    .status(UserStatus.UNVERIFIED)
                     .build();
             return userRepository.save(user);
-        } catch (Exception e) {
-            credentialService.deleteUser(login);
+        } catch (PersistenceException e) {
+            credentialService.deleteUser(id);
             throw new InternalCustomException(e);
         }
     }
@@ -57,14 +59,46 @@ public class MyUserService implements UserService {
     }
 
     @Override
-    public UserEntity updateName(UUID id, String name) {
-        userRepository.updateName(id, name);
+    public void setStatus(UUID id, UserStatus status) {
+        userRepository.updateStatus(id, status.name());
+    }
+
+    @Override
+    public UserEntity updateName(UUID id, String newName) {
+        userRepository.updateName(id, newName);
         return getById(id);
     }
 
     @Override
+    public UserEntity updateLogin(UUID id, String newLogin) {
+        UserEntity user = getById(id);
+        String oldLogin = user.getLogin();
+        credentialService.updateEmail(id, newLogin);
+        try {
+            userRepository.updateLogin(id, newLogin);
+            user.setLogin(newLogin);
+            return user;
+        } catch (PersistenceException e) {
+            credentialService.updateEmail(id, oldLogin);
+            throw new InternalCustomException(e);
+        }
+    }
+
+    @Override
+    public void updatePassword(UUID id, String email, String oldPassword, String newPassword) {
+        credentialService.setPassword(id, email, oldPassword, newPassword);
+    }
+
+    @Override
     public void delete(UUID id) {
+        UserEntity user = getById(id);
         userRepository.deleteById(id);
+        try {
+            credentialService.deleteUser(id);
+        } catch (Exception e) {
+            userRepository.save(user);
+            throw new InternalCustomException(e);
+        }
     }
 
     @Override
@@ -82,5 +116,11 @@ public class MyUserService implements UserService {
     public TelegramChatEntity getTelegramChat(Long chatId) {
         return telegramChatRepository.findById(chatId)
                 .orElseThrow(() -> NotFoundCustomException.byId("TelegramChat", chatId));
+    }
+
+    @Override
+    public TelegramChatEntity getTelegramChat(UUID userId) {
+        return telegramChatRepository.findByUserId(userId)
+                .orElseThrow(() -> NotFoundCustomException.byParams("TelegramChat", Map.of("userId", userId)));
     }
 }

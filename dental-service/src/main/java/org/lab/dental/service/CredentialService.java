@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface CredentialService {
 
-    UUID signUp(String login, String password, String name);
+    UUID signUp(String email, String password, String name);
 
     AuthToken clientLogin(String clientId, String clientSecret);
 
@@ -13,7 +13,11 @@ public interface CredentialService {
 
     AuthToken refresh(String refreshToken);
 
-    void setPassword(String login, String password);
+    void verifyEmail(UUID userId, String email);
 
-    void deleteUser(String login);
+    void updateEmail(UUID userId, String newEmail);
+
+    void setPassword(UUID userId, String email, String oldPassword, String newPassword);
+
+    void deleteUser(UUID userId);
 }

@@ -2,12 +2,13 @@ package org.lab.dental.service.impl;
 
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.lab.dental.exception.InternalServiceException;
-import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.service.CredentialService;
 import org.lab.exception.BadRequestCustomException;
+import org.lab.exception.ForbiddenCustomException;
+import org.lab.exception.InternalCustomException;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +26,12 @@ import java.util.UUID;
 public class KeycloakCredentialService implements CredentialService {
 
     private static final String TOKEN_URI = "/protocol/openid-connect/token";
+
     private final RealmResource realmResource;
     private final RestClient restClient;
     private final String clientId;
     private final String clientSecret;
+
 
     @Autowired
     public KeycloakCredentialService(RealmResource realmResource,
@@ -44,20 +47,20 @@ public class KeycloakCredentialService implements CredentialService {
 
 
     @Override
-    public UUID signUp(String login, String password, String name) {
+    public UUID signUp(String email, String password, String name) {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(false);
         credential.setValue(password);
         credential.setType(CredentialRepresentation.PASSWORD);
 
         UserRepresentation representation = new UserRepresentation();
-        representation.setEmail(login);
-        representation.setUsername(login);
+        representation.setEmail(email);
+        representation.setUsername(email);
         representation.setFirstName(name);
         representation.setCredentials(Collections.singletonList(credential));
         representation.setEnabled(true);
         representation.setClientRoles(Map.of(clientId, List.of("ROLE_USER")));
-        representation.setEmailVerified(true);
+        representation.setEmailVerified(false);
         representation.setRequiredActions(Collections.emptyList());
 
         Response response = realmResource.users().create(representation);
@@ -65,10 +68,10 @@ public class KeycloakCredentialService implements CredentialService {
             if (response.getStatus() == 201) {
                 return extractId(response);
             } else if (response.getStatus() == 409) {
-                throw new BadRequestCustomException("User duplication: " + login);
+                throw new BadRequestCustomException("User duplication: " + email);
             } else {
                 String statusInfo = response.getStatusInfo().toString();
-                throw InternalServiceException.keycloakAuthFail(login, statusInfo);
+                throw InternalCustomException.keycloakAuthFail(email, statusInfo);
             }
         }
     }
@@ -104,18 +107,53 @@ public class KeycloakCredentialService implements CredentialService {
     }
 
     @Override
-    public void setPassword(String login, String password) {
-        //TODO
+    public void verifyEmail(UUID userId, String email) {
+        UserRepresentation representation = realmResource.users().get(userId.toString()).toRepresentation();
+        if (representation.getEmail().equals(email)) {
+            representation.setEmailVerified(true);
+            realmResource
+                    .users()
+                    .get(userId.toString())
+                    .update(representation);
+        } else {
+            throw new BadRequestCustomException("Passed email not equals to user email");
+        }
     }
 
     @Override
-    public void deleteUser(String login) {
-        List<UserRepresentation> users = realmResource.users().searchByEmail(login, true);
-        if (users.isEmpty()) {
-            throw NotFoundCustomException.byParams(UserRepresentation.class.getSimpleName(), Map.of("login", login));
+    public void updateEmail(UUID userId, String newEmail) {
+        UserRepresentation representation = realmResource.users().get(userId.toString()).toRepresentation();
+        representation.setEmail(newEmail);
+        representation.setEmailVerified(true);
+        realmResource
+                .users()
+                .get(userId.toString())
+                .update(representation);
+    }
+
+    @Override
+    public void setPassword(UUID userId, String email, String oldPassword, String newPassword) {
+        AuthToken token = userLogin(email, oldPassword);
+        if (token != null) {
+            CredentialRepresentation representation = new CredentialRepresentation();
+            representation.setType(CredentialRepresentation.PASSWORD);
+            representation.setTemporary(false);
+            representation.setValue(newPassword);
+            UserResource resource = realmResource.users().get(userId.toString());
+            if (resource.toRepresentation().getEmail().equals(email)) {
+                resource.resetPassword(representation);
+            }
+        } else {
+            throw new ForbiddenCustomException("Incorrect credentials, access to the update is denied");
         }
-        String userId = users.getFirst().getId();
-        realmResource.users().get(userId).remove();
+    }
+
+    @Override
+    public void deleteUser(UUID userId) {
+        realmResource
+                .users()
+                .get(userId.toString())
+                .remove();
     }
 
 

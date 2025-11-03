@@ -8,6 +8,7 @@ import org.lab.dental.service.UserService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.model.User;
 import org.lab.request.NewUser;
+import org.lab.request.UpdatePasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,11 +35,12 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody @Valid NewUser newUser) {
-        UserEntity entity = userService.create(newUser.getLogin(), newUser.getPassword(), newUser.getName());
-        return ResponseEntity.created(URI.create(URL + '/' + entity.getId())).body(userConverter.toDto(entity));
+    public ResponseEntity<?> create(@RequestBody @Valid NewUser newUser) {
+        UserEntity entity = userService.create(newUser.getLogin(), newUser.getName(), newUser.getPassword());
+        return ResponseEntity
+                .created(URI.create(URL + '/' + entity.getId()))
+                .body(userConverter.toDto(entity));
     }
-
 
     @GetMapping
     public ResponseEntity<User> getUser(@RequestHeader("X-USER-ID") UUID userId) {
@@ -46,24 +48,34 @@ public class UserController {
         return ResponseEntity.ok(userConverter.toDto(entity));
     }
 
-
-    @PutMapping
+    @PutMapping("/name")
     public ResponseEntity<User> updateName(@RequestHeader("X-USER-ID") UUID userId,
                                            @RequestBody String name) {
         UserEntity entity = userService.updateName(userId, name);
         return ResponseEntity.ok(userConverter.toDto(entity));
     }
 
+    @PutMapping("/email")
+    public ResponseEntity<User> updateEmail(@RequestHeader("X-USER-ID") UUID userId,
+                                            @RequestBody String email) {
+        UserEntity entity = userService.updateLogin(userId, email);
+        return ResponseEntity.ok(userConverter.toDto(entity));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<Void> updatePassword(@RequestHeader("X-USER-ID") UUID userId,
+                                               @RequestBody UpdatePasswordRequest request) {
+        userService.updatePassword(
+                        userId,
+                        request.getEmail(),
+                        request.getOldPassword(),
+                        request.getNewPassword());
+        return ResponseEntity.noContent().build();
+    }
 
     @DeleteMapping
     public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId) {
         userService.delete(userId);
         return ResponseEntity.noContent().build();
-    }
-
-
-    public ResponseEntity<Void> sendOtpForChangeEmail(@RequestHeader("X-USER-ID") UUID userId) {
-
-        return ResponseEntity.ok().build();
     }
 }

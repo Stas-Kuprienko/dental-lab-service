@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/main/product-map")
-public class ProductMapController {
+public class ProductMapController extends MvcControllerUtil {
 
     private static final String PRODUCT_MAP = "product-map";
     private static final String PRODUCT_MAP_PATH = "/main/product-map";
@@ -28,9 +28,9 @@ public class ProductMapController {
 
     @GetMapping
     public String productMapPage(HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
+        UUID userId = getUserId(session);
         ProductMap map = productMapService.get(userId);
-        model.addAttribute(MvcControllerUtil.ATTRIBUTE_KEY_MAP, map.getEntries());
+        model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return PRODUCT_MAP;
     }
 
@@ -38,28 +38,28 @@ public class ProductMapController {
     public String addProduct(@RequestParam("title") String title,
                              @RequestParam("price") float price,
                              HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
+        UUID userId = getUserId(session);
         ProductMap map = productMapService.create(userId, new NewProductType(title, price));
-        model.addAttribute(MvcControllerUtil.ATTRIBUTE_KEY_MAP, map.getEntries());
-        return MvcControllerUtil.REDIRECT + PRODUCT_MAP_PATH;
+        model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
+        return REDIRECT + PRODUCT_MAP_PATH;
     }
 
     @PostMapping("/{id}/edit")
     public String editProduct(@PathVariable("id") UUID id,
                               @RequestParam("price") float price,
                               HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
+        UUID userId = getUserId(session);
         ProductMap map = productMapService.update(userId, id, price);
-        model.addAttribute(MvcControllerUtil.ATTRIBUTE_KEY_MAP, map.getEntries());
-        return MvcControllerUtil.REDIRECT + PRODUCT_MAP_PATH;
+        model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
+        return REDIRECT + PRODUCT_MAP_PATH;
     }
 
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable("id") UUID id,
                                 HttpSession session, Model model) {
-        UUID userId = (UUID) session.getAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID);
+        UUID userId = getUserId(session);
         ProductMap map = productMapService.delete(userId, id);
-        model.addAttribute(MvcControllerUtil.ATTRIBUTE_KEY_MAP, map.getEntries());
-        return MvcControllerUtil.REDIRECT + PRODUCT_MAP_PATH;
+        model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
+        return REDIRECT + PRODUCT_MAP_PATH;
     }
 }

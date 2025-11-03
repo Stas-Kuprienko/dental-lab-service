@@ -2,6 +2,7 @@ package org.dental.restclient;
 
 import org.lab.model.User;
 import org.lab.request.NewUser;
+import org.lab.request.UpdatePasswordRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
@@ -38,9 +39,30 @@ public class UserService {
     public User updateName(String name) {
         return restClient
                 .put()
+                .uri("/name")
                 .body(name)
                 .retrieve()
                 .body(User.class);
+    }
+
+    public User updateEmail(String email) {
+        return restClient
+                .put()
+                .uri("/email")
+                .body(email)
+                .retrieve()
+                .body(User.class);
+    }
+
+    public boolean updatePassword(UpdatePasswordRequest request) {
+        return restClient
+                .put()
+                .uri("/password")
+                .body(request)
+                .retrieve()
+                .toBodilessEntity()
+                .getStatusCode()
+                .is2xxSuccessful();
     }
 
     public boolean delete() {
@@ -49,13 +71,5 @@ public class UserService {
                 .retrieve()
                 .toBodilessEntity();
         return response.getStatusCode().is2xxSuccessful();
-    }
-
-    public boolean changeEmail() {
-        return false;
-    }
-
-    public boolean verifyEmailChangeCode(String code) {
-        return false;
     }
 }

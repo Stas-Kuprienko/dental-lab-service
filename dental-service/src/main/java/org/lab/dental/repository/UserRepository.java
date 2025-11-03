@@ -15,8 +15,18 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     @Modifying
     @Transactional
+    @Query(value = "UPDATE dental_lab.users SET login = :login WHERE id = :id", nativeQuery = true)
+    void updateLogin(@Param("id") UUID id, @Param("login") String name);
+
+
+    @Modifying
+    @Transactional
     @Query(value = "UPDATE dental_lab.users SET name = :name WHERE id = :id", nativeQuery = true)
-    void updateName(@Param("id") UUID id, @Param("workId") String name);
+    void updateName(@Param("id") UUID id, @Param("name") String name);
 
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE dental_lab.users SET status = :status WHERE id = :id", nativeQuery = true)
+    void updateStatus(@Param("id") UUID id, @Param("status") String status);
 }

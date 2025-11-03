@@ -87,4 +87,12 @@ public class TelegramChatController {
         TelegramChatEntity entity = userService.getTelegramChat(chatId);
         return ResponseEntity.ok(userConverter.telegramChatToDto(entity));
     }
+
+
+    @GetMapping("/user")
+    public ResponseEntity<TelegramChat> findByUserId(@RequestHeader("X-USER-ID") UUID userId) {
+        log.info("From user '{}' received request to get TelegramChat", userId);
+        TelegramChatEntity entity = userService.getTelegramChat(userId);
+        return ResponseEntity.ok(userConverter.telegramChatToDto(entity));
+    }
 }

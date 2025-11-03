@@ -10,22 +10,11 @@
 <div th:replace="fragments/nav :: main-menu"></div>
 
 <section class="form-section">
-    <h2>Смена Email</h2>
+    <h2>Изменение email</h2>
 
-    <div th:if="${message}" class="alert" th:text="${message}"></div>
-    <div th:if="${error}" class="alert error" th:text="${error}"></div>
-
-    <!-- 🧾 Этап 1: Ввод кода -->
-    <form th:if="${step == 1}" method="post" th:action="@{/main/user/verify-email-code}">
-        <label>Код из Telegram:</label><br>
-        <input type="text" name="code" required>
-        <button type="submit">Проверить</button>
-    </form>
-
-    <!-- 📧 Этап 2: Ввод нового email -->
-    <form th:if="${step == 2}" method="post" th:action="@{/main/user/save-email}">
-        <label>Новый email:</label><br>
-        <input type="email" name="newEmail" required>
+    <form method="post" th:action="@{/main/user/update-email}">
+        <label>Введите новый email:</label><br>
+        <input type="email" name="new-email" required>
         <button type="submit">Сохранить</button>
     </form>
 </section>
