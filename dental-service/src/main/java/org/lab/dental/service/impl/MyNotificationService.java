@@ -10,6 +10,7 @@ import org.lab.dental.util.LetterTemplateKey;
 import org.lab.dental.util.LetterTemplateUtility;
 import org.lab.event.EventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -18,21 +19,26 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class MyNotificationService implements NotificationService {
 
+    private static final String EMAIL_VERIFICATION_PATH = "/main/user/verify?token=";
+
     private final UserService userService;
     private final EmailNotificationService emailNotificationService;
     private final KafkaNotificationService kafkaNotificationService;
     private final LetterTemplateUtility letterTemplateUtility;
+    private final String serviceUrl;
 
 
     @Autowired
     public MyNotificationService(UserService userService,
                                  EmailNotificationService emailNotificationService,
                                  KafkaNotificationService kafkaNotificationService,
-                                 LetterTemplateUtility letterTemplateUtility) {
+                                 LetterTemplateUtility letterTemplateUtility,
+                                 @Value("${project.variables.service-url}") String serviceUrl) {
         this.userService = userService;
         this.emailNotificationService = emailNotificationService;
         this.kafkaNotificationService = kafkaNotificationService;
         this.letterTemplateUtility = letterTemplateUtility;
+        this.serviceUrl = serviceUrl;
     }
 
 
@@ -66,13 +72,13 @@ public class MyNotificationService implements NotificationService {
             UserEntity user = userService.getById(emailVerificationToken.getUserId());
             String mail = user.getLogin();
             Locale locale = Locale.of("RU");
-            String token = emailVerificationToken.getToken();
-            String message = letterTemplateUtility.construct(locale, key, user.getName(), token);
+            String link = serviceUrl + EMAIL_VERIFICATION_PATH + emailVerificationToken.getToken();
+            String message = letterTemplateUtility.construct(locale, key, user.getName(), link);
             emailNotificationService.sendHtmlEmail(message, mail);
         }).thenAccept(v ->
-                log.info("The token message was sent to the email for user '{}' successfully", emailVerificationToken.getUserId())
+                log.info("The token message was sent to the email for user email '{}' successfully", emailVerificationToken.getEmail())
         ).exceptionally(throwable -> {
-            log.error("Failure to send the token message to the email for user '%s'".formatted(emailVerificationToken.getUserId()),throwable.getMessage());
+            log.error("Failure to send the token message to the email for user email '%s'".formatted(emailVerificationToken.getEmail()),throwable.getMessage());
             return null;
         });
     }

@@ -11,6 +11,7 @@ import org.lab.dental.service.UserService;
 import org.lab.enums.UserStatus;
 import org.lab.exception.InternalCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Map;
@@ -45,8 +46,9 @@ public class MyUserService implements UserService {
                     .createdAt(LocalDate.now())
                     .status(UserStatus.UNVERIFIED)
                     .build();
-            return userRepository.save(user);
-        } catch (PersistenceException e) {
+            user = userRepository.save(user);
+            return user;
+        } catch (PersistenceException | DataAccessException e) {
             credentialService.deleteUser(id);
             throw new InternalCustomException(e);
         }

@@ -5,7 +5,7 @@ CREATE TABLE dental_lab.users (
     login VARCHAR(255)      NOT NULL    UNIQUE,
     name VARCHAR(127)       NOT NULL,
     created_at DATE         NOT NULL    DEFAULT now(),
-    status VARCHAR(63)      NOT NULL    DEFAULT 'ENABLED' CHECK (status IN('ENABLED', 'DISABLED'))
+    status VARCHAR(63)      NOT NULL    DEFAULT 'ENABLED' CHECK (status IN('ENABLED', 'UNVERIFIED', 'DISABLED'))
 );
 
 
@@ -51,9 +51,17 @@ CREATE TABLE dental_lab.telegram_chat (
 );
 
 CREATE TABLE dental_lab.telegram_otp_link (
-    key VARCHAR(31)         PRIMARY KEY,
+    key VARCHAR(63)         PRIMARY KEY,
     user_id UUID                        REFERENCES dental_lab.users ON DELETE CASCADE,
     chat_id BIGINT          NOT NULL,
     otp VARCHAR(31)         NOT NULL,
     expires_at TIMESTAMP    NOT NULL
+);
+
+CREATE TABLE dental_lab.email_verification_token (
+    user_id UUID            PRIMARY KEY     REFERENCES dental_lab.users ON DELETE CASCADE,
+    email VARCHAR(255)      NOT NULL,
+    token VARCHAR(127)       NOT NULL        UNIQUE,
+    created_at TIMESTAMP    NOT NULL        DEFAULT now(),
+    is_verified BOOLEAN     NOT NULL        DEFAULT false
 );

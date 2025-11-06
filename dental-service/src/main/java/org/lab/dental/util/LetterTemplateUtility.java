@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 @Component
 public class LetterTemplateUtility {
 
+    //TODO  !!!!!
+    // кодировка страниц
 
     private static final String CLASSPATH = "classpath:";
     private static final String DIRECTORY = "templates";
@@ -28,8 +30,9 @@ public class LetterTemplateUtility {
 
 
     public String construct(Locale locale, LetterTemplateKey key, String... payload) {
-
-        return "example";
+        String template = templates.get(key.name());
+        template = template.formatted((Object[]) payload);
+        return template;
     }
 
 

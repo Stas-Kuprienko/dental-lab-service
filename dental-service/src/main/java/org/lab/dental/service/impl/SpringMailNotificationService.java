@@ -15,16 +15,16 @@ import org.springframework.stereotype.Service;
 public class SpringMailNotificationService implements EmailNotificationService {
 
     private final JavaMailSender mailSender;
-    private final String serviceUrl;
+    private final String serviceLabel;
     private final String serviceEmail;
 
 
     @Autowired
     public SpringMailNotificationService(JavaMailSender mailSender,
-                                         @Value("${project.variables.service-url}") String serviceUrl,
+                                         @Value("${project.variables.service-label}") String serviceLabel,
                                          @Value("${spring.mail.username}") String serviceEmail) {
         this.mailSender = mailSender;
-        this.serviceUrl = serviceUrl;
+        this.serviceLabel = serviceLabel;
         this.serviceEmail = serviceEmail;
     }
 
@@ -33,7 +33,7 @@ public class SpringMailNotificationService implements EmailNotificationService {
     public void sendMessage(String text, String recipient) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
-        message.setSubject(serviceUrl);
+        message.setSubject(serviceLabel);
         message.setText(text);
         message.setFrom(serviceEmail);
         mailSender.send(message);
@@ -45,7 +45,7 @@ public class SpringMailNotificationService implements EmailNotificationService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(recipient);
-            helper.setSubject(serviceUrl);
+            helper.setSubject(serviceLabel);
             helper.setText(text, true);
             helper.setFrom(serviceEmail);
             mailSender.send(message);

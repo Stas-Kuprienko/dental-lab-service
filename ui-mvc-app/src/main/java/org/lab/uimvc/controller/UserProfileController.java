@@ -7,9 +7,11 @@ import org.dental.restclient.VerificationService;
 import org.lab.model.ErrorResponse;
 import org.lab.model.User;
 import org.lab.request.UpdatePasswordRequest;
+import org.lab.uimvc.configuration.auth.CredentialsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -35,13 +37,17 @@ public class UserProfileController extends MvcControllerUtil {
 
     private final UserService userService;
     private final VerificationService verificationService;
+    private final CredentialsUtility credentialsUtility;
     private final MessageSource messageSource;
 
 
     @Autowired
-    public UserProfileController(DentalLabRestClient dentalLabRestClient, MessageSource messageSource) {
+    public UserProfileController(DentalLabRestClient dentalLabRestClient,
+                                 CredentialsUtility credentialsUtility,
+                                 MessageSource messageSource) {
         userService = dentalLabRestClient.USERS;
         verificationService = dentalLabRestClient.VERIFICATION;
+        this.credentialsUtility = credentialsUtility;
         this.messageSource = messageSource;
     }
 
@@ -54,9 +60,10 @@ public class UserProfileController extends MvcControllerUtil {
     }
 
     @PostMapping("/update-name")
-    public String updateName(@RequestParam("name") String name, RedirectAttributes redirect) {
+    public String updateName(@RequestParam("name") String name, Model model) {
         User user = userService.updateName(name);
-        redirect.addAttribute("user", user);
+        //TODO !!!!!!
+        model.addAttribute("user", user);
         return REDIRECT + USER_PROFILE_PAGE;
     }
 
@@ -66,26 +73,19 @@ public class UserProfileController extends MvcControllerUtil {
         return REDIRECT + LOGOUT;
     }
 
-    @GetMapping("/verify")
-    public String verifyEmail(@RequestParam("token") String token) {
-        boolean result = verificationService.verifyUserEmail(token, false);
-        
-        return REDIRECT + MAIN_PAGE;
-    }
-
-
     @PostMapping("/change-email")
-    public String sendChangeEmailLink(HttpSession session, RedirectAttributes redirect) {
+    public String sendChangeEmailLink(HttpSession session, RedirectAttributes redirect, Model model) {
         String email = getEmail(session);
         verificationService.sendVerificationLink(email, true);
-        User user = userService.get();
         String message = messageSource.getMessage(CHANGE_EMAIL_LINK_SENT, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
-        redirect.addAttribute("user", user);
+        User user = userService.get();
+        //TODO !!!!!!!!
+        model.addAttribute("user", user);
         return REDIRECT + USER_PROFILE_PAGE;
     }
 
-    @GetMapping("/change-email")
+    @GetMapping("/verify")
     public String changeEmailPage(@RequestParam("token") String token, Model model) {
         boolean result = verificationService.verifyUserEmail(token, true);
         if (result) {
@@ -104,14 +104,16 @@ public class UserProfileController extends MvcControllerUtil {
     @PostMapping("/update-email")
     public String updateEmail(@RequestParam("new-email") String newEmail,
                               HttpSession session,
+                              Authentication authentication,
                               RedirectAttributes redirect) {
         boolean result = verificationService.isVerified(getEmail(session));
         String messageKey;
         if (result) {
             User user = userService.updateEmail(newEmail);
+            //TODO !!!!!!!
+            credentialsUtility.updateUserEmail(authentication, newEmail);
             session.setAttribute(ATTRIBUTE_KEY_USER_EMAIL, user.getLogin());
             messageKey = EMAIL_IS_UPDATED;
-            redirect.addAttribute("user", user);
         } else {
             messageKey = TOKEN_FOR_CHANGE_EMAIL_NOT_VERIFIED;
         }
@@ -152,9 +154,7 @@ public class UserProfileController extends MvcControllerUtil {
         }
         String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
-        User user = userService.get();
-        redirect.addAttribute("user", user);
-        return REDIRECT + USER_PROFILE_PAGE;
+        return REDIRECT + USER_PROFILE_PATH;
     }
 
     @PostMapping("/reset-password")

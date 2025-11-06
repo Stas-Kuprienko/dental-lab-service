@@ -12,7 +12,7 @@ import org.lab.enums.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public class MyVerificationService implements VerificationService {
                 .userId(userId)
                 .email(email)
                 .token(token)
-                .createdAt(LocalDate.now())
+                .createdAt(LocalDateTime.now())
                 .isVerified(false)
                 .build();
         return emailVerificationTokenRepository.save(emailVerificationToken);
@@ -64,16 +64,14 @@ public class MyVerificationService implements VerificationService {
             throw new IllegalArgumentException("the passed token has already been used");
         }
         if (verificationToken.getToken().equals(token)) {
-            verificationToken.setVerified(true);
-            emailVerificationTokenRepository.save(verificationToken);
+            emailVerificationTokenRepository.setIsVerified(userId, true);
             try {
                 credentialService.verifyEmail(verificationToken.getUserId(), verificationToken.getEmail());
                 userService.setStatus(userId, UserStatus.ENABLED);
                 emailVerificationTokenRepository.deleteById(userId);
                 return true;
             } catch (Exception e) {
-                verificationToken.setVerified(false);
-                emailVerificationTokenRepository.save(verificationToken);
+                emailVerificationTokenRepository.setIsVerified(userId, false);
                 throw e;
             }
         } else {
@@ -90,11 +88,15 @@ public class MyVerificationService implements VerificationService {
         }
         if (verificationToken.isVerified()) {
             throw new IllegalArgumentException("the passed token has already been used");
-        } else if (LocalDate.now().isAfter(verificationToken.getCreatedAt().plus(TOKEN_EXPIRATION))) {
+        } else if (LocalDateTime.now().isAfter(verificationToken.getCreatedAt().plus(TOKEN_EXPIRATION))) {
             emailVerificationTokenRepository.deleteById(userId);
             throw new IllegalArgumentException("the passed token has already been expired");
         } else {
-            return verificationToken.getToken().equals(token);
+            boolean result = verificationToken.getToken().equals(token);
+            if (result) {
+                emailVerificationTokenRepository.setIsVerified(userId, true);
+            }
+            return result;
         }
     }
 

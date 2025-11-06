@@ -73,7 +73,8 @@
 </section>
 
 <!-- ⚙️ JS -->
-<script>
+<script th:inline="javascript">
+    const BASE_URL = [[@{/}]];
     // Универсальные функции показа / скрытия формы
     function setupToggle(labelId, formId) {
         const label = document.getElementById(labelId);
@@ -130,7 +131,7 @@
 
         changeEmailBtn.addEventListener('click', () => {
             if (confirm('Вы действительно хотите сменить email? Вам придёт письмо со ссылкой для подтверждения.')) {
-                fetch('/main/user/email-request', { method: 'POST' });
+                fetch(BASE_URL + 'main/user/change-email', { method: 'POST' });
                 alert('Письмо отправлено на ваш email!');
                 startTimer([changeEmailBtn, noAccessBtn]);
             }
@@ -139,7 +140,7 @@
         // Нет доступа к email
         noAccessBtn.addEventListener('click', () => {
             if (confirm('Нет доступа к почте? На ваш Telegram будет отправлен код.')) {
-                fetch('/main/user/email-otp', { method: 'POST' });
+                fetch(BASE_URL + 'main/user/change-email-otp', { method: 'POST' });
                 alert('Код отправлен в Telegram!');
                 startTimer([changeEmailBtn, noAccessBtn]);
             }

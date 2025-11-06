@@ -1,5 +1,6 @@
 package org.lab.uimvc.controller.advice;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class ErrorResponse {
 
-    private int code;
+    @JsonProperty("code")
+    private String code;
 
+    @JsonProperty("message")
     private String message;
 
 

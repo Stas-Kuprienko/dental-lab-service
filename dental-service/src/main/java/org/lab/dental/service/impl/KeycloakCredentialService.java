@@ -9,13 +9,16 @@ import org.lab.dental.service.CredentialService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
 import org.lab.exception.InternalCustomException;
+import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +71,7 @@ public class KeycloakCredentialService implements CredentialService {
             if (response.getStatus() == 201) {
                 return extractId(response);
             } else if (response.getStatus() == 409) {
-                throw new BadRequestCustomException("User duplication: " + email);
+                throw new KeycloakEmailDuplicationException(email);
             } else {
                 String statusInfo = response.getStatusInfo().toString();
                 throw InternalCustomException.keycloakAuthFail(email, statusInfo);
@@ -133,8 +136,8 @@ public class KeycloakCredentialService implements CredentialService {
 
     @Override
     public void setPassword(UUID userId, String email, String oldPassword, String newPassword) {
-        AuthToken token = userLogin(email, oldPassword);
-        if (token != null) {
+        try {
+            userLogin(email, oldPassword);
             CredentialRepresentation representation = new CredentialRepresentation();
             representation.setType(CredentialRepresentation.PASSWORD);
             representation.setTemporary(false);
@@ -143,8 +146,8 @@ public class KeycloakCredentialService implements CredentialService {
             if (resource.toRepresentation().getEmail().equals(email)) {
                 resource.resetPassword(representation);
             }
-        } else {
-            throw new ForbiddenCustomException("Incorrect credentials, access to the update is denied");
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new ForbiddenCustomException("Incorrect credentials, access to the update is denied", e);
         }
     }
 

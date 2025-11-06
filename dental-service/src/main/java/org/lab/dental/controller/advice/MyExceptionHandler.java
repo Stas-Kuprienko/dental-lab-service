@@ -6,6 +6,7 @@ import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
 import org.lab.exception.InternalCustomException;
+import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +81,15 @@ public class MyExceptionHandler {
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
+    }
+
+    @ExceptionHandler(KeycloakEmailDuplicationException.class)
+    public ResponseEntity<String> keycloakEmailDuplication(KeycloakEmailDuplicationException e) {
+        log.info(e.getMessage());
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(e.email);
     }
 
     @ExceptionHandler(InternalCustomException.class)
