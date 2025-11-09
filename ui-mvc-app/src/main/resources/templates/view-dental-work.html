@@ -10,16 +10,7 @@
 
 <body>
 <!-- 🔝 Меню -->
-<nav class="menu">
-    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
-    <a th:href="@{/main/dental-works/new}">NEW WORK</a>
-    <a th:href="@{/main/dental-works}">WORK LIST</a>
-    <a th:href="@{/main/product-map}">PRODUCT MAP</a>
-    <a th:href="@{/main/user}">ACCOUNT</a>
-    <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Выйти?')">
-        <button>выйти</button>
-    </a>
-</nav>
+<div th:replace="fragments/nav :: main-menu"></div>
 
 <section style="font-size:22px;">
 
@@ -99,13 +90,13 @@
 
     <!-- PRODUCTS -->
     <div class="work" style="text-align:center; display:flex; flex-direction:column; align-items:center;">
-        <label>ПРОДУКТЫ:</label><br>
+        <label>СПИСОК РАБОТ:</label><br>
         <a class="tr">
-            <label id="product-label" class="td" style="cursor:pointer; width: auto;">+ новый продукт</label>
+            <label id="product-label" class="td" style="cursor:pointer; width: auto;">+ новая работа</label>
         </a>
 
         <form id="add-product" th:action="@{'/main/dental-works/' + ${work.id} + '/products/new'}" method="post" style="display:none; margin-top:10px; text-align:left; width:100%; max-width:600px;">
-            <label for="product">продукт:</label>
+            <label for="product">работа:</label>
             <select id="product" name="product" required>
                 <option th:each="item : ${map}"
                         th:value="${item.id}"
@@ -139,7 +130,7 @@
                     <button type="button" class="cancel-complete">❌</button>
                 </form>
                 <form th:action="@{'/main/dental-works/' + ${work.id} + '/products/delete'}" method="post">
-                    <button type="submit" th:name="product" th:value="${product.id}" onclick="return confirm('Удалить продукт?')">удалить</button>
+                    <button type="submit" th:name="product" th:value="${product.id}" onclick="return confirm('Удалить работу?')">удалить</button>
                 </form>
             </div>
 
@@ -166,7 +157,7 @@
 
     <div class="work">
         <label th:text="${work.countPhoto()} + ' фотофайлов'">0 фотофайлов</label>
-        <a th:href="@{/main/dental-works/' + ${work.id} + '/photo}" style="font-weight: bold; background-color: #fffed4; height: 30px; width: auto">
+        <a th:href="@{'/main/dental-works/' + ${work.id} + '/photo'}" style="font-weight: bold; background-color: #fffed4; height: 30px; width: auto">
             ОТКРЫТЬ
         </a>
     </div>

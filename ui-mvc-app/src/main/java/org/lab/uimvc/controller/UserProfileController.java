@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
 import org.dental.restclient.VerificationService;
+import org.lab.exception.ForbiddenCustomException;
 import org.lab.model.ErrorResponse;
 import org.lab.model.User;
 import org.lab.request.UpdatePasswordRequest;
@@ -12,14 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -60,11 +60,18 @@ public class UserProfileController extends MvcControllerUtil {
     }
 
     @PostMapping("/update-name")
-    public String updateName(@RequestParam("name") String name, Model model) {
-        User user = userService.updateName(name);
-        //TODO !!!!!!
-        model.addAttribute("user", user);
-        return REDIRECT + USER_PROFILE_PAGE;
+    public String updateName(@RequestParam("name") String name,
+                             HttpSession session,
+                             Authentication authentication) {
+        credentialsUtility.updateUserName(authentication, name);
+        try {
+            userService.updateName(name);
+        } catch (Exception e) {
+            credentialsUtility.rollbackUserName(authentication);
+            throw e;
+        }
+        session.setAttribute(ATTRIBUTE_KEY_USER_NAME, name);
+        return REDIRECT + USER_PROFILE_PATH;
     }
 
     @PostMapping("/delete")
@@ -74,15 +81,12 @@ public class UserProfileController extends MvcControllerUtil {
     }
 
     @PostMapping("/change-email")
-    public String sendChangeEmailLink(HttpSession session, RedirectAttributes redirect, Model model) {
+    public String sendChangeEmailLink(HttpSession session, RedirectAttributes redirect) {
         String email = getEmail(session);
         verificationService.sendVerificationLink(email, true);
         String message = messageSource.getMessage(CHANGE_EMAIL_LINK_SENT, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
-        User user = userService.get();
-        //TODO !!!!!!!!
-        model.addAttribute("user", user);
-        return REDIRECT + USER_PROFILE_PAGE;
+        return REDIRECT + USER_PROFILE_PATH;
     }
 
     @GetMapping("/verify")
@@ -101,6 +105,11 @@ public class UserProfileController extends MvcControllerUtil {
         }
     }
 
+    @GetMapping("/change-email")
+    public String changeEmailPage() {
+        return "change-email";
+    }
+
     @PostMapping("/update-email")
     public String updateEmail(@RequestParam("new-email") String newEmail,
                               HttpSession session,
@@ -109,23 +118,50 @@ public class UserProfileController extends MvcControllerUtil {
         boolean result = verificationService.isVerified(getEmail(session));
         String messageKey;
         if (result) {
-            User user = userService.updateEmail(newEmail);
-            //TODO !!!!!!!
             credentialsUtility.updateUserEmail(authentication, newEmail);
-            session.setAttribute(ATTRIBUTE_KEY_USER_EMAIL, user.getLogin());
+            try {
+                userService.updateEmail(newEmail);
+            } catch (Exception e) {
+                credentialsUtility.rollbackUserEmail(authentication);
+                throw e;
+            }
+            session.setAttribute(ATTRIBUTE_KEY_USER_EMAIL, newEmail);
             messageKey = EMAIL_IS_UPDATED;
         } else {
             messageKey = TOKEN_FOR_CHANGE_EMAIL_NOT_VERIFIED;
         }
         String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
-        return REDIRECT + USER_PROFILE_PAGE;
+        return REDIRECT + USER_PROFILE_PATH;
     }
 
     @PostMapping("/change-email-otp")
-    public String sendEmailOtp(RedirectAttributes redirect) {
-        redirect.addFlashAttribute("message", "Иди ты нахуй");
-        return REDIRECT + USER_PROFILE_PATH;
+    public String sendEmailOtp(HttpSession session, RedirectAttributes redirect) {
+        String email = getEmail(session);
+        try {
+            verificationService.sendTelegramOtp(email);
+            redirect.addFlashAttribute("message", "Код отправлен в Telegram!");
+            return REDIRECT + USER_PROFILE_PATH + "/change-email-otp";
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ForbiddenCustomException("User doesn't have bound Telegram for this request!", e);
+        }
+    }
+
+    @GetMapping("/change-email-otp")
+    public String telegramOtpPage() {
+        return "telegram-change-email-otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyEmailOtp(@RequestParam("otp") String otp, RedirectAttributes redirect) {
+        boolean result = verificationService.verifyUserEmail(otp, true);
+        if (result) {
+            return REDIRECT + USER_PROFILE_PATH + "/change-email";
+        } else {
+            String message = messageSource.getMessage(WRONG_TOKEN, null, DEFAULT_LOCALE);
+            redirect.addFlashAttribute("error", message);
+            return REDIRECT + USER_PROFILE_PATH;
+        }
     }
 
     @PostMapping("/change-password")
@@ -155,15 +191,5 @@ public class UserProfileController extends MvcControllerUtil {
         String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
         return REDIRECT + USER_PROFILE_PATH;
-    }
-
-    @PostMapping("/reset-password")
-    public String requestPasswordReset(@AuthenticationPrincipal UserDetails user,
-                                       RedirectAttributes redirect) {
-//        String token = passwordService.generateResetToken(user.getUsername());
-//        mailService.sendPasswordResetLink(user.getUsername(), token);
-
-        redirect.addFlashAttribute("message", "Ссылка для смены пароля отправлена на почту");
-        return "redirect:/main/user";
     }
 }

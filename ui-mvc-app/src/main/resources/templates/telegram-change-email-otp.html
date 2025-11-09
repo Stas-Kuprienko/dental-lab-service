@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DENTAL MECHANIC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<!-- 🔝 Меню -->
+<div th:replace="fragments/nav :: main-menu"></div>
+
+<section>
+
+    <div th:if="${message}" class="alert" th:text="${message}"></div>
+
+    <p style="font-size: 18px;" th:text="#{TELEGRAM_CHANGE_EMAIL_OTP}">
+        Для изменения email введите код, который пришёл вам на Телеграм:
+    </p>
+
+    <form method="post" th:action="@{/main/user/verify-otp}">
+        <input type="text" name="otp" required>
+        <button type="submit">Далее</button>
+    </form>
+</section>
+
+</body>
+</html>

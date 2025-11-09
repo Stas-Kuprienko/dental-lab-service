@@ -18,29 +18,27 @@
             align-items: center;
         }
         .photo-box img {
-            max-width: 280px;
-            max-height: 200px;
+            max-width: 480px;
+<!--            max-height: 720px;-->
             border: 2px solid gray;
             border-radius: 8px;
         }
     </style>
 </head>
 <body>
-<nav class="menu">
-    <header><strong>🦷 DENTAL MECHANIC SERVICE 🦷</strong></header>
-    <a th:href="@{/main/dental-works}" style="float:right;"><button>назад</button></a>
-</nav>
+
+<div th:replace="fragments/nav :: main-menu"></div>
 
 <section>
-    <h2>Фото работы</h2>
+    <h2>Фото записи</h2>
+    <div th:text="${clinic} + ' : ' + ${patient}"> </div>
 
     <!-- 🔽 Галерея -->
     <div class="photo-gallery">
         <div th:each="photo : ${photoLinks}" class="photo-box">
-            <img th:src="@{${photo}}" alt="Фото" />
-            <form th:action="@{'/main/photo/delete'}" method="post">
-                <input type="hidden" name="id" th:value="${workId}" />
-                <input type="hidden" name="photoLink" th:value="${photo}" />
+            <img th:src="${photo}"/>
+            <form th:action="@{'/main/dental-works/' + ${workId} + '/photo/delete'}" method="post">
+                <input type="hidden" name="photo-link" th:value="${photo}" />
                 <button type="submit" onclick="return confirm('Удалить это фото?')">удалить</button>
             </form>
         </div>
@@ -50,7 +48,7 @@
     <h3>Добавить фото</h3>
     <form method="post"
           enctype="multipart/form-data"
-          th:action="@{'/main/photo/upload'}">
+          th:action="@{'/main/dental-works/' + ${workId} + '/photo/upload'}" name="выбрать фото">
         <input type="hidden" name="id" th:value="${workId}" />
         <input type="file" name="file" accept="image/*" required />
         <button type="submit">загрузить</button>

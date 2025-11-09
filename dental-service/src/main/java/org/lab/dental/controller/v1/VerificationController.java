@@ -2,7 +2,8 @@ package org.lab.dental.controller.v1;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.EmailVerificationTokenEntity;
-import org.lab.dental.service.NotificationService;
+import org.lab.dental.entity.TelegramChatEntity;
+import org.lab.dental.service.UserService;
 import org.lab.dental.service.VerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +17,12 @@ import java.util.UUID;
 public class VerificationController {
 
     private final VerificationService verificationService;
-    private final NotificationService notificationService;
+    private final UserService userService;
 
     @Autowired
-    public VerificationController(VerificationService verificationService, NotificationService notificationService) {
+    public VerificationController(VerificationService verificationService, UserService userService) {
         this.verificationService = verificationService;
-        this.notificationService = notificationService;
+        this.userService = userService;
     }
 
 
@@ -29,12 +30,15 @@ public class VerificationController {
     public ResponseEntity<Void> sendVerificationLink(@RequestHeader("X-USER-ID") UUID userId,
                                                      @RequestBody String email,
                                                      @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
-        EmailVerificationTokenEntity token = verificationService.createForUserId(userId, email);
-        if (toChange) {
-            notificationService.sendEmailChangeLink(token);
-        } else {
-            notificationService.sendEmailVerifyLink(token);
-        }
+        verificationService.createForUserId(userId, email, toChange);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/telegram-otp")
+    public ResponseEntity<Void> sendTelegramOtp(@RequestHeader("X-USER-ID") UUID userId,
+                                                @RequestBody String email) {
+        TelegramChatEntity telegramChat = userService.getTelegramChat(userId);
+        verificationService.createTelegramOtpForUserId(userId, email, telegramChat.getChatId());
         return ResponseEntity.noContent().build();
     }
 

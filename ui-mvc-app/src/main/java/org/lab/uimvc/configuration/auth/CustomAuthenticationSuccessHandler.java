@@ -25,7 +25,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         session.setAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID, UUID.fromString(user.getSubject()));
         session.setAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_EMAIL, user.getEmail());
         session.setAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_NAME, user.getFullName());
-        System.out.println(request.getRequestURI());
         response.sendRedirect(MvcControllerUtil.MAIN_FULL_PATH);
     }
 }

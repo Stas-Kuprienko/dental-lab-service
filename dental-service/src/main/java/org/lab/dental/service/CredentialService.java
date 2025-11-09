@@ -17,6 +17,8 @@ public interface CredentialService {
 
     void updateEmail(UUID userId, String newEmail);
 
+    void updateName(UUID userId, String newName);
+
     void setPassword(UUID userId, String email, String oldPassword, String newPassword);
 
     void deleteUser(UUID userId);

@@ -80,6 +80,15 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public List<DentalWorkEntity> getAllActualByUserId(UUID userId) {
+        YearMonth yearMonth = YearMonth.now();
+        LocalDate from = yearMonth.atDay(1);
+        List<DentalWorkEntity> dentalWorks = dentalWorkRepository.findAllFromMonthAndNotPaidByUserId(userId, from);
+        log.info("Found {} DentalWorks for current month by parameters: userId='{}'", dentalWorks.size(), userId);
+        return dentalWorks;
+    }
+
+    @Override
     public List<DentalWorkEntity> getAllByClinicAndPatientAndUserId(UUID userId, @Nullable String clinic, @Nullable String patient) {
         List<DentalWorkEntity> dentalWorks;
         if (clinic == null && patient == null) {

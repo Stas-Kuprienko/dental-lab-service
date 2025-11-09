@@ -49,17 +49,17 @@ public class UserController {
     }
 
     @PutMapping("/name")
-    public ResponseEntity<User> updateName(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateName(@RequestHeader("X-USER-ID") UUID userId,
                                            @RequestBody String name) {
-        UserEntity entity = userService.updateName(userId, name);
-        return ResponseEntity.ok(userConverter.toDto(entity));
+        userService.updateName(userId, name);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/email")
-    public ResponseEntity<User> updateEmail(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateEmail(@RequestHeader("X-USER-ID") UUID userId,
                                             @RequestBody String email) {
-        UserEntity entity = userService.updateLogin(userId, email);
-        return ResponseEntity.ok(userConverter.toDto(entity));
+        userService.updateLogin(userId, email);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/password")
@@ -70,7 +70,7 @@ public class UserController {
                         request.getEmail(),
                         request.getOldPassword(),
                         request.getNewPassword());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping

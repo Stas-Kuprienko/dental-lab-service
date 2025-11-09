@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .successHandler(authenticationSuccessHandler)
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl(MvcControllerUtil.LOGIN_PATH)
+                        .logoutSuccessUrl(MvcControllerUtil.LOGIN_PATH + "?logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                 ).build();

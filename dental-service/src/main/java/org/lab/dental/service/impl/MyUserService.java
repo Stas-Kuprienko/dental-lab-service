@@ -66,20 +66,18 @@ public class MyUserService implements UserService {
     }
 
     @Override
-    public UserEntity updateName(UUID id, String newName) {
+    public void updateName(UUID id, String newName) {
         userRepository.updateName(id, newName);
-        return getById(id);
+        credentialService.updateName(id, newName);
     }
 
     @Override
-    public UserEntity updateLogin(UUID id, String newLogin) {
+    public void updateLogin(UUID id, String newLogin) {
         UserEntity user = getById(id);
         String oldLogin = user.getLogin();
         credentialService.updateEmail(id, newLogin);
         try {
             userRepository.updateLogin(id, newLogin);
-            user.setLogin(newLogin);
-            return user;
         } catch (PersistenceException e) {
             credentialService.updateEmail(id, oldLogin);
             throw new InternalCustomException(e);

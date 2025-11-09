@@ -1,11 +1,8 @@
 package org.lab.dental.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.EmailVerificationTokenEntity;
-import org.lab.dental.entity.UserEntity;
 import org.lab.dental.service.EmailNotificationService;
 import org.lab.dental.service.NotificationService;
-import org.lab.dental.service.UserService;
 import org.lab.dental.util.LetterTemplateKey;
 import org.lab.dental.util.LetterTemplateUtility;
 import org.lab.event.EventMessage;
@@ -13,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -21,7 +19,6 @@ public class MyNotificationService implements NotificationService {
 
     private static final String EMAIL_VERIFICATION_PATH = "/main/user/verify?token=";
 
-    private final UserService userService;
     private final EmailNotificationService emailNotificationService;
     private final KafkaNotificationService kafkaNotificationService;
     private final LetterTemplateUtility letterTemplateUtility;
@@ -29,12 +26,10 @@ public class MyNotificationService implements NotificationService {
 
 
     @Autowired
-    public MyNotificationService(UserService userService,
-                                 EmailNotificationService emailNotificationService,
+    public MyNotificationService(EmailNotificationService emailNotificationService,
                                  KafkaNotificationService kafkaNotificationService,
                                  LetterTemplateUtility letterTemplateUtility,
                                  @Value("${project.variables.service-url}") String serviceUrl) {
-        this.userService = userService;
         this.emailNotificationService = emailNotificationService;
         this.kafkaNotificationService = kafkaNotificationService;
         this.letterTemplateUtility = letterTemplateUtility;
@@ -43,13 +38,13 @@ public class MyNotificationService implements NotificationService {
 
 
     @Override
-    public void sendEmailVerifyLink(EmailVerificationTokenEntity emailVerificationToken) {
-        sendEmailLink(emailVerificationToken, LetterTemplateKey.EMAIL_VERIFICATION);
+    public void sendEmailVerifyLink(UUID userId, String email, String data) {
+        sendEmailLink(userId, email, data, LetterTemplateKey.EMAIL_VERIFICATION);
     }
 
     @Override
-    public void sendEmailChangeLink(EmailVerificationTokenEntity emailVerificationToken) {
-        sendEmailLink(emailVerificationToken, LetterTemplateKey.CHANGE_EMAIL_LINK);
+    public void sendEmailChangeLink(UUID userId, String email, String data) {
+        sendEmailLink(userId, email, data, LetterTemplateKey.CHANGE_EMAIL_LINK);
     }
 
     @Override
@@ -66,19 +61,17 @@ public class MyNotificationService implements NotificationService {
     }
 
 
-    private void sendEmailLink(EmailVerificationTokenEntity emailVerificationToken, LetterTemplateKey key) {
-        log.info("The token message is accepted to send to the email for user '{}'", emailVerificationToken.getUserId());
+    private void sendEmailLink(UUID userId, String email, String data, LetterTemplateKey key) {
+        log.info("The token message is accepted to send to the email for user '{}'", userId);
         CompletableFuture.runAsync(() -> {
-            UserEntity user = userService.getById(emailVerificationToken.getUserId());
-            String mail = user.getLogin();
             Locale locale = Locale.of("RU");
-            String link = serviceUrl + EMAIL_VERIFICATION_PATH + emailVerificationToken.getToken();
-            String message = letterTemplateUtility.construct(locale, key, user.getName(), link);
-            emailNotificationService.sendHtmlEmail(message, mail);
+            String link = serviceUrl + EMAIL_VERIFICATION_PATH + data;
+            String message = letterTemplateUtility.construct(locale, key, link);
+            emailNotificationService.sendHtmlEmail(message, email);
         }).thenAccept(v ->
-                log.info("The token message was sent to the email for user email '{}' successfully", emailVerificationToken.getEmail())
+                log.info("The token message was sent to the email for user email '{}' successfully", email)
         ).exceptionally(throwable -> {
-            log.error("Failure to send the token message to the email for user email '%s'".formatted(emailVerificationToken.getEmail()),throwable.getMessage());
+            log.error("Failure to send the token message to the email for user email '%s'".formatted(email),throwable.getMessage());
             return null;
         });
     }

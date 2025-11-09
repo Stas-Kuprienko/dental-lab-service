@@ -2,6 +2,7 @@ package org.lab.uimvc.controller.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lab.exception.BadRequestCustomException;
+import org.lab.exception.ForbiddenCustomException;
 import org.lab.exception.InternalCustomException;
 import org.lab.exception.NotFoundCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,21 @@ public class MyExceptionHandler {
       log.warn(exception.getMessage());
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       return errorPage(httpStatus);
+    }
+
+    @ExceptionHandler(ForbiddenCustomException.class)
+    public ModelAndView forbidden(ForbiddenCustomException exception) {
+        log.warn(exception.getMessage());
+        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+        String message = messageSource.getMessage(httpStatus.name() + "_TELEGRAM", null, DEFAULT_LOCALE);
+        ErrorResponse error = ErrorResponse.builder()
+                .code(String.valueOf(httpStatus.value()))
+                .message(message)
+                .build();
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("error", error);
+        modelAndView.setViewName(ERROR_PAGE);
+        return modelAndView;
     }
 
     @ExceptionHandler(InternalCustomException.class)

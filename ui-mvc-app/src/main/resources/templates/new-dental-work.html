@@ -11,16 +11,7 @@
 
 <body>
 <!-- 🔝 Меню -->
-<nav class="menu">
-  <header><strong>DENTAL MECHANIC SERVICE</strong></header>
-  <a th:href="@{/main/dental-works/new}">NEW WORK</a>
-  <a th:href="@{/main/dental-works}">WORK LIST</a>
-  <a th:href="@{/main/product-map}">PRODUCT MAP</a>
-  <a th:href="@{/main/user}">ACCOUNT</a>
-  <a style="float:right;" th:href="@{/main/log-out}" onclick="return confirm('Вы действительно хотите выйти?')">
-    <button>выйти</button>
-  </a>
-</nav>
+<div th:replace="fragments/nav :: main-menu"></div>
 
 <!-- 📝 Форма -->
 <section>

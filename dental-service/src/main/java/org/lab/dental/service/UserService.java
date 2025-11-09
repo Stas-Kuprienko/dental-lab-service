@@ -13,9 +13,9 @@ public interface UserService {
 
     void setStatus(UUID id, UserStatus status);
 
-    UserEntity updateName(UUID id, String name);
+    void updateName(UUID id, String name);
 
-    UserEntity updateLogin(UUID id, String login);
+    void updateLogin(UUID id, String login);
 
     void updatePassword(UUID id, String email, String oldPassword, String newPassword);
 

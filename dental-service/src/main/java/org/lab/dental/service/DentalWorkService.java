@@ -18,6 +18,8 @@ public interface DentalWorkService {
 
     List<DentalWorkEntity> getAllForCurrentMonthByUserId(UUID userId);
 
+    List<DentalWorkEntity> getAllActualByUserId(UUID userId);
+
     List<DentalWorkEntity> getAllByClinicAndPatientAndUserId(UUID userId, @Nullable String clinic, @Nullable String patient);
 
     DentalWorkEntity update(DentalWorkEntity updatable);

@@ -5,7 +5,9 @@ import java.util.UUID;
 
 public interface VerificationService {
 
-    EmailVerificationTokenEntity createForUserId(UUID userId, String email);
+    void createForUserId(UUID userId, String email, boolean toChange);
+
+    void createTelegramOtpForUserId(UUID userId, String email, long chatId);
 
     boolean verifyUserEmail(UUID userId, String token);
 

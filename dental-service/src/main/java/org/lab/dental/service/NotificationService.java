@@ -1,12 +1,13 @@
 package org.lab.dental.service;
 
-import org.lab.dental.entity.EmailVerificationTokenEntity;
 import org.lab.event.EventMessage;
+import java.util.UUID;
 
 public interface NotificationService {
-    void sendEmailVerifyLink(EmailVerificationTokenEntity emailVerificationToken);
 
-    void sendEmailChangeLink(EmailVerificationTokenEntity emailVerificationToken);
+    void sendEmailVerifyLink(UUID userId, String email, String data);
+
+    void sendEmailChangeLink(UUID userId, String email, String data);
 
     void sendTelegramMessage(EventMessage message);
 }

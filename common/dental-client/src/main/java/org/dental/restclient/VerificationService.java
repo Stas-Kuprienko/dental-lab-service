@@ -4,7 +4,7 @@ import org.springframework.web.client.RestClient;
 
 public class VerificationService {
 
-    private static final String RESOURCE = "/verification/email";
+    private static final String RESOURCE = "/verification";
 
     private final RestClient restClient;
 
@@ -21,8 +21,18 @@ public class VerificationService {
         restClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
+                        .path("/email")
                         .queryParam("to-change", toChange)
                         .build())
+                .body(email)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void sendTelegramOtp(String email) {
+        restClient
+                .post()
+                .uri("/telegram-otp")
                 .body(email)
                 .retrieve()
                 .toBodilessEntity();
@@ -32,7 +42,7 @@ public class VerificationService {
         return restClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path(DentalLabRestClient.uriById(token))
+                        .path("/email" + DentalLabRestClient.uriById(token))
                         .queryParam("to-change", toChange)
                         .build())
                 .retrieve()
@@ -42,7 +52,7 @@ public class VerificationService {
     public boolean isVerified(String email) {
         return restClient
                 .post()
-                .uri(DentalLabRestClient.uriById(email))
+                .uri("/email" + DentalLabRestClient.uriById(email))
                 .retrieve()
                 .body(Boolean.class);
     }

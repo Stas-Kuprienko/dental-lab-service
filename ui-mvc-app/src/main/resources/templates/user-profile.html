@@ -18,6 +18,8 @@
 
     <div th:if="${message}" class="alert" th:text="${message}"></div>
 
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+
     <!-- Имя -->
     <div class="work">
         <label style="font-size:80%;">имя:</label><br>
@@ -140,9 +142,15 @@
         // Нет доступа к email
         noAccessBtn.addEventListener('click', () => {
             if (confirm('Нет доступа к почте? На ваш Telegram будет отправлен код.')) {
-                fetch(BASE_URL + 'main/user/change-email-otp', { method: 'POST' });
-                alert('Код отправлен в Telegram!');
-                startTimer([changeEmailBtn, noAccessBtn]);
+                fetch(BASE_URL + 'main/user/change-email-otp', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = BASE_URL + 'main/user/change-email-otp';
+                        } else {
+                            alert('Ошибка при отправке кода!');
+                        }
+                    })
+                    .catch(() => alert('Ошибка соединения с сервером.'));
             }
         });
 

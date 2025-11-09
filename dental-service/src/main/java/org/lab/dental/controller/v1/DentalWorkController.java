@@ -75,7 +75,7 @@ public class DentalWorkController {
     public List<DentalWork> findAllCurrentMonth(@RequestHeader("X-USER-ID") UUID userId) {
 
         log.info("From user '{}' received request to get all DentalWorks for current month", userId);
-        List<DentalWorkEntity> entities = dentalWorkService.getAllForCurrentMonthByUserId(userId);
+        List<DentalWorkEntity> entities = dentalWorkService.getAllActualByUserId(userId);
         return convertAndSetPhotoLinks(entities);
     }
 

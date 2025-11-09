@@ -18,7 +18,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -128,6 +127,16 @@ public class KeycloakCredentialService implements CredentialService {
         UserRepresentation representation = realmResource.users().get(userId.toString()).toRepresentation();
         representation.setEmail(newEmail);
         representation.setEmailVerified(true);
+        realmResource
+                .users()
+                .get(userId.toString())
+                .update(representation);
+    }
+
+    @Override
+    public void updateName(UUID userId, String newName) {
+        UserRepresentation representation = realmResource.users().get(userId.toString()).toRepresentation();
+        representation.setFirstName(newName);
         realmResource
                 .users()
                 .get(userId.toString())

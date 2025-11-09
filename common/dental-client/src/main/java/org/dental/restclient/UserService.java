@@ -36,22 +36,22 @@ public class UserService {
                 .body(User.class);
     }
 
-    public User updateName(String name) {
-        return restClient
+    public void updateName(String name) {
+        restClient
                 .put()
                 .uri("/name")
                 .body(name)
                 .retrieve()
-                .body(User.class);
+                .toBodilessEntity();
     }
 
-    public User updateEmail(String email) {
-        return restClient
+    public void updateEmail(String email) {
+        restClient
                 .put()
                 .uri("/email")
                 .body(email)
                 .retrieve()
-                .body(User.class);
+                .toBodilessEntity();
     }
 
     public boolean updatePassword(UpdatePasswordRequest request) {
