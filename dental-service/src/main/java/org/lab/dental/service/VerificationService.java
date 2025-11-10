@@ -1,6 +1,8 @@
 package org.lab.dental.service;
 
 import org.lab.dental.entity.EmailVerificationTokenEntity;
+import org.lab.dental.entity.ResetPasswordTokenEntity;
+
 import java.util.UUID;
 
 public interface VerificationService {
@@ -16,4 +18,16 @@ public interface VerificationService {
     EmailVerificationTokenEntity getByUserId(UUID userId);
 
     void deleteByUserId(UUID userId);
+
+    void createResetPasswordToken(String email);
+
+    ResetPasswordTokenEntity getResetPasswordTokenById(String email);
+
+    ResetPasswordTokenEntity getResetPasswordTokenByToken(String token);
+
+    boolean verifyResetPasswordToken(String email, String token);
+
+    boolean isVerifiedResetPasswordToken(String email);
+
+    void deleteResetPasswordToken(String email);
 }

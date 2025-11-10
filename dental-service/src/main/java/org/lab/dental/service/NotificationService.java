@@ -9,5 +9,7 @@ public interface NotificationService {
 
     void sendEmailChangeLink(UUID userId, String email, String data);
 
+    void sendResetPasswordLink(String email, String data);
+
     void sendTelegramMessage(EventMessage message);
 }

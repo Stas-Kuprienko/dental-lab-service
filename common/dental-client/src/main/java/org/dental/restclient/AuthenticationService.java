@@ -5,12 +5,14 @@ import org.lab.model.LoginCredential;
 import org.lab.request.ClientCredentialsRequest;
 import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
+import org.lab.request.ResetPasswordRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 public class AuthenticationService extends ClientExceptionDispatcher {
 
     private static final String RESOURCE = "/auth";
+    private static final String RESET_PASSWORD_URI = "/reset-password";
 
     private final RestClient restClient;
 
@@ -54,5 +56,42 @@ public class AuthenticationService extends ClientExceptionDispatcher {
                 .toEntity(AuthToken.class);
         check(response);
         return getBodyOrThrowNotFoundEx(response, "refresh token error");
+    }
+
+    public void sendResetPasswordLink(String email) {
+        restClient
+                .post()
+                .uri(RESET_PASSWORD_URI)
+                .body(email)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public boolean verifyResetPasswordToken(String token, String email) {
+        return restClient
+                .patch()
+                .uri(RESET_PASSWORD_URI + DentalLabRestClient.uriById(token))
+                .body(email)
+                .retrieve()
+                .body(Boolean.class);
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+        restClient
+                .put()
+                .uri(RESET_PASSWORD_URI)
+                .body(request)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void deleteResetPasswordToken(String email) {
+        restClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("email", email)
+                        .build())
+                .retrieve()
+                .toBodilessEntity();
     }
 }

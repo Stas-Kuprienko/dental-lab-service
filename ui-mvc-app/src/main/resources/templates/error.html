@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>DENTAL MECHANIC</title>
+    <title>DENTAL LAB SERVICE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -14,13 +14,20 @@
 <div th:replace="fragments/nav :: main-menu"></div>
 
 <section>
-    <div class="work">
+    <div th:if="${error}" class="work">
         <label style="font-size: 80%;">Ошибка:</label><br>
         <label style="font-size: 120%;" th:text="${error.code}">404</label>
+        <p style="font-size: 36px; font-weight: bold; margin-top: 20px;" th:text="${error.message}">
+            Сорян, что-то пошло не так, бывает...
+        </p>
     </div>
-    <p style="font-size: 36px; font-weight: bold; margin-top: 20px;" th:text="${error.message}">
-        сообщение
-    </p>
+    <div th:unless="${error}" class="work">
+        <label style="font-size: 80%;">Ошибка:</label><br>
+        <label style="font-size: 120%;">400</label>
+        <p style="font-size: 36px; font-weight: bold; margin-top: 20px;">
+            Сорян, что-то пошло не так, бывает...
+        </p>
+    </div>
 </section>
 </body>
 </html>

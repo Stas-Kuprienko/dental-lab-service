@@ -5,6 +5,7 @@ import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
 import org.lab.exception.InternalCustomException;
 import org.lab.exception.NotFoundCustomException;
+import org.lab.uimvc.controller.MvcControllerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.Locale;
 
 @Slf4j
@@ -44,6 +46,14 @@ public class MyExceptionHandler {
         }
         HttpStatus httpStatus = HttpStatus.resolve(exception.getStatusCode().value());
         return errorPage(httpStatus);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ModelAndView noResourceFound(NoResourceFoundException exception) {
+        log.info(exception.getMessage());
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName(MvcControllerUtil.MAIN_PAGE);
+        return modelAndView;
     }
 
     @ExceptionHandler(NotFoundCustomException.class)

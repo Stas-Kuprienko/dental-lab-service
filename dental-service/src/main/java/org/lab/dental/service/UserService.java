@@ -19,6 +19,8 @@ public interface UserService {
 
     void updatePassword(UUID id, String email, String oldPassword, String newPassword);
 
+    void logoutById(UUID userId);
+
     void delete(UUID id);
 
     void addTelegram(UUID id, Long chatId);

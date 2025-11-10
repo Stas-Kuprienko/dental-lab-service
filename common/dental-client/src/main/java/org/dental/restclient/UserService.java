@@ -65,6 +65,14 @@ public class UserService {
                 .is2xxSuccessful();
     }
 
+    public void logout() {
+        restClient
+                .post()
+                .uri("/logout")
+                .retrieve()
+                .toBodilessEntity();
+    }
+
     public boolean delete() {
         ResponseEntity<Void> response = restClient
                 .delete()

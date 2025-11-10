@@ -28,7 +28,7 @@ public class TokenRequestInterceptor implements ClientHttpRequestInterceptor {
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
-        if (!(request.getURI().getPath().equals("/api/v1/users") && request.getMethod().equals(HttpMethod.POST))) {
+        if (isSecured(request)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("keycloak")
                     .principal(authentication)
@@ -40,5 +40,12 @@ public class TokenRequestInterceptor implements ClientHttpRequestInterceptor {
             }
         }
         return execution.execute(request, body);
+    }
+
+
+    private boolean isSecured(HttpRequest request) {
+        return (!(request.getURI().getPath().equals("/api/v1/users") &&
+                request.getMethod().equals(HttpMethod.POST))) ||
+                request.getURI().getPath().startsWith("/api/v1/auth");
     }
 }

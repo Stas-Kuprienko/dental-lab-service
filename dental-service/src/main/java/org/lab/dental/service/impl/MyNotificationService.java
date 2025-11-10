@@ -18,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 public class MyNotificationService implements NotificationService {
 
     private static final String EMAIL_VERIFICATION_PATH = "/main/user/verify?token=";
+    private static final String RESET_PASSWORD_VERIFICATION_PATH = "/auth/reset-password-verify?email=%s&token=%s";
+    private static final Locale DEFAULT_LOCALE = Locale.of("RU");
 
     private final EmailNotificationService emailNotificationService;
     private final KafkaNotificationService kafkaNotificationService;
@@ -48,6 +50,21 @@ public class MyNotificationService implements NotificationService {
     }
 
     @Override
+    public void sendResetPasswordLink(String email, String data) {
+        log.info("The reset password token message is accepted to send to the email '{}'", email);
+        CompletableFuture.runAsync(() -> {
+            String link = serviceUrl + RESET_PASSWORD_VERIFICATION_PATH.formatted(email, data);
+            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKey.RESET_PASSWORD_LINK, link);
+            emailNotificationService.sendHtmlEmail(message, email);
+        }).thenAccept(v ->
+                log.info("The reset password token message was sent to the email '{}' successfully", email)
+        ).exceptionally(throwable -> {
+            log.error("Failure to send the reset password token message to the email '%s'".formatted(email),throwable.getMessage());
+            return null;
+        });
+    }
+
+    @Override
     public void sendTelegramMessage(EventMessage message) {
         log.info("The message '{}' is accepted to send to Kafka-service", message.getId());
         kafkaNotificationService
@@ -64,9 +81,8 @@ public class MyNotificationService implements NotificationService {
     private void sendEmailLink(UUID userId, String email, String data, LetterTemplateKey key) {
         log.info("The token message is accepted to send to the email for user '{}'", userId);
         CompletableFuture.runAsync(() -> {
-            Locale locale = Locale.of("RU");
             String link = serviceUrl + EMAIL_VERIFICATION_PATH + data;
-            String message = letterTemplateUtility.construct(locale, key, link);
+            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, key, link);
             emailNotificationService.sendHtmlEmail(message, email);
         }).thenAccept(v ->
                 log.info("The token message was sent to the email for user email '{}' successfully", email)

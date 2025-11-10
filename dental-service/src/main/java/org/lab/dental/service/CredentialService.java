@@ -19,7 +19,11 @@ public interface CredentialService {
 
     void updateName(UUID userId, String newName);
 
-    void setPassword(UUID userId, String email, String oldPassword, String newPassword);
+    void updatePassword(UUID userId, String email, String oldPassword, String newPassword);
+
+    void resetPassword(String email, String newPassword);
+
+    void logout(UUID userId);
 
     void deleteUser(UUID userId);
 }

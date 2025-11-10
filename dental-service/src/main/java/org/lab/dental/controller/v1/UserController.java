@@ -73,6 +73,12 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logoutById(@RequestHeader("X-USER-ID") UUID userId) {
+        userService.logoutById(userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping
     public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId) {
         userService.delete(userId);

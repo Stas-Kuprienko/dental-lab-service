@@ -144,7 +144,7 @@ public class KeycloakCredentialService implements CredentialService {
     }
 
     @Override
-    public void setPassword(UUID userId, String email, String oldPassword, String newPassword) {
+    public void updatePassword(UUID userId, String email, String oldPassword, String newPassword) {
         try {
             userLogin(email, oldPassword);
             CredentialRepresentation representation = new CredentialRepresentation();
@@ -158,6 +158,25 @@ public class KeycloakCredentialService implements CredentialService {
         } catch (HttpClientErrorException.Unauthorized e) {
             throw new ForbiddenCustomException("Incorrect credentials, access to the update is denied", e);
         }
+    }
+
+    @Override
+    public void resetPassword(String email, String newPassword) {
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setTemporary(false);
+        credentialRepresentation.setValue(newPassword);
+        String userId = realmResource.users().search(email).getFirst().getId();
+        UserResource resource = realmResource.users().get(userId);
+        resource.resetPassword(credentialRepresentation);
+    }
+
+    @Override
+    public void logout(UUID userId) {
+        realmResource
+                .users()
+                .get(userId.toString())
+                .logout();
     }
 
     @Override

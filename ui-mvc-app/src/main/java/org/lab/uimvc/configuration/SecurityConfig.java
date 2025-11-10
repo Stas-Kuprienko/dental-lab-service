@@ -1,6 +1,7 @@
 package org.lab.uimvc.configuration;
 
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
+import org.lab.uimvc.configuration.auth.CustomAccessDeniedHandler;
 import org.lab.uimvc.controller.MvcControllerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,22 +34,27 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> authz
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/error", "/error/**").permitAll()
                         .requestMatchers(MvcControllerUtil.LOGIN_PATH, "/sign-up", "/sign-up/*").anonymous()
+                        .requestMatchers("/auth/*").anonymous()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage(MvcControllerUtil.LOGIN_PATH)
                         .successHandler(authenticationSuccessHandler)
                 )
+                .exceptionHandling(exceptionHandler -> exceptionHandler
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .logout(logout -> logout
                         .logoutSuccessUrl(MvcControllerUtil.LOGIN_PATH + "?logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
                 ).build();
     }
 

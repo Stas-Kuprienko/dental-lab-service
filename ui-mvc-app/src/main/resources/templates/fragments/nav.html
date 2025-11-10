@@ -3,12 +3,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <nav class="menu" th:fragment="main-menu">
-    <header th:href="@{/main}"><strong>🦷 DENTAL LAB SERVICE 🦷</strong></header>
+    <header><strong>🦷 DENTAL LAB SERVICE 🦷</strong></header>
     <a th:href="@{/main/dental-works/new}">НОВАЯ ЗАПИСЬ</a>
     <a th:href="@{/main/dental-works}">СПИСОК ЗАПИСЕЙ</a>
     <a th:href="@{/main/product-map}">КАРТА РАБОТ</a>
     <a th:href="@{/main/user}">ПРОФИЛЬ</a>
-    <a style="float:right;" th:href="@{/logout}" onclick="return confirm('Выйти?')">
+    <a style="float:right;" th:href="@{/log-out}" onclick="return confirm('Выйти?')">
         <button>выйти</button>
     </a>
 </nav>

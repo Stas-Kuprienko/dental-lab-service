@@ -61,7 +61,15 @@ CREATE TABLE dental_lab.telegram_otp_link (
 CREATE TABLE dental_lab.email_verification_token (
     user_id UUID            PRIMARY KEY     REFERENCES dental_lab.users ON DELETE CASCADE,
     email VARCHAR(255)      NOT NULL,
-    token VARCHAR(127)       NOT NULL        UNIQUE,
+    token VARCHAR(127)      NOT NULL        UNIQUE,
     created_at TIMESTAMP    NOT NULL        DEFAULT now(),
+    is_verified BOOLEAN     NOT NULL        DEFAULT false
+);
+
+CREATE TABLE dental_lab.reset_password_token (
+    email VARCHAR(255)      PRIMARY KEY     REFERENCES dental_lab.users (login) ON DELETE CASCADE,
+    token VARCHAR(127)      NOT NULL        UNIQUE,
+    created_at TIMESTAMP    NOT NULL        DEFAULT now(),
+    expires_at TIMESTAMP    NOT NULL        DEFAULT now(),
     is_verified BOOLEAN     NOT NULL        DEFAULT false
 );

@@ -86,7 +86,12 @@ public class MyUserService implements UserService {
 
     @Override
     public void updatePassword(UUID id, String email, String oldPassword, String newPassword) {
-        credentialService.setPassword(id, email, oldPassword, newPassword);
+        credentialService.updatePassword(id, email, oldPassword, newPassword);
+    }
+
+    @Override
+    public void logoutById(UUID userId) {
+        credentialService.logout(userId);
     }
 
     @Override
