@@ -1,7 +1,7 @@
 package org.lab.uimvc.configuration.auth;
 
 import lombok.extern.slf4j.Slf4j;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,7 +53,7 @@ public class CredentialsUtility {
         String key = PREVIOUS_EMAIL + oidcUser.getSubject();
         String oldEmail = (String) attributes.get(key);
         if (oldEmail == null) {
-            throw new InternalCustomException("Rollback failure! The previous email value was not found for the user: " + oidcUser.getSubject());
+            throw new ApplicationCustomException("Rollback failure! The previous email value was not found for the user: " + oidcUser.getSubject());
         }
         refreshOidcUserEmail(oidcUser, oldEmail);
         refreshSecurityContext((OAuth2AuthenticationToken) authentication, oidcUser);
@@ -64,7 +64,7 @@ public class CredentialsUtility {
         String key = PREVIOUS_NAME + oidcUser.getSubject();
         String oldName = (String) attributes.get(key);
         if (oldName == null) {
-            throw new InternalCustomException("Rollback failure! The previous name value was not found for the user: " + oidcUser.getSubject());
+            throw new ApplicationCustomException("Rollback failure! The previous name value was not found for the user: " + oidcUser.getSubject());
         }
         refreshOidcUserName(oidcUser, oldName);
         refreshSecurityContext((OAuth2AuthenticationToken) authentication, oidcUser);
@@ -83,7 +83,7 @@ public class CredentialsUtility {
             field.set(oAuth2User, Collections.unmodifiableMap(new LinkedHashMap<>(map)));
             field.setAccessible(false);
         } catch (ReflectiveOperationException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class CredentialsUtility {
             field.set(oAuth2User, Collections.unmodifiableMap(new LinkedHashMap<>(map)));
             field.setAccessible(false);
         } catch (ReflectiveOperationException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 

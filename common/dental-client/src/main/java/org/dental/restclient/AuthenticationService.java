@@ -6,8 +6,8 @@ import org.lab.request.ClientCredentialsRequest;
 import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
 import org.lab.request.ResetPasswordRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
+import java.util.function.BiFunction;
 
 public class AuthenticationService extends ClientExceptionDispatcher {
 
@@ -26,36 +26,30 @@ public class AuthenticationService extends ClientExceptionDispatcher {
 
 
     public AuthToken clientLogin(String clientId, String clientSecret) {
-        ResponseEntity<AuthToken> response = restClient
+        return restClient
                 .post()
                 .uri("/login/client-id")
                 .body(new ClientCredentialsRequest(clientId, clientSecret))
                 .retrieve()
-                .toEntity(AuthToken.class);
-        check(response);
-        return getBodyOrThrowNotFoundEx(response, "authentication error");
+                .body(AuthToken.class);
     }
 
     public LoginCredential userLogin(String email, String password) {
-        ResponseEntity<LoginCredential> response = restClient
+        return restClient
                 .post()
                 .uri("/login")
                 .body(new LoginRequest(email, password))
                 .retrieve()
-                .toEntity(LoginCredential.class);
-        check(response);
-        return getBodyOrThrowNotFoundEx(response, "authentication error");
+                .body(LoginCredential.class);
     }
 
     public AuthToken refresh(String refreshToken) {
-        ResponseEntity<AuthToken> response = restClient
+        return restClient
                 .post()
                 .uri("/refresh")
                 .body(new RefreshTokenRequest(refreshToken))
                 .retrieve()
-                .toEntity(AuthToken.class);
-        check(response);
-        return getBodyOrThrowNotFoundEx(response, "refresh token error");
+                .body(AuthToken.class);
     }
 
     public void sendResetPasswordLink(String email) {
@@ -93,5 +87,9 @@ public class AuthenticationService extends ClientExceptionDispatcher {
                         .build())
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    public BiFunction<String, String, AuthToken> getClientAuthenticationFunction() {
+        return this::clientLogin;
     }
 }

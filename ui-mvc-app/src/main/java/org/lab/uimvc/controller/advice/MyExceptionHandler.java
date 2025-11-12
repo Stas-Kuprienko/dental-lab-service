@@ -3,12 +3,10 @@ package org.lab.uimvc.controller.advice;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.NotFoundCustomException;
-import org.lab.uimvc.controller.MvcControllerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,9 +49,7 @@ public class MyExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ModelAndView noResourceFound(NoResourceFoundException exception) {
         log.info(exception.getMessage());
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName(MvcControllerUtil.MAIN_PAGE);
-        return modelAndView;
+        return errorPage("NO_PAGE", HttpStatus.NOT_FOUND.value());
     }
 
     @ExceptionHandler(NotFoundCustomException.class)
@@ -81,19 +77,11 @@ public class MyExceptionHandler {
     public ModelAndView forbidden(ForbiddenCustomException exception) {
         log.warn(exception.getMessage());
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
-        String message = messageSource.getMessage(httpStatus.name() + "_TELEGRAM", null, DEFAULT_LOCALE);
-        ErrorResponse error = ErrorResponse.builder()
-                .code(String.valueOf(httpStatus.value()))
-                .message(message)
-                .build();
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("error", error);
-        modelAndView.setViewName(ERROR_PAGE);
-        return modelAndView;
+        return errorPage(httpStatus.name() + "_TELEGRAM", httpStatus.value());
     }
 
-    @ExceptionHandler(InternalCustomException.class)
-    public ModelAndView internal(InternalCustomException exception) {
+    @ExceptionHandler(ApplicationCustomException.class)
+    public ModelAndView internal(ApplicationCustomException exception) {
       log.error(exception.getMessage(), exception);
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       return errorPage(httpStatus);
@@ -108,15 +96,21 @@ public class MyExceptionHandler {
 
 
     private ModelAndView errorPage(HttpStatus httpStatus) {
-        String message;
-        try {
-            message =  messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
-        } catch (NoSuchMessageException e) {
-            log.info(e.getMessage());
-            message = messageSource.getMessage("DEFAULT", null, DEFAULT_LOCALE);
-        }
+        String message =  messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
         ErrorResponse error = ErrorResponse.builder()
                 .code(String.valueOf(httpStatus.value()))
+                .message(message)
+                .build();
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("error", error);
+        modelAndView.setViewName(ERROR_PAGE);
+        return modelAndView;
+    }
+
+    private ModelAndView errorPage(String messageCode, int httpStatus) {
+        String message = messageSource.getMessage(messageCode, null, DEFAULT_LOCALE);
+        ErrorResponse error = ErrorResponse.builder()
+                .code(String.valueOf(httpStatus))
                 .message(message)
                 .build();
         ModelAndView modelAndView = new ModelAndView();
@@ -128,9 +122,9 @@ public class MyExceptionHandler {
     private ModelAndView conflictError(String exceptionMessage) {
         HttpStatus httpStatus = HttpStatus.CONFLICT;
         String email = exceptionMessage.split("\"")[1];
-        String message =  messageSource.getMessage(httpStatus.name(), new Object[]{email}, DEFAULT_LOCALE);
+        String message = messageSource.getMessage(httpStatus.name(), new Object[]{email}, DEFAULT_LOCALE);
         ErrorResponse error = ErrorResponse.builder()
-                .code(String.valueOf(httpStatus.value()))
+                .code(String.valueOf(httpStatus))
                 .message(message)
                 .build();
         ModelAndView modelAndView = new ModelAndView();

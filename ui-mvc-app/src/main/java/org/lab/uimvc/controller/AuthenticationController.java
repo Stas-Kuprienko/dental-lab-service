@@ -79,6 +79,8 @@ public class AuthenticationController extends MvcControllerUtil {
     public String verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, Model model) {
         boolean result = authenticationService.verifyResetPasswordToken(token, email);
         if (result) {
+            model.addAttribute("email", email);
+            model.addAttribute("token", token);
             return "change-password";
         } else {
             String message = messageSource.getMessage(WRONG_TOKEN, null, DEFAULT_LOCALE);
@@ -92,7 +94,8 @@ public class AuthenticationController extends MvcControllerUtil {
     }
 
     @PostMapping("/auth/change-password")
-    public String changePassword(@RequestParam("email") String email,
+    public String changePassword(@RequestParam("token") String token,
+                                 @RequestParam("email") String email,
                                  @RequestParam("new-password") String newPassword,
                                  @RequestParam("confirm-password") String confirmPassword,
                                  RedirectAttributes redirect) {

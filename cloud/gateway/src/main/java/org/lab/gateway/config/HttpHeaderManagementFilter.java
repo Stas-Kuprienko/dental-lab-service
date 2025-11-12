@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class HttpHeaderManagementFilter implements GatewayFilter {
 
+    private static final String DENTAL_LAB_CLIENT_ID = "dental-lab-client";
+    private static final String UI_MVC_CLIENT_ID = "ui-mvc-client";
     private static final String TELEGRAM_CLIENT_ID = "telegram-bot-client";
     private static final String USER_ID_HEADER = "X-USER-ID";
     private static final String SERVICE_ID_HEADER = "X-SERVICE-ID";
@@ -36,14 +38,15 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
         String clientId = jwtAuth.getToken().getClaimAsString(CLIENT_ID_CLAIM);
         return switch (clientId) {
             case TELEGRAM_CLIENT_ID -> telegramBotClient(exchange);
+            case UI_MVC_CLIENT_ID -> uiMvcClient(exchange);
             case null -> throw new ForbiddenCustomException("client ID is null, but must be set");
             default -> dentalLabClient(exchange, jwtAuth);
         };
     }
 
 
-    private static ServerWebExchange dentalLabClient(ServerWebExchange exchange, JwtAuthenticationToken jwtAuth) {
-        log.info("request from dental-lab-client");
+    private ServerWebExchange dentalLabClient(ServerWebExchange exchange, JwtAuthenticationToken jwtAuth) {
+        log.info("request from {}", DENTAL_LAB_CLIENT_ID);
         String userId = jwtAuth.getToken().getSubject();
         ServerHttpRequest mutatedRequest = exchange
                 .getRequest()
@@ -53,8 +56,19 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
         return exchange.mutate().request(mutatedRequest).build();
     }
 
+    private ServerWebExchange uiMvcClient(ServerWebExchange exchange) {
+        log.info("request from {}", UI_MVC_CLIENT_ID);
+        ServerHttpRequest mutatedRequest = exchange
+                .getRequest()
+                .mutate()
+                .header(SERVICE_ID_HEADER, UI_MVC_CLIENT_ID)
+                .build();
+        log.info("set HTTP header {}:{}", SERVICE_ID_HEADER, UI_MVC_CLIENT_ID);
+        return exchange.mutate().request(mutatedRequest).build();
+    }
+
     private ServerWebExchange telegramBotClient(ServerWebExchange exchange) {
-        log.info("request from telegram-bot-client");
+        log.info("request from {}", TELEGRAM_CLIENT_ID);
         if (!exchange.getRequest().getHeaders().containsKey(USER_ID_HEADER)) {
             if (isTelegramClientPermitted(exchange)) {
                 ServerHttpRequest mutatedRequest = exchange
@@ -70,7 +84,6 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
         }
         return exchange;
     }
-
 
     private boolean isTelegramClientPermitted(ServerWebExchange exchange) {
         String path = exchange.getRequest().getURI().getPath();

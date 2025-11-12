@@ -5,7 +5,7 @@ import org.lab.dental.entity.WorkPhotoFilenameEntity;
 import org.lab.dental.repository.WorkPhotoFilenameRepository;
 import org.lab.dental.service.S3ClientService;
 import org.lab.dental.service.WorkPhotoFileService;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,7 +80,7 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
             log.info("File '{}' is found", filename);
             return new WorkPhotoFileData(bytes, filename);
         } catch (IOException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -92,7 +92,7 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
             try (inputStream) {
                 files.add(new WorkPhotoFileData(inputStream.readAllBytes(), filename));
             } catch (IOException e) {
-                throw new InternalCustomException(e);
+                throw new ApplicationCustomException(e);
             }
         }
         log.info("Found {} files by parameters: dentalWorkId='{}'", files.size(), workId);

@@ -1,7 +1,7 @@
 package org.lab.dental.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
@@ -48,7 +48,7 @@ public class LetterTemplateUtility {
                 throw new FileNotFoundException("No templates directory");
             }
         } catch (FileNotFoundException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
         Stream.of(templateArray)
                 .filter(file -> !file.isDirectory())
@@ -74,7 +74,7 @@ public class LetterTemplateUtility {
             log.info("Template file ({}) is loaded", file.getName());
             return stringBuilder.toString();
         } catch (IOException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 }

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,7 +37,7 @@ public class XLSXFileTool {
 
         } catch (IOException e) {
             log.error("Error while creating Excel report", e);
-            throw new InternalCustomException("Failed to generate Excel file", e);
+            throw new ApplicationCustomException("Failed to generate Excel file", e);
         }
     }
 }

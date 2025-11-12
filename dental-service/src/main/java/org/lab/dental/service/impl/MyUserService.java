@@ -9,7 +9,7 @@ import org.lab.dental.repository.UserRepository;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.UserService;
 import org.lab.enums.UserStatus;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class MyUserService implements UserService {
             return user;
         } catch (PersistenceException | DataAccessException e) {
             credentialService.deleteUser(id);
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -80,7 +80,7 @@ public class MyUserService implements UserService {
             userRepository.updateLogin(id, newLogin);
         } catch (PersistenceException e) {
             credentialService.updateEmail(id, oldLogin);
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -102,7 +102,7 @@ public class MyUserService implements UserService {
             credentialService.deleteUser(id);
         } catch (Exception e) {
             userRepository.save(user);
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.dental.restclient;
 
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
 
 public class DentalLabRestClient {
@@ -15,8 +16,9 @@ public class DentalLabRestClient {
     public final WorkPhotoLinkService PHOTO_LINKS;
 
 
-    public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder) {
+    public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
         AUTHENTICATION = new AuthenticationService(baseUrl, restClientBuilder);
+        restClientBuilder.requestInterceptor(interceptor);
         USERS = new UserService(baseUrl, restClientBuilder);
         VERIFICATION = new VerificationService(baseUrl, restClientBuilder);
         TELEGRAM_CHATS = new TelegramChatService(baseUrl, restClientBuilder);

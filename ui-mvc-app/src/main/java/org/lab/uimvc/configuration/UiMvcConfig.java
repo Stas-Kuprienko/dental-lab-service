@@ -30,8 +30,9 @@ public class UiMvcConfig {
     public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,
                                                    RestClient.Builder restClientBuilder,
                                                    TokenRequestInterceptor interceptor) {
-        restClientBuilder.requestInterceptor(interceptor);
-        return new DentalLabRestClient(url, restClientBuilder);
+        DentalLabRestClient dentalLabRestClient = new DentalLabRestClient(url, restClientBuilder, interceptor);
+        interceptor.setAuthentication(dentalLabRestClient.AUTHENTICATION.getClientAuthenticationFunction());
+        return dentalLabRestClient;
     }
 
 

@@ -8,7 +8,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.lab.dental.service.CredentialService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +73,7 @@ public class KeycloakCredentialService implements CredentialService {
                 throw new KeycloakEmailDuplicationException(email);
             } else {
                 String statusInfo = response.getStatusInfo().toString();
-                throw InternalCustomException.keycloakAuthFail(email, statusInfo);
+                throw ApplicationCustomException.keycloakAuthFail(email, statusInfo);
             }
         }
     }

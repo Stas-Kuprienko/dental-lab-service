@@ -308,3 +308,51 @@ select {
     padding: 10px;
     cursor: pointer;
 }
+
+
+/* Адаптация под планшет */
+@media (max-width: 992px) {
+    body {
+        font-size: 16px;
+        width: 90%;
+    }
+
+    nav.menu {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    nav.menu a {
+        margin: 6px 0;
+    }
+}
+
+/* Под смартфон */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+        width: 95%;
+        padding: 10px;
+    }
+
+    nav.menu {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .work {
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    input, select, button, textarea {
+        width: 100%;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    .small-button, .medium-button {
+        width: 100%;
+        margin-top: 6px;
+    }
+}

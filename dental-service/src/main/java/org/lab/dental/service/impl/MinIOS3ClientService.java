@@ -4,7 +4,7 @@ import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
 import org.lab.dental.service.S3ClientService;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class MinIOS3ClientService implements S3ClientService {
                     .contentType(file.getContentType())
                     .build());
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -63,7 +63,7 @@ public class MinIOS3ClientService implements S3ClientService {
         try {
             return minioClient.getPresignedObjectUrl(args);
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -77,7 +77,7 @@ public class MinIOS3ClientService implements S3ClientService {
                             .build()
             );
         } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 
@@ -89,7 +89,7 @@ public class MinIOS3ClientService implements S3ClientService {
                     .object(filename)
                     .build());
         } catch (MinioException | IOException | GeneralSecurityException e) {
-            throw new InternalCustomException(e);
+            throw new ApplicationCustomException(e);
         }
     }
 }

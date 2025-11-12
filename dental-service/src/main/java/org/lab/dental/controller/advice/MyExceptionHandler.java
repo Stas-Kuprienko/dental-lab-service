@@ -5,7 +5,7 @@ import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
-import org.lab.exception.InternalCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -92,8 +92,8 @@ public class MyExceptionHandler {
                 .body(e.email);
     }
 
-    @ExceptionHandler(InternalCustomException.class)
-    public ResponseEntity<ErrorResponse> internalCustomExceptionHandle(InternalCustomException e) {
+    @ExceptionHandler(ApplicationCustomException.class)
+    public ResponseEntity<ErrorResponse> internalCustomExceptionHandle(ApplicationCustomException e) {
         log.error(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity

@@ -15,7 +15,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/main/dental-works/{id}/photo")
-public class PhotoController {
+public class WorkPhotoController {
 
     private static final String URL = "/main/dental-works/%d/photo";
 
@@ -24,7 +24,7 @@ public class PhotoController {
 
 
     @Autowired
-    public PhotoController(DentalLabRestClient dentalLabRestClient) {
+    public WorkPhotoController(DentalLabRestClient dentalLabRestClient) {
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
         this.workPhotoLinkService = dentalLabRestClient.PHOTO_LINKS;
     }

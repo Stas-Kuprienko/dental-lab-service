@@ -30,7 +30,7 @@
     <button type="submit" style="font-size:18px;width:90px;">LOG IN</button>
   </form>
     <br>
-    <a action="${properties.resetPassword}" method="get" style="color:white">
+    <a href="${properties.resetPassword}" style="color:white">
         Забыли пароль?
     </a>
   <br><br>
