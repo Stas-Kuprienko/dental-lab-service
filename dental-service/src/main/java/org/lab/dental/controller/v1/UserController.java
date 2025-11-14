@@ -35,7 +35,8 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid NewUser newUser) {
+    public ResponseEntity<?> create(@RequestHeader("X-SERVICE-ID") String serviceId,
+                                    @RequestBody @Valid NewUser newUser) {
         UserEntity entity = userService.create(newUser.getLogin(), newUser.getName(), newUser.getPassword());
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId()))

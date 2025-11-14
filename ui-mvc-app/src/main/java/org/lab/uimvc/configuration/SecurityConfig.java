@@ -1,7 +1,7 @@
 package org.lab.uimvc.configuration;
 
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
-import org.lab.uimvc.configuration.auth.CustomAccessDeniedHandler;
+import org.lab.uimvc.configuration.auth.MyAccessDeniedHandler;
 import org.lab.uimvc.controller.MvcControllerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,13 +28,13 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Autowired
-    public SecurityConfig(@Qualifier("customAuthenticationSuccessHandler") AuthenticationSuccessHandler authenticationSuccessHandler) {
+    public SecurityConfig(@Qualifier("myAuthenticationSuccessHandler") AuthenticationSuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, MyAccessDeniedHandler accessDeniedHandler) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth

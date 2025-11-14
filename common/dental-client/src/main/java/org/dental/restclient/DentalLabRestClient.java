@@ -18,10 +18,10 @@ public class DentalLabRestClient {
 
 
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
-        RestClient restClient = restClientBuilder.baseUrl(baseUrl).build();
-        AUTHENTICATION = new AuthenticationService(restClient);
+        restClientBuilder.baseUrl(baseUrl);
+        AUTHENTICATION = new AuthenticationService(restClientBuilder.build());
+        RestClient restClient = restClientBuilder.requestInterceptor(interceptor).build();
         CREDENTIALS = new CredentialService(restClient);
-        restClientBuilder.requestInterceptor(interceptor);
         USERS = new UserService(restClient);
         VERIFICATION = new VerificationService(restClient);
         TELEGRAM_CHATS = new TelegramChatService(restClient);

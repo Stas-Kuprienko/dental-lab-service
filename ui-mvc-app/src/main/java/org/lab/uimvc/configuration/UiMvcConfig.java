@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.dental.restclient.DentalLabRestClient;
 import org.lab.model.ProductMap;
-import org.lab.uimvc.configuration.auth.TokenRequestInterceptor;
+import org.lab.uimvc.configuration.auth.ClientAuthenticationManager;
+import org.lab.uimvc.configuration.auth.MyRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,15 @@ public class UiMvcConfig {
 
 
     @Bean
-    public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,
-                                                   RestClient.Builder restClientBuilder,
-                                                   TokenRequestInterceptor interceptor) {
+    public DentalLabRestClient dentalLabRestClient(RestClient.Builder restClientBuilder,
+                                                   MyRequestInterceptor interceptor,
+                                                   @Value("${project.variables.dental-lab-api.url}") String url,
+                                                   @Value("${project.variables.keycloak.service-client-id}") String clientId,
+                                                   @Value("${project.variables.keycloak.service-client-secret}") String clientSecret) {
         DentalLabRestClient dentalLabRestClient = new DentalLabRestClient(url, restClientBuilder, interceptor);
-        interceptor.setAuthentication(dentalLabRestClient.AUTHENTICATION.getClientAuthenticationFunction());
+        ClientAuthenticationManager authenticationManager = new ClientAuthenticationManager(dentalLabRestClient.AUTHENTICATION, clientId, clientSecret);
+        authenticationManager.authenticate();
+        interceptor.setAuthentication(authenticationManager);
         return dentalLabRestClient;
     }
 

@@ -11,7 +11,7 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class MyAccessDeniedHandler implements AccessDeniedHandler {
 
 
     @Override

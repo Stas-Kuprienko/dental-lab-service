@@ -1,9 +1,7 @@
 package org.lab.uimvc.configuration.auth;
 
 import org.lab.exception.ApplicationCustomException;
-import org.lab.model.AuthToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -17,23 +15,16 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
-import java.util.function.BiFunction;
 
 @Component
-public class TokenRequestInterceptor implements ClientHttpRequestInterceptor {
+public class MyRequestInterceptor implements ClientHttpRequestInterceptor {
 
     private final OAuth2AuthorizedClientManager authorizedClientManager;
-    private final String clientId;
-    private final String clientSecret;
-    private BiFunction<String, String, AuthToken> authentication;
+    private ClientAuthenticationManager authenticationManager;
 
     @Autowired
-    public TokenRequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager,
-                                   @Value("${project.variables.keycloak.service-client-id}") String clientId,
-                                   @Value("${project.variables.keycloak.service-client-secret}") String clientSecret) {
+    public MyRequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager) {
         this.authorizedClientManager = authorizedClientManager;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
     }
 
 
@@ -53,25 +44,25 @@ public class TokenRequestInterceptor implements ClientHttpRequestInterceptor {
                         "Unauthorized user trying to make request for secured endpoint: " + request.getURI().getPath());
             }
         } else {
-            if (authentication == null) {
-                throw new ApplicationCustomException("Authentication function is not set for Request Interceptor!");
+            if (authenticationManager == null) {
+                throw new ApplicationCustomException("AuthenticationManager is not set for Request Interceptor!");
             }
-            AuthToken token = authentication.apply(clientId, clientSecret);
-            request.getHeaders().setBearerAuth(token.getAccessToken());
+            request.getHeaders().setBearerAuth(authenticationManager.accessToken());
         }
         return execution.execute(request, body);
     }
 
-    public void setAuthentication(BiFunction<String, String, AuthToken> authentication) {
-        this.authentication = authentication;
+    public void setAuthentication(ClientAuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
 
     private boolean isSecured(HttpRequest request) {
+        String path = request.getURI().getPath();
+        HttpMethod method = request.getMethod();
         return !(
-                (request.getURI().getPath().equals("/api/v1/users") && request.getMethod().equals(HttpMethod.POST))
+                (path.equals("/api/v1/users") && method.equals(HttpMethod.POST))
                 ||
-                request.getURI().getPath().startsWith("/api/v1/auth/")
-        );
+                (path.startsWith("/credentials")));
     }
 }

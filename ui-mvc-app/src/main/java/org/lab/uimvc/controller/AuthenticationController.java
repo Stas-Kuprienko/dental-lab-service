@@ -1,6 +1,6 @@
 package org.lab.uimvc.controller;
 
-import org.dental.restclient.AuthenticationService;
+import org.dental.restclient.CredentialService;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
 import org.lab.model.ErrorResponse;
@@ -27,14 +27,14 @@ public class AuthenticationController extends MvcControllerUtil {
     private static final String PASSWORD_IS_UPDATED = "PASSWORD_IS_UPDATED";
 
     private final UserService userService;
-    private final AuthenticationService authenticationService;
+    private final CredentialService credentialService;
     private final MessageSource messageSource;
 
 
     @Autowired
     public AuthenticationController(DentalLabRestClient dentalLabRestClient, MessageSource messageSource) {
         this.userService = dentalLabRestClient.USERS;
-        this.authenticationService = dentalLabRestClient.AUTHENTICATION;
+        this.credentialService = dentalLabRestClient.CREDENTIALS;
         this.messageSource = messageSource;
     }
 
@@ -69,7 +69,7 @@ public class AuthenticationController extends MvcControllerUtil {
 
     @PostMapping("/auth/reset-password")
     public String resetPassword(@RequestParam("login") String email, RedirectAttributes redirect) {
-        authenticationService.sendResetPasswordLink(email);
+        credentialService.sendResetPasswordLink(email);
         String message = messageSource.getMessage(RESET_PASSWORD_LINK_SENT, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
         return REDIRECT + "/auth/reset-password";
@@ -77,7 +77,7 @@ public class AuthenticationController extends MvcControllerUtil {
 
     @GetMapping("/auth/reset-password-verify")
     public String verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, Model model) {
-        boolean result = authenticationService.verifyResetPasswordToken(token, email);
+        boolean result = credentialService.verifyResetPasswordToken(token, email);
         if (result) {
             model.addAttribute("email", email);
             model.addAttribute("token", token);
@@ -108,7 +108,7 @@ public class AuthenticationController extends MvcControllerUtil {
                     .email(email)
                     .newPassword(newPassword)
                     .build();
-            authenticationService.resetPassword(request);
+            credentialService.resetPassword(request);
             String message = messageSource.getMessage(PASSWORD_IS_UPDATED, null, DEFAULT_LOCALE);
             redirect.addFlashAttribute("infoMessage", message);
             return REDIRECT + LOGIN_PATH;
