@@ -110,7 +110,7 @@ public class AuthenticationController extends MvcControllerUtil {
                     .build();
             credentialService.resetPassword(request);
             String message = messageSource.getMessage(PASSWORD_IS_UPDATED, null, DEFAULT_LOCALE);
-            redirect.addFlashAttribute("infoMessage", message);
+            redirect.addFlashAttribute("message", message);
             return REDIRECT + LOGIN_PATH;
         }
     }

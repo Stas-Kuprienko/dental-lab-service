@@ -4,13 +4,16 @@
 <body>
 <nav class="menu" th:fragment="main-menu">
     <header><strong>🦷 DENTAL LAB SERVICE 🦷</strong></header>
+    <div class="burger" onclick="document.body.classList.toggle('menu-open')">
+        ☰
+    </div>
     <a th:href="@{/main/dental-works/new}">НОВАЯ ЗАПИСЬ</a>
     <a th:href="@{/main/dental-works}">СПИСОК ЗАПИСЕЙ</a>
     <a th:href="@{/main/product-map}">КАРТА РАБОТ</a>
     <a th:href="@{/main/user}">ПРОФИЛЬ</a>
-    <a style="float:right;" th:href="@{/log-out}" onclick="return confirm('Выйти?')">
+    <form style="float:right;" th:action="@{/log-out}" onclick="return confirm('Выйти?')">
         <button>выйти</button>
-    </a>
+    </form>
 </nav>
 </body>
 </html>

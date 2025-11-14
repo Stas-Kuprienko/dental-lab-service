@@ -63,6 +63,6 @@ public class MyRequestInterceptor implements ClientHttpRequestInterceptor {
         return !(
                 (path.equals("/api/v1/users") && method.equals(HttpMethod.POST))
                 ||
-                (path.startsWith("/credentials")));
+                (path.startsWith("/api/v1/credentials/")));
     }
 }

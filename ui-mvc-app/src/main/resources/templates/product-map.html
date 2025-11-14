@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DENTAL LAB SERVICE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
@@ -14,27 +15,27 @@
 <section>
     <!-- 🔧 Добавить продукт -->
     <h3 style="text-align: left;">
-        <a class="tr" id="product-new" style="cursor: pointer;">+ Новый продукт</a>
+        <a class="tr" id="product-new" style="cursor: pointer;">+ Новый вид работы</a>
     </h3>
 
     <div id="product-form" style="display:none; margin-bottom: 1em;">
         <form method="post" th:action="@{/main/product-map}"
               style="display: flex; align-items: center; gap: 1em; flex-wrap: wrap;">
-            <label for="title">продукт:</label>
+            <label for="title">вид работы:</label>
             <input id="title" type="text" name="title" required style="width: 160px; font-size: 16px;">
-
+            <br>
             <label for="price">цена:</label>
             <input id="price" type="number" name="price" min="0" required style="width: 100px; font-size: 16px;">
-
-            <input type="submit" value="Сохранить" style="font-size: 16px; font-weight: bold; height: 32px; width: 96px;">
+            <br>
+            <input type="submit" value="Сохранить" style="font-size: 16px; font-weight: bold; height: 32px; width: auto;">
         </form>
     </div>
 
     <!-- 📋 Таблица -->
-    <div class="table" style="width:75%;">
+    <div class="table" style="width:auto;">
         <div class="thead">
             <div class="tr">
-                <div class="th">ПРОДУКТ</div>
+                <div class="th">ВИД РАБОТЫ</div>
                 <div class="th">ЦЕНА</div>
                 <div class="th"> </div>
             </div>

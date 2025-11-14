@@ -117,7 +117,8 @@ a.tr:hover {
     overflow: auto;
     position: fixed;
     top: 0;
-    width: 100%;
+    width: 98%;
+    margin-right: 4px;
 }
 
 .menu a {
@@ -265,7 +266,7 @@ select {
     padding: 1%;
     margin: auto;
     border: 2px solid dimGrey;
-    width: 65%;
+    width: 80%;
     min-height: 32px;
     float: center;
 }
@@ -309,50 +310,138 @@ select {
     cursor: pointer;
 }
 
-
-/* Адаптация под планшет */
-@media (max-width: 992px) {
-    body {
-        font-size: 16px;
-        width: 90%;
-    }
-
-    nav.menu {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    nav.menu a {
-        margin: 6px 0;
-    }
+/* ================================
+   АДАПТИВНОЕ МЕНЮ + ГАМБУРГЕР
+================================ */
+.menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-image: linear-gradient(#808080, #1f1f1f);
+    padding: 8px 0;
+    z-index: 1000;
 }
 
-/* Под смартфон */
-@media (max-width: 600px) {
-    body {
-        font-size: 14px;
-        width: 95%;
-        padding: 10px;
+.menu header {
+    font-size: 22px;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ссылки меню (ПК) */
+.menu a {
+    float: left;
+    padding: 14px 16px;
+    font-size: 16px;
+    color: white;
+    text-decoration: none;
+}
+
+.menu a:hover {
+    background-color: dimGrey;
+}
+
+/* кнопка ГАМБУРГЕР (мобилки) */
+.burger {
+    display: none;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    margin-left: 12px;
+}
+
+/* ===============================
+        М О Б И Л Ь Н О Е
+   =============================== */
+
+@media (max-width: 768px) {
+
+    /* показываем гамбургер */
+    .burger {
+        display: block;
     }
 
-    nav.menu {
-        flex-direction: column;
-        gap: 8px;
+    /* скрываем все ссылки меню пока меню закрыто */
+    .menu a {
+        display: none;
+        float: none;
+        text-align: center;
+        padding: 12px;
+        font-size: 20px;
+        border-top: 1px solid #3a3a3a;
+    }
+
+    /* меню в мобильном виде — колонкой */
+    body.menu-open .menu a {
+        display: block;
+    }
+
+    /* заголовок уменьшаем чтобы не вылезал */
+    .menu header {
+        font-size: 18px;
+        padding-bottom: 4px;
     }
 
     .work {
-        margin-bottom: 18px;
-        text-align: center;
+        width: auto;
     }
 
-    input, select, button, textarea {
-        width: 100%;
+
+    /* Контейнер нижнего меню */
+    .low-menu {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: auto;          /* не растягиваем на ширину */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 10px;
+        gap: 10px;
+        background: transparent;
+    }
+
+    /* Каждая кнопка */
+    .low-menu a,
+    .low-menu form {
+        width: auto;
+        display: block;
+        text-align: right;
+    }
+
+    .low-menu button,
+    .low-menu input[type="submit"] {
+        width: 150px;               /* одинаковая ширина для красоты */
         font-size: 16px;
-        box-sizing: border-box;
+        padding: 8px;
+        margin: 0;
     }
 
-    .small-button, .medium-button {
+    /* Выпадающие формы под кнопками */
+    .low-menu div {
+        position: relative;
+        right: 0;
+        width: 180px;
+        background: rgba(255,255,255,0.95);
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .low-menu div form {
         width: 100%;
-        margin-top: 6px;
+    }
+
+    .medium-button {
+        width: 100%;
+    }
+}
+
+/* слегка уменьшить размер на ультрамаленьких экранах */
+@media (max-width: 420px) {
+    .menu header {
+        font-size: 16px;
     }
 }

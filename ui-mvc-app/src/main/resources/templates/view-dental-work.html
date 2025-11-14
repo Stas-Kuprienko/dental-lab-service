@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DENTAL LAB SERVICE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
@@ -101,11 +102,11 @@
                 <option th:each="item : ${map}"
                         th:value="${item.id}"
                         th:text="${item.title}">Product</option>
-            </select>
+            </select><br>
             <label for="quantity">количество:</label>
             <input style="width:64px;" type="number" id="quantity" name="quantity" min="0" max="32" required/><br>
-            <label>дата выполнения:</label>
-            <input type="date" name="completeAt" required />
+            <label>назначено:</label>
+            <input type="date" name="completeAt" required /><br>
             <button type="submit" name="id" th:value="${work.id}">✅</button>
             <button type="button" onclick="hideForm('product-label', 'add-product')">❌</button>
         </form><br>
@@ -113,9 +114,9 @@
         <!-- Список продуктов -->
         <div th:each="product : ${work.products}" class="tr" th:id="'product-row-' + ${product.id}" style="margin-top:8px; text-align:left; width:100%; max-width:600px;">
             <div class="td">
-                <b th:text="${product.title}">Название</b>: <span th:text="${product.quantity}">1</span> -—-
+                <b th:text="${product.title}">Название</b>: <span th:text="${product.quantity}">1</span><br>
                 <small>
-                    дата выполнения:
+                    назначено:
                     <span class="complete-label"
                           th:text="${#temporals.format(product.completeAt, 'dd-MM-yyyy')}"
                           th:attr="data-id=${product.id}, data-date=${#temporals.format(product.completeAt, 'yyyy-MM-dd')}" style="cursor:pointer; text-decoration: underline;">🗓️</span>
