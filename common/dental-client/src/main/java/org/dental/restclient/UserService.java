@@ -13,17 +13,15 @@ public class UserService {
     private final RestClient restClient;
 
 
-    UserService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    UserService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
     public User signUp(NewUser newUser) {
         return restClient
                 .post()
+                .uri(RESOURCE)
                 .body(newUser)
                 .retrieve()
                 .body(User.class);
@@ -32,6 +30,7 @@ public class UserService {
     public User get() {
         return restClient
                 .get()
+                .uri(RESOURCE)
                 .retrieve()
                 .body(User.class);
     }
@@ -39,7 +38,7 @@ public class UserService {
     public void updateName(String name) {
         restClient
                 .put()
-                .uri("/name")
+                .uri(RESOURCE + "/name")
                 .body(name)
                 .retrieve()
                 .toBodilessEntity();
@@ -48,7 +47,7 @@ public class UserService {
     public void updateEmail(String email) {
         restClient
                 .put()
-                .uri("/email")
+                .uri(RESOURCE + "/email")
                 .body(email)
                 .retrieve()
                 .toBodilessEntity();
@@ -57,7 +56,7 @@ public class UserService {
     public boolean updatePassword(UpdatePasswordRequest request) {
         return restClient
                 .put()
-                .uri("/password")
+                .uri(RESOURCE + "/password")
                 .body(request)
                 .retrieve()
                 .toBodilessEntity()
@@ -68,7 +67,7 @@ public class UserService {
     public void logout() {
         restClient
                 .post()
-                .uri("/logout")
+                .uri(RESOURCE + "/logout")
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -76,6 +75,7 @@ public class UserService {
     public boolean delete() {
         ResponseEntity<Void> response = restClient
                 .delete()
+                .uri(RESOURCE)
                 .retrieve()
                 .toBodilessEntity();
         return response.getStatusCode().is2xxSuccessful();

@@ -18,17 +18,15 @@ public class TelegramChatService {
     private final RestClient restClient;
 
 
-    TelegramChatService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    TelegramChatService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
     public void createLink(NewTelegramOtpLink newTelegramOtpLink) {
         restClient
                 .post()
+                .uri(RESOURCE)
                 .body(newTelegramOtpLink)
                 .retrieve()
                 .toBodilessEntity();
@@ -37,6 +35,7 @@ public class TelegramChatService {
     public void createLink(NewTelegramOtpLink newTelegramOtpLink, Consumer<HttpHeaders> headersConsumer) {
         restClient
                 .post()
+                .uri(RESOURCE)
                 .headers(headersConsumer)
                 .body(newTelegramOtpLink)
                 .retrieve()
@@ -46,7 +45,7 @@ public class TelegramChatService {
     public void setUserId(String key) {
         restClient
                 .put()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -54,7 +53,7 @@ public class TelegramChatService {
     public void setUserId(String key, Consumer<HttpHeaders> headersConsumer) {
         restClient
                 .put()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .retrieve()
                 .toBodilessEntity();
@@ -63,7 +62,7 @@ public class TelegramChatService {
     public String getOtpByKey(String key) {
         return restClient
                 .get()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .retrieve()
                 .body(String.class);
     }
@@ -71,7 +70,7 @@ public class TelegramChatService {
     public String getOtpByKey(String key, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .retrieve()
                 .body(String.class);
@@ -80,7 +79,7 @@ public class TelegramChatService {
     public UUID bindTelegram(String key, String otp) {
         return restClient
                 .post()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .body(otp)
                 .retrieve()
                 .body(UUID.class);
@@ -89,7 +88,7 @@ public class TelegramChatService {
     public UUID bindTelegram(String key, OtpRequest otp, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
-                .uri("/link" + DentalLabRestClient.uriById(key))
+                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
                 .headers(headersConsumer)
                 .body(otp)
                 .retrieve()
@@ -100,7 +99,7 @@ public class TelegramChatService {
         try {
             TelegramChat response = restClient
                     .get()
-                    .uri(DentalLabRestClient.uriById(chatId))
+                    .uri(RESOURCE + DentalLabRestClient.uriById(chatId))
                     .retrieve()
                     .toEntity(TelegramChat.class)
                     .getBody();
@@ -114,7 +113,7 @@ public class TelegramChatService {
         try {
             TelegramChat response = restClient
                     .get()
-                    .uri(DentalLabRestClient.uriById(chatId))
+                    .uri(RESOURCE + DentalLabRestClient.uriById(chatId))
                     .headers(headersConsumer)
                     .retrieve()
                     .toEntity(TelegramChat.class)
@@ -129,7 +128,7 @@ public class TelegramChatService {
         try {
             TelegramChat response = restClient
                     .get()
-                    .uri("/user")
+                    .uri(RESOURCE + "/user")
                     .retrieve()
                     .toEntity(TelegramChat.class)
                     .getBody();

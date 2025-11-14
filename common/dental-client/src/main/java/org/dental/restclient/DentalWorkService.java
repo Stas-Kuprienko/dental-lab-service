@@ -17,17 +17,15 @@ public class DentalWorkService {
     private final RestClient restClient;
 
 
-    DentalWorkService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    DentalWorkService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
     public DentalWork create(NewDentalWork newDentalWork) {
         return restClient
                 .post()
+                .uri(RESOURCE)
                 .body(newDentalWork)
                 .retrieve()
                 .body(DentalWork.class);
@@ -36,6 +34,7 @@ public class DentalWorkService {
     public DentalWork create(NewDentalWork newDentalWork, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
+                .uri(RESOURCE)
                 .headers(headersConsumer)
                 .body(newDentalWork)
                 .retrieve()
@@ -45,7 +44,7 @@ public class DentalWorkService {
     public DentalWork findById(Long id) {
         return restClient
                 .get()
-                .uri(DentalLabRestClient.uriById(id))
+                .uri(RESOURCE + DentalLabRestClient.uriById(id))
                 .retrieve()
                 .body(DentalWork.class);
     }
@@ -53,7 +52,7 @@ public class DentalWorkService {
     public DentalWork findById(Long id, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
-                .uri(DentalLabRestClient.uriById(id))
+                .uri(RESOURCE + DentalLabRestClient.uriById(id))
                 .headers(headersConsumer)
                 .retrieve()
                 .body(DentalWork.class);
@@ -62,6 +61,7 @@ public class DentalWorkService {
     public List<DentalWork> findAll() {
         return restClient
                 .get()
+                .uri(RESOURCE)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -69,6 +69,7 @@ public class DentalWorkService {
     public List<DentalWork> findAll(Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
+                .uri(RESOURCE)
                 .headers(headersConsumer)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
@@ -78,7 +79,7 @@ public class DentalWorkService {
         return restClient
                 .get()
                 .uri( uriBuilder -> uriBuilder
-                        .path("/by-period")
+                        .path(RESOURCE + "/by-period")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
@@ -90,7 +91,7 @@ public class DentalWorkService {
         return restClient
                 .get()
                 .uri( uriBuilder -> uriBuilder
-                        .path("/by-period")
+                        .path(RESOURCE + "/by-period")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
@@ -103,7 +104,7 @@ public class DentalWorkService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/search")
+                        .path(RESOURCE + "/search")
                         .queryParam("clinic", clinic)
                         .queryParam("patient", patient)
                         .build())
@@ -115,7 +116,7 @@ public class DentalWorkService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/search")
+                        .path(RESOURCE + "/search")
                         .queryParam("clinic", clinic)
                         .queryParam("patient", patient)
                         .build())
@@ -127,7 +128,7 @@ public class DentalWorkService {
     public DentalWork update(DentalWork updatable) {
         return restClient
                 .put()
-                .uri(DentalLabRestClient.uriById(updatable.getId()))
+                .uri(RESOURCE + DentalLabRestClient.uriById(updatable.getId()))
                 .body(updatable)
                 .retrieve()
                 .body(DentalWork.class);
@@ -136,7 +137,7 @@ public class DentalWorkService {
     public DentalWork update(DentalWork updatable, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .put()
-                .uri(DentalLabRestClient.uriById(updatable.getId()))
+                .uri(RESOURCE + DentalLabRestClient.uriById(updatable.getId()))
                 .headers(headersConsumer)
                 .body(updatable)
                 .retrieve()
@@ -146,7 +147,7 @@ public class DentalWorkService {
     public void delete(long id) {
         ResponseEntity<Void> response = restClient
                 .delete()
-                .uri(DentalLabRestClient.uriById(id))
+                .uri(RESOURCE + DentalLabRestClient.uriById(id))
                 .retrieve()
                 .toBodilessEntity();
         if (response.getStatusCode().isError()) {
@@ -157,7 +158,7 @@ public class DentalWorkService {
     public void delete(long id, Consumer<HttpHeaders> headersConsumer) {
         ResponseEntity<Void> response = restClient
                 .delete()
-                .uri(DentalLabRestClient.uriById(id))
+                .uri(RESOURCE + DentalLabRestClient.uriById(id))
                 .headers(headersConsumer)
                 .retrieve()
                 .toBodilessEntity();

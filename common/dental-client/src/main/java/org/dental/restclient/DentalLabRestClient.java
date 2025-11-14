@@ -7,6 +7,7 @@ public class DentalLabRestClient {
 
     public final AuthenticationService AUTHENTICATION;
     public final UserService USERS;
+    public final CredentialService CREDENTIALS;
     public final VerificationService VERIFICATION;
     public final TelegramChatService TELEGRAM_CHATS;
     public final ProductMapService PRODUCT_MAP;
@@ -17,16 +18,18 @@ public class DentalLabRestClient {
 
 
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
-        AUTHENTICATION = new AuthenticationService(baseUrl, restClientBuilder);
+        RestClient restClient = restClientBuilder.baseUrl(baseUrl).build();
+        AUTHENTICATION = new AuthenticationService(restClient);
+        CREDENTIALS = new CredentialService(restClient);
         restClientBuilder.requestInterceptor(interceptor);
-        USERS = new UserService(baseUrl, restClientBuilder);
-        VERIFICATION = new VerificationService(baseUrl, restClientBuilder);
-        TELEGRAM_CHATS = new TelegramChatService(baseUrl, restClientBuilder);
-        PRODUCT_MAP = new ProductMapService(baseUrl, restClientBuilder);
-        DENTAL_WORKS = new DentalWorkService(baseUrl, restClientBuilder);
-        PRODUCTS = new ProductService(baseUrl, restClientBuilder);
-        REPORTS = new ReportService(baseUrl, restClientBuilder);
-        PHOTO_LINKS = new WorkPhotoLinkService(baseUrl, restClientBuilder);
+        USERS = new UserService(restClient);
+        VERIFICATION = new VerificationService(restClient);
+        TELEGRAM_CHATS = new TelegramChatService(restClient);
+        PRODUCT_MAP = new ProductMapService(restClient);
+        DENTAL_WORKS = new DentalWorkService(restClient);
+        PRODUCTS = new ProductService(restClient);
+        REPORTS = new ReportService(restClient);
+        PHOTO_LINKS = new WorkPhotoLinkService(restClient);
     }
 
 

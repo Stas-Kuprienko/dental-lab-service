@@ -9,11 +9,8 @@ public class VerificationService {
     private final RestClient restClient;
 
 
-    VerificationService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    VerificationService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
@@ -21,7 +18,7 @@ public class VerificationService {
         restClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/email")
+                        .path(RESOURCE + "/email")
                         .queryParam("to-change", toChange)
                         .build())
                 .body(email)
@@ -32,7 +29,7 @@ public class VerificationService {
     public void sendTelegramOtp(String email) {
         restClient
                 .post()
-                .uri("/telegram-otp")
+                .uri(RESOURCE + "/telegram-otp")
                 .body(email)
                 .retrieve()
                 .toBodilessEntity();
@@ -42,7 +39,7 @@ public class VerificationService {
         return restClient
                 .put()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/email" + DentalLabRestClient.uriById(token))
+                        .path(RESOURCE + "/email" + DentalLabRestClient.uriById(token))
                         .queryParam("to-change", toChange)
                         .build())
                 .retrieve()
@@ -52,7 +49,7 @@ public class VerificationService {
     public boolean isVerified(String email) {
         return restClient
                 .post()
-                .uri("/email" + DentalLabRestClient.uriById(email))
+                .uri(RESOURCE + "/email" + DentalLabRestClient.uriById(email))
                 .retrieve()
                 .body(Boolean.class);
     }

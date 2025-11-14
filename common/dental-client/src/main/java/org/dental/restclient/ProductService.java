@@ -10,24 +10,20 @@ import java.util.function.Consumer;
 
 public class ProductService {
 
-    private static final String RESOURCE = "/dental_works";
-    private static final String URI = "/%d/products";
+    private static final String RESOURCE = "/dental_works/%d/products";
 
     private final RestClient restClient;
 
 
-    ProductService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    ProductService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
     public DentalWork addProduct(Long workId, NewProduct newProduct) {
         return restClient
                 .post()
-                .uri(URI.formatted(workId))
+                .uri(RESOURCE.formatted(workId))
                 .body(newProduct)
                 .retrieve()
                 .body(DentalWork.class);
@@ -36,7 +32,7 @@ public class ProductService {
     public DentalWork addProduct(Long workId, NewProduct newProduct, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
-                .uri(URI.formatted(workId))
+                .uri(RESOURCE.formatted(workId))
                 .headers(headersConsumer)
                 .body(newProduct)
                 .retrieve()
@@ -46,7 +42,7 @@ public class ProductService {
     public DentalWork updateCompletion(Long workId, UUID productId, LocalDate completeAt) {
         return restClient
                 .put()
-                .uri(URI.formatted(workId) + '/' + productId)
+                .uri(RESOURCE.formatted(workId) + '/' + productId)
                 .body(completeAt)
                 .retrieve()
                 .body(DentalWork.class);
@@ -55,7 +51,7 @@ public class ProductService {
     public DentalWork updateCompletion(Long workId, UUID productId, LocalDate completeAt, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .put()
-                .uri(URI.formatted(workId) + '/' + productId)
+                .uri(RESOURCE.formatted(workId) + '/' + productId)
                 .headers(headersConsumer)
                 .body(completeAt)
                 .retrieve()
@@ -65,7 +61,7 @@ public class ProductService {
     public DentalWork deleteProduct(Long workId, UUID productId) {
         return restClient
                 .delete()
-                .uri(URI.formatted(workId) + '/' + productId)
+                .uri(RESOURCE.formatted(workId) + '/' + productId)
                 .retrieve()
                 .body(DentalWork.class);
     }
@@ -73,7 +69,7 @@ public class ProductService {
     public DentalWork deleteProduct(Long workId, UUID productId, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .delete()
-                .uri(URI.formatted(workId) + '/' + productId)
+                .uri(RESOURCE.formatted(workId) + '/' + productId)
                 .headers(headersConsumer)
                 .retrieve()
                 .body(DentalWork.class);

@@ -12,11 +12,8 @@ public class ReportService {
     private final RestClient restClient;
 
 
-    ReportService(String baseUrl, RestClient.Builder restClientBuilder) {
-        baseUrl += RESOURCE;
-        restClient = restClientBuilder
-                .baseUrl(baseUrl)
-                .build();
+    ReportService(RestClient restClient) {
+        this.restClient = restClient;
     }
 
 
@@ -24,7 +21,7 @@ public class ReportService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/works")
+                        .path(RESOURCE + "/works")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
@@ -36,7 +33,7 @@ public class ReportService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/works")
+                        .path(RESOURCE + "/works")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
@@ -49,7 +46,7 @@ public class ReportService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/profit")
+                        .path(RESOURCE + "/profit")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
@@ -61,7 +58,7 @@ public class ReportService {
         return restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/profit")
+                        .path(RESOURCE + "/profit")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
