@@ -27,7 +27,7 @@
         <label style="font-size: 120%;" id="name-label" th:text="${user.name}">Имя</label>
 
         <form id="name-form" th:action="@{/main/user/update-name}" method="post" style="display: none;">
-            <input type="text" name="name" th:value="${user.name}" required />
+            <input type="text" name="name" th:value="${user.name}" required /><br>
             <input type="submit" value="Сохранить" class="small-button"/>
             <button type="button" onclick="hideForm('name-label', 'name-form')">❌</button>
         </form>
@@ -56,7 +56,7 @@
             <label>Повторите новый пароль:</label><br>
             <input type="password" name="confirm-password" required /><br>
             <br>
-            <input type="submit" value="Сохранить" />
+            <input class="small-button" type="submit" value="Сохранить" />
             <button type="button" id="cancel-password-btn" class="small-button">Отмена</button>
         </form>
     </div>

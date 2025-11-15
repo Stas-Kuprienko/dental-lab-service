@@ -6,8 +6,15 @@ server:
       cookie:
         secure: false
         http-only: true
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 50MB
   application:
     name: ui-application
   profiles:

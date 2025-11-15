@@ -18,7 +18,9 @@
     <!-- 🔽 Галерея -->
     <div class="photo-gallery">
         <div th:each="photo : ${photoEntries}" class="photo-box">
-            <img th:src="${photo.photoLink}"/>
+            <img th:src="${photo.photoLink}"
+                 onclick="openPhotoModal(this.src)"
+                 style="cursor: pointer;">
             <form th:action="@{'/main/dental-works/' + ${workId} + '/photo/delete'}" method="post">
                 <input type="hidden" name="photo-file" th:value="${photo.filename}" />
                 <button type="submit" onclick="return confirm('Удалить это фото?')">удалить</button>
@@ -36,5 +38,22 @@
         <button type="submit">загрузить</button>
     </form>
 </section>
+<!-- 🖼️ Модальное окно для просмотра фото -->
+<div id="photo-modal" class="photo-modal" onclick="closePhotoModal()">
+    <span class="photo-close">&times;</span>
+    <img id="photo-modal-img" class="photo-modal-content">
+</div>
+<script>
+    function openPhotoModal(src) {
+        const modal = document.getElementById("photo-modal");
+        const img = document.getElementById("photo-modal-img");
+        img.src = src;
+        modal.style.display = "block";
+    }
+
+    function closePhotoModal() {
+        document.getElementById("photo-modal").style.display = "none";
+    }
+</script>
 </body>
 </html>

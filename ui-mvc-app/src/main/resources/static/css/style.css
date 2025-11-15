@@ -310,25 +310,81 @@ select {
     cursor: pointer;
 }
 
+/* 📸 Галерея фото */
 .photo-gallery {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
     justify-content: center;
-    margin: 20px;
+    padding: 10px;
 }
 
+/* Контейнер одного фото */
 .photo-box {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 380px; /* фиксированная ширина карточки */
+    width: 100%;
 }
 
+/* Сами изображения */
 .photo-box img {
-    max-width: 480px;
-<!--    max-height: 720px;-->
-    border: 2px solid gray;
+    width: 100%;
+    height: auto;
+    max-height: 520px;
+    object-fit: cover;
     border-radius: 8px;
+    border: 2px solid #777;
+}
+
+/* Кнопка "удалить" под фото */
+.photo-box form {
+    margin-top: 8px;
+}
+
+/* ============================
+   📸 Modal Photo Viewer
+   ============================ */
+.photo-modal {
+    display: none;              /* скрыто по умолчанию */
+    position: fixed;
+    z-index: 9999;
+    padding-top: 40px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.photo-modal-content {
+    display: block;
+    margin: auto;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+}
+
+.photo-close {
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Эффект появления */
+.photo-modal-content {
+    animation: zoomIn 0.2s ease-out;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.7); opacity: 0.2; }
+    to   { transform: scale(1);   opacity: 1; }
 }
 
 /* ================================
@@ -366,6 +422,7 @@ select {
 
 /* кнопка ГАМБУРГЕР (мобилки) */
 .burger {
+    float: left;
     display: none;
     font-size: 30px;
     color: white;
@@ -468,6 +525,25 @@ select {
 
     .table-wrapper .table {
         min-width: 800px;     /* или 800px — подбери под фактическую ширину таблицы */
+    }
+
+    .photo-gallery {
+        gap: 16px;
+    }
+
+    .photo-box {
+        max-width: 100%;
+    }
+
+    .photo-box img {
+        width: 100%;
+        max-height: none;
+        border-radius: 6px;
+    }
+
+    .photo-modal-content {
+        max-width: 100%;
+        max-height: 80%;
     }
 }
 
