@@ -98,7 +98,7 @@
 
         <form id="add-product" th:action="@{'/main/dental-works/' + ${work.id} + '/products/new'}" method="post" style="display:none; margin-top:10px; text-align:left; width:100%; max-width:600px;">
             <label for="product">работа:</label>
-            <select id="product" name="product" required>
+            <select id="product" name="productTypeId" required>
                 <option th:each="item : ${map}"
                         th:value="${item.id}"
                         th:text="${item.title}">Product</option>

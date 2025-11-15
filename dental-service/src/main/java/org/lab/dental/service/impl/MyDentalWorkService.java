@@ -62,6 +62,15 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public DentalWorkEntity getById(Long id) {
+        DentalWorkEntity dentalWork = dentalWorkRepository.findById(id)
+                .orElseThrow(() -> NotFoundCustomException.byId(DentalWorkEntity.class.getSimpleName(), id));
+        log.info("Entity is found: {}", dentalWork);
+
+        return dentalWork;
+    }
+
+    @Override
     public List<DentalWorkEntity> getAllForMonthByUserId(UUID userId, YearMonth yearMonth) {
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
@@ -124,10 +133,9 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
-    public DentalWorkEntity updateStatus(Long id, UUID userId, WorkStatus status) {
+    public void updateStatus(Long id, UUID userId, WorkStatus status) {
         dentalWorkRepository.updateStatus(id, userId, status.name());
         log.info("Updated entity 'status': {}", status);
-        return getByIdAndUserId(id, userId);
     }
 
     @Override

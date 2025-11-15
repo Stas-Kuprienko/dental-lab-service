@@ -1,11 +1,14 @@
-package org.lab.telegram_bot.utils;
+package org.lab.dental.repository.redis;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.lab.model.DentalWork;
 import org.springframework.data.redis.core.RedisHash;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor

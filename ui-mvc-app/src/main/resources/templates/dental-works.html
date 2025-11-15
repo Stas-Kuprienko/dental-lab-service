@@ -25,37 +25,38 @@
     </h4>
 
     <!-- 🧾 Таблица -->
-    <div class="table">
-        <div class="thead" style="font-size: 65%;">
-            <div class="tr">
-                <div class="th">ПАЦИЕНТ</div>
-                <div class="th">КЛИНИКА</div>
-                <div class="th" th:each="item : ${map}" th:text="${item.title.toUpperCase()}">РАБОТА</div>
-                <div class="th">НАЗНАЧЕНО</div>
-                <div class="th">ПРИНЯТО</div>
+    <div class="table-wrapper">
+        <div class="table">
+            <div class="thead" style="font-size: 65%;">
+                <div class="tr">
+                    <div class="th">ПАЦИЕНТ</div>
+                    <div class="th">КЛИНИКА</div>
+                    <div class="th" th:each="item : ${map}" th:text="${item.title.toUpperCase()}">РАБОТА</div>
+                    <div class="th">НАЗНАЧЕНО</div>
+                    <div class="th">ПРИНЯТО</div>
+                </div>
+            </div>
+
+            <div class="tbody">
+                <a th:each="work : ${works}"
+                   th:class="${work.status == 'COMPLETED'} ? 'tr-closed' : (${work.status == 'PAID'} ? 'tr-paid' : 'tr')"
+                   th:href="@{'/main/dental-works/' + ${work.id}}">
+
+                    <div class="td" th:text="${work.patient}">Пациент</div>
+                    <div class="td" th:text="${work.clinic}">Клиника</div>
+
+                    <!-- Продукты -->
+                    <div class="td"
+                         th:each="item : ${map}"
+                         th:text="${work.quantityFor(item.title) ?: ' '}">
+                        0
+                    </div>
+
+                    <div class="td" th:text="${work.completeAt}">01-01-2000</div>
+                    <div class="td" th:text="${work.acceptedAt}">01-01-2000</div>
+                </a>
             </div>
         </div>
-
-        <div class="tbody">
-            <a th:each="work : ${works}"
-               th:class="${work.status == 'COMPLETED'} ? 'tr-closed' : (${work.status == 'PAID'} ? 'tr-paid' : 'tr')"
-               th:href="@{'/main/dental-works/' + ${work.id}}">
-
-                <div class="td" th:text="${work.patient}">Пациент</div>
-                <div class="td" th:text="${work.clinic}">Клиника</div>
-
-                <!-- Продукты -->
-                <div class="td"
-                     th:each="item : ${map}"
-                     th:text="${work.quantityFor(item.title) ?: ' '}">
-                    0
-                </div>
-
-                <div class="td" th:text="${work.completeAt}">01-01-2000</div>
-                <div class="td" th:text="${work.acceptedAt}">01-01-2000</div>
-            </a>
-        </div>
-    </div>
     </div>
 </section>
 

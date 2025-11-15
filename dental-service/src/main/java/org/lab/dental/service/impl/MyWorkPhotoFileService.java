@@ -6,14 +6,17 @@ import org.lab.dental.repository.WorkPhotoFilenameRepository;
 import org.lab.dental.service.S3ClientService;
 import org.lab.dental.service.WorkPhotoFileService;
 import org.lab.exception.ApplicationCustomException;
+import org.lab.model.WorkPhotoEntry;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -23,6 +26,7 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
 
     private final S3ClientService s3ClientService;
     private final WorkPhotoFilenameRepository repository;
+    private Consumer<Long> action = (id) -> {};
 
 
     @Autowired
@@ -33,14 +37,15 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
 
 
     @Override
-    public String uploadFile(MultipartFile file, long workId) {
+    public WorkPhotoFilenameEntity uploadFile(MultipartFile file, long workId) {
         log.info("File for DentalWork ID={} received to save: {}", workId, file);
         String filename = FILENAME_PREFIX_TEMPLATE.formatted(workId) + file.getOriginalFilename();
         s3ClientService.uploadPhoto(file, filename);
         WorkPhotoFilenameEntity entity = new WorkPhotoFilenameEntity(filename, workId);
         entity = repository.save(entity);
         log.info("Entity saved: {}", entity);
-        return getLinkByFilename(filename);
+        action.accept(workId);
+        return entity;
     }
 
     @Override
@@ -51,14 +56,17 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
     }
 
     @Override
-    public List<String> getAllLinksByWorkId(long workId) {
+    public List<WorkPhotoEntry> getAllLinksByWorkId(long workId) {
         List<WorkPhotoFilenameEntity> entities = repository.findAllByDentalWorkId(workId);
-        List<String> links = entities
+        List<WorkPhotoEntry> photoEntries = entities
                 .stream()
-                .map(e -> s3ClientService.getFileUrl(e.getFilename()))
+                .map(e -> WorkPhotoEntry.builder()
+                        .filename(e.getFilename())
+                        .photoLink(s3ClientService.getFileUrl(e.getFilename()))
+                        .build())
                 .toList();
-        log.info("Found {} file links by parameters: dentalWorkId='{}'", links.size(), workId);
-        return links;
+        log.info("Found {} file links by parameters: dentalWorkId='{}'", photoEntries.size(), workId);
+        return photoEntries;
     }
 
     @Override
@@ -100,9 +108,14 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
     }
 
     @Override
-    public void deleteFile(String filename, long workId) {
+    public void deleteFile(String filename) {
         s3ClientService.deletePhoto(filename);
-        repository.deleteByFilenameAndDentalWorkId(filename, workId);
-        log.info("Photo file '{}' for dentalWorkId='{}' is deleted", filename, workId);
+        repository.deleteById(filename);
+        log.info("Photo file '{}' is deleted", filename);
+    }
+
+    @Override
+    public void listenFileUploading(Consumer<Long> action) {
+        this.action = action;
     }
 }

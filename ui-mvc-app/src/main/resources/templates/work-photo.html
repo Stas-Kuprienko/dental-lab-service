@@ -6,26 +6,6 @@
     <title>DENTAL LAB SERVICE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
-    <style>
-        .photo-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            justify-content: center;
-            margin: 20px;
-        }
-        .photo-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .photo-box img {
-            max-width: 480px;
-<!--            max-height: 720px;-->
-            border: 2px solid gray;
-            border-radius: 8px;
-        }
-    </style>
 </head>
 <body>
 
@@ -37,10 +17,10 @@
 
     <!-- 🔽 Галерея -->
     <div class="photo-gallery">
-        <div th:each="photo : ${photoLinks}" class="photo-box">
-            <img th:src="${photo}"/>
+        <div th:each="photo : ${photoEntries}" class="photo-box">
+            <img th:src="${photo.photoLink}"/>
             <form th:action="@{'/main/dental-works/' + ${workId} + '/photo/delete'}" method="post">
-                <input type="hidden" name="photo-link" th:value="${photo}" />
+                <input type="hidden" name="photo-file" th:value="${photo.filename}" />
                 <button type="submit" onclick="return confirm('Удалить это фото?')">удалить</button>
             </form>
         </div>

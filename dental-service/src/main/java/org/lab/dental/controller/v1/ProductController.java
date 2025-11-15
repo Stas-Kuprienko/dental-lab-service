@@ -2,9 +2,7 @@ package org.lab.dental.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.dental.mapping.DentalWorkConverter;
-import org.lab.dental.service.DentalWorkService;
+import org.lab.dental.service.DentalWorkManager;
 import org.lab.model.DentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +16,11 @@ import java.util.UUID;
 @RequestMapping("/api/v1/dental_works/{work_id}/products")
 public class ProductController {
 
-    private final DentalWorkService dentalWorkService;
-    private final DentalWorkConverter dentalWorkConverter;
+    private final DentalWorkManager dentalWorkManager;
 
     @Autowired
-    public ProductController(DentalWorkService dentalWorkService,
-                             DentalWorkConverter dentalWorkConverter) {
-        this.dentalWorkService = dentalWorkService;
-        this.dentalWorkConverter = dentalWorkConverter;
+    public ProductController(DentalWorkManager dentalWorkManager) {
+        this.dentalWorkManager = dentalWorkManager;
     }
 
 
@@ -35,11 +30,8 @@ public class ProductController {
                                                  @RequestBody @Valid NewProduct newProduct) {
 
         log.info("From user '{}' received request to add: {}", userId, newProduct);
-        UUID productTypeId = newProduct.getProduct();
-        Integer quantity = newProduct.getQuantity();
-        LocalDate completeAt = newProduct.getCompleteAt();
-        DentalWorkEntity dentalWork = dentalWorkService.addProduct(workId, userId, productTypeId, quantity, completeAt);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(dentalWork));
+        DentalWork dentalWork = dentalWorkManager.addProduct(workId, userId, newProduct);
+        return ResponseEntity.ok(dentalWork);
     }
 
 
@@ -49,8 +41,8 @@ public class ProductController {
                                                        @PathVariable("id") UUID productId,
                                                        @RequestBody LocalDate completeAt) {
         log.info("From user '{}' received request to update completion ({}) by ID='{}' and workID={}", userId, completeAt, productId, workId);
-        DentalWorkEntity entity = dentalWorkService.updateProductCompletion(workId, userId, productId, completeAt);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+        DentalWork dentalWork = dentalWorkManager.updateProductCompletion(workId, userId, productId, completeAt);
+        return ResponseEntity.ok(dentalWork);
     }
 
 
@@ -60,7 +52,7 @@ public class ProductController {
                                                     @PathVariable("id") UUID id) {
 
         log.info("From user '{}' received request to delete by ID='{}' and workID={}", userId, id, workId);
-        DentalWorkEntity entity = dentalWorkService.deleteProduct(workId, userId, id);
-        return ResponseEntity.ok(dentalWorkConverter.toDto(entity));
+        DentalWork dentalWork = dentalWorkManager.deleteProduct(workId, userId, id);
+        return ResponseEntity.ok(dentalWork);
     }
 }

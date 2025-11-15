@@ -1,7 +1,9 @@
 package org.lab.dental.controller.v1;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lab.dental.entity.WorkPhotoFilenameEntity;
 import org.lab.dental.service.WorkPhotoFileService;
+import org.lab.model.WorkPhotoEntry;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,8 +32,8 @@ public class WorkPhotoFileController {
                                          @RequestParam("file") MultipartFile file) {
 
         log.info("From user '{}' received request to upload file for DentalWork ID={}", userId, workId);
-        String filename = workPhotoFileService.uploadFile(file, workId);
-        return ResponseEntity.ok(filename);
+        WorkPhotoFilenameEntity entity = workPhotoFileService.uploadFile(file, workId);
+        return ResponseEntity.ok(entity.getFilename());
     }
 
 
@@ -46,11 +48,11 @@ public class WorkPhotoFileController {
 
 
     @GetMapping
-    public List<String> findAll(@RequestHeader("X-USER-ID") UUID userId,
-                                @PathVariable("work_id") Long workId) {
+    public ResponseEntity<List<WorkPhotoEntry>> findAll(@RequestHeader("X-USER-ID") UUID userId,
+                                                        @PathVariable("work_id") Long workId) {
 
         log.info("From user '{}' received request to all file links for DentalWork ID={}", userId, workId);
-        return workPhotoFileService.getAllLinksByWorkId(workId);
+        return ResponseEntity.ok(workPhotoFileService.getAllLinksByWorkId(workId));
     }
 
 
@@ -81,7 +83,7 @@ public class WorkPhotoFileController {
                                        @PathVariable("filename") String filename) {
 
         log.info("From user '{}' received request to delete file '{}' for DentalWork ID={}", userId, filename, workId);
-        workPhotoFileService.deleteFile(filename, workId);
+        workPhotoFileService.deleteFile(filename);
         return ResponseEntity.noContent().build();
     }
 }

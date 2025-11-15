@@ -6,6 +6,7 @@ import org.lab.model.DentalWork;
 import org.lab.model.Product;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
+import org.lab.request.NewProduct;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -15,8 +16,10 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.DentalWorkMvcService;
+import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
+import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.service.ProductMapMvcService;
+import org.lab.telegram_bot.service.ProductServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -38,7 +41,8 @@ import java.util.function.Consumer;
 public class ViewDentalWorkHandler extends BotCommandHandler {
 
     private final ProductMapMvcService productMapService;
-    private final DentalWorkMvcService dentalWorkService;
+    private final DentalWorkServiceWrapper dentalWorkService;
+    private final ProductServiceWrapper productService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private Consumer<BotApiMethod<?>> executor;
@@ -47,12 +51,13 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
     @Autowired
     public ViewDentalWorkHandler(MessageSource messageSource,
                                  ProductMapMvcService productMapService,
-                                 DentalWorkMvcService dentalWorkService,
+                                 DentalLabRestClientWrapper dentalLabRestClient,
                                  KeyboardBuilderKit keyboardBuilderKit,
                                  ChatSessionService chatSessionService) {
         super(messageSource);
         this.productMapService = productMapService;
-        this.dentalWorkService = dentalWorkService;
+        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
+        this.productService = dentalLabRestClient.PRODUCTS;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -138,7 +143,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
-        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         String text = messageSource.getMessage(TextKeys.SELECT_PRODUCT_FOR_DELETE.name(), null, locale);
         String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.VIEW_DENTAL_WORK, Steps.SELECT_PRODUCT_TO_DELETE.ordinal());
         InlineKeyboardMarkup keyboardMarkup = productsAsKeyboard(dentalWork.getProducts(), callbackQueryPrefix, locale);
@@ -176,7 +181,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         }
         UUID productId = UUID.fromString(callbackData[2]);
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        DentalWork dentalWork = dentalWorkService.deleteProduct(workId, session.getUserId(), productId);
+        DentalWork dentalWork = productService.deleteProduct(workId, session.getUserId(), productId);
         return viewDentalWork(
                 keyboardBuilderKit,
                 chatSessionService,
@@ -204,7 +209,12 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         LocalDate completeAt = parseLocalDate(values[1]);
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
         UUID productTypeId = UUID.fromString(session.getAttribute(Attributes.PRODUCT_TYPE_ID.name()));
-        DentalWork dentalWork = dentalWorkService.addProduct(workId, productTypeId, quantity, completeAt, session.getUserId());
+        NewProduct newProduct = NewProduct.builder()
+                .productTypeId(productTypeId)
+                .quantity(quantity)
+                .completeAt(completeAt)
+                .build();
+        DentalWork dentalWork = productService.addProduct(workId, newProduct, session.getUserId());
         return viewDentalWork(
                 keyboardBuilderKit,
                 chatSessionService,
@@ -219,7 +229,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
         String text = messageSource.getMessage(TextKeys.SELECT_FIELD_TO_UPDATE.name(), null, locale);
-        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         InlineKeyboardMarkup dentalWorkKeyboard = dentalWorkAsKeyboard(dentalWork, locale);
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         chatSessionService.save(session);
@@ -251,7 +261,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
     private SendMessage updateCompletion(ChatSession session, Locale locale, String messageText, int messageId) {
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
-        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         String callbackPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.VIEW_DENTAL_WORK, Steps.SELECT_PRODUCT_FOR_UPDATE_COMPLETION.ordinal());
         InlineKeyboardMarkup keyboardMarkup = productsAsKeyboard(dentalWork.getProducts(), callbackPrefix, locale);
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
@@ -301,7 +311,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
 
     private SendMessage inputStatus(ChatSession session, Locale locale, String messageText, int messageId) {
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         String messageData = ChatBotUtility.callBackQueryParse(messageText)[2];
         dentalWork.setStatus(WorkStatus.valueOf(messageData.toUpperCase()));
         dentalWork = dentalWorkService.update(dentalWork, session.getUserId());
@@ -322,7 +332,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
 
     private SendMessage inputField(ChatSession session, Locale locale, String messageText, int messageId, TextKeys.WorkFields field) {
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         switch (field) {
             case PATIENT -> dentalWork.setPatient(messageText.strip());
             case CLINIC -> dentalWork.setClinic(messageText.strip());
@@ -349,7 +359,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
         UUID productId = UUID.fromString(session.getAttribute(Attributes.PRODUCT_ID.name()));
         LocalDate completeAt = parseLocalDate(messageText);
-        DentalWork dentalWork = dentalWorkService.updateProductCompletion(workId, session.getUserId(), productId, completeAt);
+        DentalWork dentalWork = productService.updateCompletion(workId, productId, completeAt, session.getUserId());
         int messageToDelete = Integer.parseInt(session.getAttribute(DentalWorksHandler.Attributes.MESSAGE_ID_TO_DELETE.name()));
         return viewDentalWork(
                 keyboardBuilderKit,
@@ -384,7 +394,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         int messageIdToDelete = Integer.parseInt(session.getAttribute(Attributes.MESSAGE_ID_TO_DELETE.name()));
         switch (response) {
             case NO -> {
-                DentalWork dentalWork = dentalWorkService.getById(workId, session.getUserId());
+                DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
                 return viewDentalWork(
                         keyboardBuilderKit,
                         chatSessionService,
@@ -437,11 +447,11 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'add product' button
         buttonLabel = messageSource.getMessage(TextKeys.ADD_PRODUCT_TO_DENTAL_WORK.name(), null, locale);
-        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.ADD_PRODUCT.ordinal(), workId);
+        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.ADD_PRODUCT.ordinal(), workId);
         buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //create 'delete product' button
         buttonLabel = messageSource.getMessage(TextKeys.DELETE_PRODUCT_FROM_DENTAL_WORK.name(), null, locale);
-        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.DELETE_PRODUCT.ordinal(), workId);
+        callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, Steps.DELETE_PRODUCT.ordinal(), workId);
         buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         //build keyboard
         return keyboardBuilderKit.inlineKeyboard(buttons);

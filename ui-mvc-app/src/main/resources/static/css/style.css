@@ -310,6 +310,27 @@ select {
     cursor: pointer;
 }
 
+.photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin: 20px;
+}
+
+.photo-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.photo-box img {
+    max-width: 480px;
+<!--    max-height: 720px;-->
+    border: 2px solid gray;
+    border-radius: 8px;
+}
+
 /* ================================
    АДАПТИВНОЕ МЕНЮ + ГАМБУРГЕР
 ================================ */
@@ -436,6 +457,17 @@ select {
 
     .medium-button {
         width: 100%;
+    }
+
+    /* 📱 Горизонтальная прокрутка таблицы на мобильных */
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* плавная прокрутка на iPhone */
+    }
+
+    .table-wrapper .table {
+        min-width: 800px;     /* или 800px — подбери под фактическую ширину таблицы */
     }
 }
 

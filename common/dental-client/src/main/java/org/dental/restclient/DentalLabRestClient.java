@@ -17,6 +17,22 @@ public class DentalLabRestClient {
     public final WorkPhotoLinkService PHOTO_LINKS;
 
 
+    public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder) {
+        RestClient restClient = restClientBuilder
+                .baseUrl(baseUrl)
+                .build();
+        AUTHENTICATION = new AuthenticationService(restClientBuilder.build());
+        CREDENTIALS = new CredentialService(restClient);
+        USERS = new UserService(restClient);
+        VERIFICATION = new VerificationService(restClient);
+        TELEGRAM_CHATS = new TelegramChatService(restClient);
+        PRODUCT_MAP = new ProductMapService(restClient);
+        DENTAL_WORKS = new DentalWorkService(restClient);
+        PRODUCTS = new ProductService(restClient);
+        REPORTS = new ReportService(restClient);
+        PHOTO_LINKS = new WorkPhotoLinkService(restClient);
+    }
+
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
         restClientBuilder.baseUrl(baseUrl);
         AUTHENTICATION = new AuthenticationService(restClientBuilder.build());

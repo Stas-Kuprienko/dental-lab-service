@@ -43,8 +43,8 @@ public class DentalWork implements Serializable {
     @JsonProperty("products")
     private List<Product> products;
 
-    @JsonProperty("photo_links")
-    private List<String> photoLinks;
+    @JsonProperty("photo_files")
+    private List<String> photoFiles;
 
 
     public DentalWork() {}
@@ -59,10 +59,10 @@ public class DentalWork implements Serializable {
     }
 
     public int countPhoto() {
-        if (photoLinks == null) {
+        if (photoFiles == null) {
             return 0;
         } else {
-            return photoLinks.size();
+            return photoFiles.size();
         }
     }
 }

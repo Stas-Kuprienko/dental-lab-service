@@ -2,10 +2,7 @@ package org.lab.dental.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.dental.mapping.DentalWorkConverter;
-import org.lab.dental.service.DentalWorkService;
-import org.lab.dental.service.WorkPhotoFileService;
+import org.lab.dental.service.DentalWorkManager;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.dental.util.RequestParamsConverter;
 import org.lab.enums.WorkStatus;
@@ -15,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,18 +22,12 @@ public class DentalWorkController {
 
     private final String URL;
 
-    private final DentalWorkService dentalWorkService;
-    private final DentalWorkConverter dentalWorkConverter;
-    private final WorkPhotoFileService workPhotoFileService;
+    private final DentalWorkManager dentalWorkManager;
 
 
     @Autowired
-    public DentalWorkController(DentalWorkService dentalWorkService,
-                                DentalWorkConverter dentalWorkConverter,
-                                WorkPhotoFileService workPhotoFileService) {
-        this.dentalWorkService = dentalWorkService;
-        this.dentalWorkConverter = dentalWorkConverter;
-        this.workPhotoFileService = workPhotoFileService;
+    public DentalWorkController(DentalWorkManager dentalWorkManager) {
+        this.dentalWorkManager = dentalWorkManager;
         URL = RequestMappingReader.read(this.getClass());
     }
 
@@ -45,110 +35,69 @@ public class DentalWorkController {
     @PostMapping
     public ResponseEntity<DentalWork> create(@RequestHeader("X-USER-ID") UUID userId,
                                              @RequestBody @Valid NewDentalWork newDentalWork) {
-
         log.info("From user '{}' received request: {}", userId, newDentalWork);
-        DentalWorkEntity entity = dentalWorkConverter.fromRequest(newDentalWork, userId);
-        entity = dentalWorkService.create(entity);
-        UUID productType = newDentalWork.getProductId();
-        Integer quantity = newDentalWork.getQuantity();
-        LocalDate completeAt = newDentalWork.getCompleteAt();
-        entity = dentalWorkService.addProduct(entity, productType, quantity, completeAt);
+        DentalWork dentalWork = dentalWorkManager.create(newDentalWork, userId);
         return ResponseEntity
-                .created(URI.create(URL + '/' + entity.getId())).body(dentalWorkConverter.toDto(entity));
+                .created(URI.create(URL + '/' + dentalWork.getId())).body(dentalWork);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<DentalWork> findById(@RequestHeader("X-USER-ID") UUID userId,
                                                @PathVariable("id") Long id) {
-
         log.info("From user '{}' received request with parameter: id={}", userId, id);
-        DentalWorkEntity entity = dentalWorkService.getByIdAndUserId(id, userId);
-        List<String> photoFilenameList = workPhotoFileService.getAllFilenamesByWorkId(id);
-        DentalWork dw = dentalWorkConverter.toDto(entity);
-        dw.setPhotoLinks(photoFilenameList);
-        return ResponseEntity.ok(dw);
+        DentalWork dentalWork = dentalWorkManager.getByIdAndUserId(id, userId);
+        return ResponseEntity.ok(dentalWork);
     }
-
 
     @GetMapping
-    public List<DentalWork> findAllCurrentMonth(@RequestHeader("X-USER-ID") UUID userId) {
-
+    public ResponseEntity<List<DentalWork>> findAllActualByUserId(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get all DentalWorks for current month", userId);
-        List<DentalWorkEntity> entities = dentalWorkService.getAllActualByUserId(userId);
-        return convertAndSetPhotoLinks(entities);
+        List<DentalWork> dentalWorks = dentalWorkManager.getAllActualByUserId(userId);
+        return ResponseEntity.ok(dentalWorks);
     }
-
 
     @GetMapping("/by-period")
-    public List<DentalWork> findAllMonth(@RequestHeader("X-USER-ID") UUID userId,
-                                         @RequestParam("year") Integer year,
-                                         @RequestParam("month") Integer month) {
-
+    public ResponseEntity<List<DentalWork>> findAllMonth(@RequestHeader("X-USER-ID") UUID userId,
+                                                         @RequestParam("year") Integer year,
+                                                         @RequestParam("month") Integer month) {
         log.info("From user '{}' received request with parameter: year={}, month={}", userId, year, month);
-        List<DentalWorkEntity> entities = dentalWorkService
+        List<DentalWork> dentalWorks = dentalWorkManager
                 .getAllForMonthByUserId(userId, RequestParamsConverter.converToYearMonth(year, month));
-        return convertAndSetPhotoLinks(entities);
+        return ResponseEntity.ok(dentalWorks);
     }
-
 
     @GetMapping("/search")
-    public List<DentalWork> findByClinicAndPatient(@RequestHeader("X-USER-ID") UUID userId,
-                                                   @RequestParam(value = "clinic", required = false) String clinic,
-                                                   @RequestParam(value = "patient", required = false) String patient) {
-
+    public ResponseEntity<List<DentalWork>> findByClinicAndPatient(@RequestHeader("X-USER-ID") UUID userId,
+                                                                   @RequestParam(value = "clinic", required = false) String clinic,
+                                                                   @RequestParam(value = "patient", required = false) String patient) {
         log.info("From user '{}' received request with parameter: clinic={}, patient={}", userId, clinic, patient);
-        List<DentalWorkEntity> entities = dentalWorkService.getAllByClinicAndPatientAndUserId(userId, clinic, patient);
-        return convertAndSetPhotoLinks(entities);
+        List<DentalWork> dentalWorks = dentalWorkManager.getAllByClinicAndPatientAndUserId(userId, clinic, patient);
+        return ResponseEntity.ok(dentalWorks);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<DentalWork> updateDentalWork(@RequestHeader("X-USER-ID") UUID userId,
                                                        @PathVariable("id") Long id,
                                                        @RequestBody @Valid DentalWork updatable) {
-
         log.info("From user '{}' received request: {}", userId, updatable);
-        DentalWorkEntity entity = dentalWorkConverter.toEntity(updatable);
-        entity.setId(id);
-        entity = dentalWorkService.update(entity);
-        DentalWork dw = dentalWorkConverter.toDto(entity);
-        dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(id));
-        return ResponseEntity.ok(dw);
+        DentalWork dentalWork = dentalWorkManager.update(updatable, id);
+        return ResponseEntity.ok(dentalWork);
     }
-
 
     @PatchMapping("/{id}/set-status-{status}")
-    public ResponseEntity<DentalWork> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
-                                                   @PathVariable("id") Long id,
-                                                   @PathVariable("status") WorkStatus status) {
-
+    public ResponseEntity<Void> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
+                                             @PathVariable("id") Long id,
+                                             @PathVariable("status") WorkStatus status) {
         log.info("From user '{}' received request to set 'status': {}", userId, status);
-        DentalWorkEntity dentalWork = dentalWorkService.updateStatus(id, userId, status);
-        DentalWork dw = dentalWorkConverter.toDto(dentalWork);
-        dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(id));
-        return ResponseEntity.ok(dw);
+        dentalWorkManager.updateStatus(id, userId, status);
+        return ResponseEntity.ok().build();
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDentalWork(@RequestHeader("X-USER-ID") UUID userId,
                                                  @PathVariable("id") Long id) {
-
         log.info("From user '{}' received request to delete by ID={}", userId, id);
-        dentalWorkService.delete(id, userId);
+        dentalWorkManager.delete(id, userId);
         return ResponseEntity.noContent().build();
-    }
-
-
-    private List<DentalWork> convertAndSetPhotoLinks(List<DentalWorkEntity> dentalWorkEntities) {
-        return dentalWorkEntities
-                .stream()
-                .map(e -> {
-                    DentalWork dw = dentalWorkConverter.toDto(e);
-                    dw.setPhotoLinks(workPhotoFileService.getAllLinksByWorkId(dw.getId()));
-                    return dw;
-                })
-                .toList();
     }
 }

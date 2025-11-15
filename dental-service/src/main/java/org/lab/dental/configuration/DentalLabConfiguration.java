@@ -1,5 +1,6 @@
 package org.lab.dental.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.MinioClient;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -7,9 +8,15 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.lab.dental.repository.redis.DentalWorkList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -86,4 +93,36 @@ public class DentalLabConfiguration {
     }
     // /\ **************** /\
 
+    // REDIS *************** \/
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory();
+    }
+
+    @Bean
+    public StringRedisSerializer stringRedisSerializer() {
+        return new StringRedisSerializer();
+    }
+
+    @Bean("dentalWorkRedisSerializer")
+    public Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer(ObjectMapper objectMapper) {
+        return new Jackson2JsonRedisSerializer<>(objectMapper, DentalWorkList.class);
+    }
+
+    @Bean("dentalWorkRedisTemplate")
+    public RedisTemplate<String, DentalWorkList> dentalWorkRedisTemplate(RedisConnectionFactory redisConnectionFactory,
+                                                                         StringRedisSerializer stringRedisSerializer,
+                                                                         Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer) {
+
+        RedisTemplate<String, DentalWorkList> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(stringRedisSerializer);
+        template.setValueSerializer(dentalWorkRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+        template.setHashValueSerializer(dentalWorkRedisSerializer);
+        template.afterPropertiesSet();
+        return template;
+    }
+    // ******************** /\
 }

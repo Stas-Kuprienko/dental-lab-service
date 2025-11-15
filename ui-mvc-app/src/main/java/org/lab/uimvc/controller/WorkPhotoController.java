@@ -3,7 +3,9 @@ package org.lab.uimvc.controller;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.DentalWorkService;
 import org.dental.restclient.WorkPhotoLinkService;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.model.DentalWork;
+import org.lab.model.WorkPhotoEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,25 +35,29 @@ public class WorkPhotoController {
     @GetMapping
     public String viewPhotos(@PathVariable("id") Long workId, Model model) {
         DentalWork work = dentalWorkService.findById(workId);
-        List<String> photoLinks = workPhotoLinkService.findAllById(workId);
+        List<WorkPhotoEntry> photoEntries = workPhotoLinkService.findAllById(workId);
         model.addAttribute("patient", work.getPatient());
         model.addAttribute("clinic", work.getClinic());
         model.addAttribute("workId", workId);
-        model.addAttribute("photoLinks", photoLinks);
+        model.addAttribute("photoEntries", photoEntries);
         return "work-photo";
     }
 
     @PostMapping("/upload")
     public String uploadPhoto(@PathVariable("id") Long workId,
-                              @RequestParam("file") MultipartFile file) throws IOException {
-        workPhotoLinkService.create(workId, file.getBytes());
+                              @RequestParam("file") MultipartFile file) {
+        try {
+            workPhotoLinkService.create(workId, file.getBytes());
+        } catch (IOException e) {
+            throw new ApplicationCustomException(e);
+        }
         return MvcControllerUtil.REDIRECT + URL.formatted(workId);
     }
 
     @PostMapping("/delete")
     public String deletePhoto(@PathVariable("id") Long workId,
-                              @RequestParam("photoLink") String photoLink) {
-        //TODO
+                              @RequestParam("photo-file") String photoFile) {
+        workPhotoLinkService.deleteByIdAndFilename(workId, photoFile);
         return MvcControllerUtil.REDIRECT + URL.formatted(workId);
     }
 }

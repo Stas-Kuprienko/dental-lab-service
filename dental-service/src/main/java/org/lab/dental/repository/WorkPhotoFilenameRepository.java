@@ -11,6 +11,4 @@ public interface WorkPhotoFilenameRepository extends JpaRepository<WorkPhotoFile
 
 
     List<WorkPhotoFilenameEntity> findAllByDentalWorkId(@Param("dentalWorkId") long workId);
-
-    void deleteByFilenameAndDentalWorkId(@Param("filename") String filename, @Param("dentalWorkId") long workId);
 }

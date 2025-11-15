@@ -1,5 +1,6 @@
 package org.dental.restclient;
 
+import org.lab.model.WorkPhotoEntry;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
@@ -61,7 +62,7 @@ public class WorkPhotoLinkService {
                 .body(String.class);
     }
 
-    public List<String> findAllById(long workId) {
+    public List<WorkPhotoEntry> findAllById(long workId) {
         return restClient
                 .get()
                 .uri(RESOURCE.formatted(workId))
@@ -69,7 +70,7 @@ public class WorkPhotoLinkService {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
-    public List<String> findAllById(long workId, Consumer<HttpHeaders> headersConsumer) {
+    public List<WorkPhotoEntry> findAllById(long workId, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
                 .uri(RESOURCE.formatted(workId))

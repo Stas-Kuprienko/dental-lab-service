@@ -16,7 +16,8 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.DentalWorkMvcService;
+import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
+import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.service.ProductMapMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.NEW_DENTAL_WORK)
 public class NewDentalWorkHandler extends BotCommandHandler {
 
-    private final DentalWorkMvcService dentalWorkService;
+    private final DentalWorkServiceWrapper dentalWorkService;
     private final ProductMapMvcService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
@@ -44,14 +45,14 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
 
     @Autowired
-    public NewDentalWorkHandler(DentalWorkMvcService dentalWorkService,
+    public NewDentalWorkHandler(DentalLabRestClientWrapper dentalLabRestClient,
                                 ProductMapMvcService productMapService,
                                 KeyboardBuilderKit keyboardBuilderKit,
                                 MessageSource messageSource,
                                 ChatSessionService chatSessionService,
                                 ObjectMapper objectMapper) {
         super(messageSource);
-        this.dentalWorkService = dentalWorkService;
+        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
         this.productMapService = productMapService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
@@ -164,7 +165,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
             throw new IllegalArgumentException("ChatSession attribute '%s' is null".formatted(Attributes.NEW_DENTAL_WORK));
         }
         newDentalWork.setQuantity(quantity);
-        DentalWork dentalWork = dentalWorkService.createAndReturnSingle(newDentalWork, session.getUserId());
+        DentalWork dentalWork = dentalWorkService.create(newDentalWork, session.getUserId());
         session.removeAttribute(NewDentalWorkHandler.Attributes.NEW_DENTAL_WORK.name());
         return viewDentalWork(
                 keyboardBuilderKit,

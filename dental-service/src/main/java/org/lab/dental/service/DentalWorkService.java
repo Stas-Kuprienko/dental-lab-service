@@ -14,6 +14,8 @@ public interface DentalWorkService {
 
     DentalWorkEntity getByIdAndUserId(Long id, UUID userId);
 
+    DentalWorkEntity getById(Long id);
+
     List<DentalWorkEntity> getAllForMonthByUserId(UUID userId, YearMonth yearMonth);
 
     List<DentalWorkEntity> getAllForCurrentMonthByUserId(UUID userId);
@@ -24,7 +26,7 @@ public interface DentalWorkService {
 
     DentalWorkEntity update(DentalWorkEntity updatable);
 
-    DentalWorkEntity updateStatus(Long id, UUID userId, WorkStatus status);
+    void updateStatus(Long id, UUID userId, WorkStatus status);
 
     DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity, LocalDate completeAt);
 

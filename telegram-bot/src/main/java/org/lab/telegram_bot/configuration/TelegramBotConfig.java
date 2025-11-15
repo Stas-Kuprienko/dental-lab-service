@@ -11,7 +11,6 @@ import org.lab.event.EventMessage;
 import org.lab.model.ProductMap;
 import org.lab.telegram_bot.controller.TelegramBotController;
 import org.lab.telegram_bot.domain.session.ChatSession;
-import org.lab.telegram_bot.utils.DentalWorkList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -125,26 +124,6 @@ public class TelegramBotConfig {
         template.setValueSerializer(productMapRedisSerializer);
         template.setHashKeySerializer(stringRedisSerializer);
         template.setHashValueSerializer(productMapRedisSerializer);
-        template.afterPropertiesSet();
-        return template;
-    }
-
-    @Bean("dentalWorkRedisSerializer")
-    public Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer(ObjectMapper objectMapper) {
-        return new Jackson2JsonRedisSerializer<>(objectMapper, DentalWorkList.class);
-    }
-
-    @Bean("dentalWorkRedisTemplate")
-    public RedisTemplate<String, DentalWorkList> dentalWorkRedisTemplate(RedisConnectionFactory redisConnectionFactory,
-                                                                         StringRedisSerializer stringRedisSerializer,
-                                                                         Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer) {
-
-        RedisTemplate<String, DentalWorkList> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(dentalWorkRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setHashValueSerializer(dentalWorkRedisSerializer);
         template.afterPropertiesSet();
         return template;
     }

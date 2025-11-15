@@ -13,7 +13,7 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkMvcService;
+import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.service.WorkPhotoLinkServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ import java.util.function.Function;
 public class PhotoFilesCommandHandler extends BotCommandHandler {
 
     private final WorkPhotoLinkServiceWrapper workPhotoLinkService;
-    private final DentalWorkMvcService dentalWorkService;
+    private final DentalWorkServiceWrapper dentalWorkService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final String telegramApiPath;
@@ -55,13 +55,12 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     @Autowired
     public PhotoFilesCommandHandler(MessageSource messageSource,
                                     DentalLabRestClientWrapper dentalLabRestClientWrapper,
-                                    DentalWorkMvcService dentalWorkService,
                                     ChatSessionService chatSessionService,
                                     KeyboardBuilderKit keyboardBuilderKit,
                                     @Value("${telegram.api.path}") String telegramApiPath,
                                     @Value("${project.variables.telegram.botToken}") String botToken) {
         super(messageSource);
-        this.dentalWorkService = dentalWorkService;
+        this.dentalWorkService = dentalLabRestClientWrapper.DENTAL_WORKS;
         this.workPhotoLinkService = dentalLabRestClientWrapper.PHOTO_LINKS;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
@@ -109,7 +108,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         log.info(LOG_MESSAGE_FOR_STEP_HANDLING, Steps.START_UPLOADING);
         String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
         long workId = Long.parseLong(callbackData[2]);
-        DentalWork dw = dentalWorkService.getById(workId, session.getUserId());
+        DentalWork dw = dentalWorkService.findById(workId, session.getUserId());
         session.addAttribute(Attributes.DENTAL_WORK_ID.name(), Long.toString(workId));
         String text = messageSource.getMessage(TextKeys.UPLOAD_PHOTO_TO_CHAT.name(), new Object[]{dw.getClinic(), dw.getPatient()}, locale);
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(cancelButton(locale));
@@ -134,7 +133,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
         byte[] bytes = pullPhotoFile(photoId);
         workPhotoLinkService.create(workId, bytes, session.getUserId());
-        DentalWork dw = dentalWorkService.updateInCache(workId, session.getUserId());
+        DentalWork dw = dentalWorkService.findById(workId, session.getUserId());
         String patient = dw.getPatient();
         String clinic = dw.getClinic();
         String photoIsAddedText = messageSource.getMessage(TextKeys.PHOTO_IS_ADDED.name(), null, locale);

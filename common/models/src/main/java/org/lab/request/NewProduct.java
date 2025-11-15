@@ -15,8 +15,8 @@ import java.util.UUID;
 public class NewProduct {
 
     @NotNull
-    @JsonProperty("product")
-    private UUID product;
+    @JsonProperty("product_type_id")
+    private UUID productTypeId;
 
     @Positive
     @JsonProperty("quantity")

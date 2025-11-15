@@ -1,6 +1,7 @@
 package org.lab.telegram_bot.service;
 
 import org.dental.restclient.WorkPhotoLinkService;
+import org.lab.model.WorkPhotoEntry;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.http.HttpHeaders;
 import java.util.List;
@@ -27,7 +28,7 @@ public class WorkPhotoLinkServiceWrapper {
         return workPhotoLinkService.findByIdAndFilename(workId, filename, httpHeaderConsumerFunction.apply(userId));
     }
 
-    public List<String> findAllById(long workId, UUID userId) {
+    public List<WorkPhotoEntry> findAllById(long workId, UUID userId) {
         return workPhotoLinkService.findAllById(workId, httpHeaderConsumerFunction.apply(userId));
     }
 

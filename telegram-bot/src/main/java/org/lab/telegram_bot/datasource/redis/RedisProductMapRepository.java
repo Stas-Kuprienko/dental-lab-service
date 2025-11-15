@@ -1,11 +1,15 @@
 package org.lab.telegram_bot.datasource.redis;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.model.ProductMap;
 import org.lab.telegram_bot.datasource.ProductMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +25,14 @@ public class RedisProductMapRepository implements ProductMapRepository {
     @Autowired
     public RedisProductMapRepository(RedisTemplate<String, ProductMap> productMapRedisTemplate) {
         this.redisTemplate = productMapRedisTemplate;
+    }
+
+
+    @PostConstruct
+    public void init() {
+        Duration duration = Duration.of(15, ChronoUnit.MINUTES);
+        redisTemplate.expire(KEY, duration);
+        log.info("Cache duration for {} key is set to {}", KEY, duration);
     }
 
 
