@@ -159,7 +159,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     }
 
     private List<InlineKeyboardButton> cancelButton(Locale locale) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CLEAR, 0);
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0);
         return List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale));
     }
 

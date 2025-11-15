@@ -149,12 +149,17 @@ public abstract class BotCommandHandler {
         buttonLabel = messageSource.getMessage(ButtonKeys.DELETE.name(), null, locale);
         callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, ViewDentalWorkHandler.Steps.CONFIRM_DELETE_DENTAL_WORK.ordinal(), workId);
         InlineKeyboardButton deleteWorkButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
+        //'cancel' button
+        buttonLabel = messageSource.getMessage(ButtonKeys.CANCEL.name(), null, locale);
+        callbackQueryData = ChatBotUtility.callBackQuery(BotCommands.CANCEL, 0, workId);
+        InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(buttonLabel, callbackQueryData);
 
         InlineKeyboardMarkup inlineKeyboardMarkup = keyboardBuilderKit.inlineKeyboard(
                 List.of(updateButton),
                 List.of(addPhotoButton),
                 List.of(openPhotoButton),
-                List.of(deleteWorkButton));
+                List.of(deleteWorkButton),
+                List.of(cancelButton));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         session.clearAttributes();
         chatSessionService.save(session);

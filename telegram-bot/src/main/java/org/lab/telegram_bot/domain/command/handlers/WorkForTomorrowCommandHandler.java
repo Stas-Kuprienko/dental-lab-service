@@ -61,12 +61,16 @@ public class WorkForTomorrowCommandHandler extends BotCommandHandler {
                 .filter(dw -> dw.getCompleteAt().equals(tomorrow))
                 .toList();
         String text = workListToMessage(dentalWorks, locale);
-        InlineKeyboardButton selectButton = buildSelectItemButton(locale);
-        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(selectButton));
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(DentalWorksHandler.Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
-        return createSendMessage(session.getChatId(), text, keyboardMarkup);
+        if (dentalWorks.isEmpty()) {
+            return createSendMessage(session.getChatId(), text);
+        } else {
+            InlineKeyboardButton selectButton = buildSelectItemButton(locale);
+            InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(selectButton));
+            return createSendMessage(session.getChatId(), text, keyboardMarkup);
+        }
     }
 
     private InlineKeyboardButton buildSelectItemButton(Locale locale) {

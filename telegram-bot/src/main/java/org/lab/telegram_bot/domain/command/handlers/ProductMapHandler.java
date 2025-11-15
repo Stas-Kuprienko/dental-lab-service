@@ -150,7 +150,9 @@ public class ProductMapHandler extends BotCommandHandler {
         InlineKeyboardButton update = keyboardBuilderKit.callbackButton(ButtonKeys.UPDATE, callbackQueryPrefix, locale);
         callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, Steps.LIST_FOR_DELETE.ordinal());
         InlineKeyboardButton delete = keyboardBuilderKit.callbackButton(ButtonKeys.DELETE, callbackQueryPrefix, locale);
-        var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete));
+        callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0);
+        InlineKeyboardButton cancel = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale);
+        var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete, cancel));
         session.setStep(0);
         session.setCommand(BotCommands.PRODUCT_MAP);
         chatSessionService.save(session);

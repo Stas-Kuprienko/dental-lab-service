@@ -14,7 +14,8 @@ public enum BotCommands {
     SEARCH_BY("/search_by", true),
     GET_REPORT("/get_report", true),
     COUNT_PROFIT("/count_profit", true),
-    PHOTO_FILES("/photo_files", false);
+    PHOTO_FILES("/photo_files", false),
+    CANCEL("/cancel", false);
 
 
     public final String value;

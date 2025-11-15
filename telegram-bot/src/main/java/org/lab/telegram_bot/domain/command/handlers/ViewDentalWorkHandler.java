@@ -231,6 +231,10 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         String text = messageSource.getMessage(TextKeys.SELECT_FIELD_TO_UPDATE.name(), null, locale);
         DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         InlineKeyboardMarkup dentalWorkKeyboard = dentalWorkAsKeyboard(dentalWork, locale);
+        //cancel button
+        String buttonLabel = messageSource.getMessage(ButtonKeys.CANCEL.name(), null, locale);
+        String callback = ChatBotUtility.callBackQuery(BotCommands.CANCEL, 0, String.valueOf(messageId));
+        dentalWorkKeyboard.getKeyboard().add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callback)));
         session.setCommand(BotCommands.VIEW_DENTAL_WORK);
         chatSessionService.save(session);
         return editMessageText(session.getChatId(), messageId, text, dentalWorkKeyboard);
@@ -467,7 +471,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
             callbackData = ChatBotUtility.callBackQuery(BotCommands.VIEW_DENTAL_WORK, step, status.name());
             buttons.add(List.of(keyboardBuilderKit.callbackButton(buttonLabel, callbackData)));
         }
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CLEAR, 0);
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0);
         buttons.add(List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale)));
         return keyboardBuilderKit.inlineKeyboard(buttons);
     }
@@ -480,7 +484,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
             buttons.add(new ArrayList<>());
             buttons.getLast().add(button);
         }
-        InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, ChatBotUtility.callBackQueryPrefix(BotCommands.CLEAR, 0), locale);
+        InlineKeyboardButton cancelButton = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0), locale);
         buttons.add(List.of(cancelButton));
         return keyboardBuilderKit.inlineKeyboard(buttons);
     }
