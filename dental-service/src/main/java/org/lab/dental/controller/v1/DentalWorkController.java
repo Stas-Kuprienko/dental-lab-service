@@ -93,11 +93,28 @@ public class DentalWorkController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/set-status-{status}")
+    public ResponseEntity<Void> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
+                                             @RequestBody List<Long> idList,
+                                             @PathVariable("status") WorkStatus status) {
+        log.info("From user '{}' received request to set 'status': {}", userId, status);
+        dentalWorkManager.updateStatusForIdList(idList, userId, status);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDentalWork(@RequestHeader("X-USER-ID") UUID userId,
                                                  @PathVariable("id") Long id) {
         log.info("From user '{}' received request to delete by ID={}", userId, id);
         dentalWorkManager.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/sorting")
+    public ResponseEntity<Void> sortForCompletion(@RequestHeader("X-USER-ID") UUID userId,
+                                                              @RequestParam(name = "is_previous_month", defaultValue = "false") boolean isPreviousMonth) {
+        log.info("From user '{}' received request to sorting", userId);
+        dentalWorkManager.sortForCompletion(userId, isPreviousMonth);
+        return ResponseEntity.ok().build();
     }
 }

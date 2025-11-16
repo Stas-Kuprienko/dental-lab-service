@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
@@ -139,6 +140,12 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public void updateStatusForIdList(List<Long> idList, UUID userId, WorkStatus status) {
+        int result = dentalWorkRepository.updateStatusForIdList(idList, userId, status.name());
+        log.info("Status has been set '{}' for DentalWorks: {}.", status, result);
+    }
+
+    @Override
     public DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity, LocalDate completeAt) {
         if (productTypeId == null || quantity == null) {
             throw PersistenceCustomException.nullParameters("Product", "productTypeId", "quantity");
@@ -216,6 +223,24 @@ public class MyDentalWorkService implements DentalWorkService {
     public void delete(Long id, UUID userId) {
         dentalWorkRepository.deleteByIdAndUserId(id, userId);
         log.info("DentalWork with ID={} and userID='{}' is deleted", id, userId);
+    }
+
+    @Override
+    public void sortForCompletion(UUID userId, boolean isPreviousMonth) {
+        List<DentalWorkEntity> dentalWorks = getAllActualByUserId(userId);
+        Month month;
+        if (isPreviousMonth) {
+            month = LocalDate.now().getMonth().minus(1);
+        } else {
+            month = LocalDate.now().getMonth();
+        }
+        List<Long> idList = dentalWorks.stream()
+                .filter(dw -> dw.getCompleteAt().getMonthValue() <= month.getValue()
+                                && dw.getStatus().equals(WorkStatus.MAKING))
+                .map(DentalWorkEntity::getId)
+                .toList();
+        log.info("Sorting has been performed for DentalWorks: {}", idList.size());
+        updateStatusForIdList(idList, userId, WorkStatus.COMPLETED);
     }
 
 

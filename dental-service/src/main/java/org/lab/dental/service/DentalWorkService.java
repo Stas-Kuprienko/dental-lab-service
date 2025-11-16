@@ -28,6 +28,8 @@ public interface DentalWorkService {
 
     void updateStatus(Long id, UUID userId, WorkStatus status);
 
+    void updateStatusForIdList(List<Long> idList, UUID userId, WorkStatus status);
+
     DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity, LocalDate completeAt);
 
     DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt);
@@ -37,4 +39,6 @@ public interface DentalWorkService {
     DentalWorkEntity deleteProduct(Long id, UUID userId, UUID productId);
 
     void delete(Long id, UUID userId);
+
+    void sortForCompletion(UUID userId, boolean isPreviousMonth);
 }

@@ -80,6 +80,7 @@ section {
     display: table-row;
     background-color: #002d73;
     color: white;
+    text-decoration: none;
 }
 
 .tr-closed:hover {
@@ -91,6 +92,7 @@ section {
     display: table-row;
     background-color: #075700;
     color: white;
+    text-decoration: none;
 }
 
 .tr-paid:hover {

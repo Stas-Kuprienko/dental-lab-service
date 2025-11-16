@@ -122,6 +122,15 @@ public class DentalWorkManager {
         });
     }
 
+    public void updateStatusForIdList(List<Long> id, UUID userId, WorkStatus status) {
+        dentalWorkService.updateStatusForIdList(id, userId, status);
+        List<DentalWork> dentalWorks = dentalWorkService.getAllActualByUserId(userId)
+                .stream()
+                .map(converter::toDto)
+                .toList();
+        cacheRepository.save(dentalWorks, userId);
+    }
+
     public DentalWork addProduct(long id, UUID userId, NewProduct newProduct) {
         UUID productTypeId = newProduct.getProductTypeId();
         int quantity = newProduct.getQuantity();
@@ -163,6 +172,15 @@ public class DentalWorkManager {
         filenames.forEach(workPhotoFileService::deleteFile);
         cacheRepository.delete(id, userId);
         dentalWorkService.delete(id, userId);
+    }
+
+    public void sortForCompletion(UUID userId, boolean isPreviousMonth) {
+        dentalWorkService.sortForCompletion(userId, isPreviousMonth);
+        List<DentalWork> dentalWorks = dentalWorkService.getAllActualByUserId(userId)
+                .stream()
+                .map(converter::toDto)
+                .toList();
+        cacheRepository.save(dentalWorks, userId);
     }
 
 

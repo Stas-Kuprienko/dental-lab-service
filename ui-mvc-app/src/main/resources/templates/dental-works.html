@@ -12,7 +12,7 @@
 <body>
 
 <!-- 🔝 Меню -->
-<div th:replace="fragments/nav :: main-menu"></div>
+<div th:replace="fragments/nav :: nav"></div>
 
 <section>
     <!-- 📅 Заголовок месяца -->
@@ -39,7 +39,7 @@
 
             <div class="tbody">
                 <a th:each="work : ${works}"
-                   th:class="${work.status == 'COMPLETED'} ? 'tr-closed' : (${work.status == 'PAID'} ? 'tr-paid' : 'tr')"
+                   th:class="${work.status.name == 'COMPLETED'} ? 'tr-closed' : (${work.status.name == 'PAID'} ? 'tr-paid' : 'tr')"
                    th:href="@{'/main/dental-works/' + ${work.id}}">
 
                     <div class="td" th:text="${work.patient}">Пациент</div>
@@ -89,8 +89,7 @@
     <a id="monthly-label"><button>другой месяц</button></a>
     <div id="monthly-form" style="display:none;">
         <form method="get" th:action="@{/main/dental-works}">
-            <input type="month" name="year-month"
-                   th:value="${headerMonth.year + '-' + headerMonth.monthValue}">
+            <input type="month" name="year-month" th:value="${headerMonth.year + '-' + headerMonth.monthValue}">
             <input class="medium-button" type="submit" value="выбрать">
         </form>
     </div>
@@ -98,21 +97,15 @@
     <!-- SORT -->
     <a id="sort-label"><button>сортировать</button></a>
     <div id="sort-form" style="display:none;">
-        <form method="post" th:action="@{/main/dental-works/sorting}">
-            <input type="hidden" name="year" th:value="${headerMonth.nowYear}">
-            <input type="hidden" name="month" th:value="${headerMonth.nowMonthValue}">
-            <input class="medium-button" type="submit" value="текущий">
+        <form method="post" th:action="@{/main/dental-works/sorting?is_previous_month=false}">
+            <input class="medium-button" type="submit" value="по текущему месяцу">
         </form>
-        <form method="post" th:action="@{/main/dental-works/sorting}">
-            <input type="hidden" name="year" th:value="${headerMonth.prevYear}">
-            <input type="hidden" name="month" th:value="${headerMonth.prevMonthValue}">
-            <input class="medium-button" type="submit" value="прошлый">
+        <form method="post" th:action="@{/main/dental-works/sorting?is_previous_month=true}">
+            <input class="medium-button" type="submit" value="по прошлому месяцу">
         </form>
-        <form method="post" th:action="@{/main/dental-works/sorting}">
-            <input type="hidden" name="year" th:value="${headerMonth.year}">
-            <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
-            <input type="hidden" name="method" value="put">
-            <input class="medium-button" type="submit" value="все оплачены">
+        <form method="get" th:action="@{/main/dental-works/bulk-update}">
+            <input type="hidden" name="year-month" th:value="${headerMonth.year + '-' + headerMonth.monthValue}">
+            <input class="medium-button" type="submit" value="выбрать несколько">
         </form>
     </div>
 

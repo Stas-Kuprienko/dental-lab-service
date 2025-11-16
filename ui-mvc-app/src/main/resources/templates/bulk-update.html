@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DENTAL LAB SERVICE</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+<!-- 🔝 Меню -->
+<div th:replace="fragments/nav :: nav"></div>
+
+<section>
+
+    <h2 style="text-align:center;">Установить статус для нескольких записей</h2>
+
+    <h3><strong th:text="${headerMonth.value()}">Июль - 2025</strong></h3>
+
+    <form id="bulk-form" th:action="@{/main/dental-works/bulk-update}" method="post">
+
+        <!-- сохраняем месяц -->
+        <input type="hidden" name="year-month" th:value="${headerMonth.year + '-' + headerMonth.monthValue}">
+
+        <div style="overflow-x:auto;">
+            <div class="table" style="min-width:800px;">
+
+                <div class="thead">
+                    <div class="tr">
+                        <div class="th" style="width:40px;">
+                            <input type="checkbox" id="select-all">
+                        </div>
+                        <div class="th">Пациент</div>
+                        <div class="th">Клиника</div>
+                        <div class="th">Статус</div>
+                        <div class="th">Дата</div>
+                    </div>
+                </div>
+
+                <div class="tbody">
+                    <div class="tr" th:each="work : ${works}">
+                        <div class="td" style="width:40px;">
+                            <input type="checkbox" name="ids" th:value="${work.id}" class="row-check">
+                        </div>
+
+                        <div class="td" th:text="${work.patient}">Пациент</div>
+                        <div class="td" th:text="${work.clinic}">Клиника</div>
+
+                        <div class="td">
+                            <span th:switch="${work.status.name}">
+                                <span th:case="MAKING">ДЕЛАЕТСЯ</span>
+                                <span th:case="COMPLETED">ВЫПОЛНЕНО</span>
+                                <span th:case="PAID">ОПЛАЧЕНО</span>
+                            </span>
+                        </div>
+
+                        <div class="td" th:text="${#temporals.format(work.completeAt, 'dd-MM-yyyy')}">01-01-2025</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <br><br>
+
+        <label><b>Статус:</b></label>
+        <select name="status" required>
+            <option value="MAKING">ДЕЛАЕТСЯ</option>
+            <option value="COMPLETED">ВЫПОЛНЕНО</option>
+            <option value="PAID">ОПЛАЧЕНО</option>
+        </select>
+
+        <br><br>
+
+        <button type="submit" class="medium-button">Применить</button>
+    </form>
+
+</section>
+
+<script>
+    // выбрать всё
+    document.getElementById('select-all')
+        .addEventListener('change', function() {
+            const checked = this.checked;
+            document.querySelectorAll('.row-check').forEach(c => c.checked = checked);
+        });
+</script>
+
+</body>
+</html>

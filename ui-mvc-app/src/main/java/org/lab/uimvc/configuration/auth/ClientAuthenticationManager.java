@@ -1,10 +1,12 @@
 package org.lab.uimvc.configuration.auth;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dental.restclient.AuthenticationService;
 import org.lab.model.AuthToken;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 public class ClientAuthenticationManager {
 
     private final AuthenticationService authenticationService;
@@ -21,6 +23,7 @@ public class ClientAuthenticationManager {
 
     public void authenticate() {
         login();
+        log.info("Client '{}' authentication is successful", clientId);
     }
 
     public String accessToken() {

@@ -129,4 +129,12 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
     @Query(value = "DELETE FROM dental_lab.dental_work WHERE id = :id AND user_id = :userId", nativeQuery = true)
     void deleteByIdAndUserId(@Param("id") Long id,
                              @Param("userId") UUID userId);
+
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE dental_lab.dental_work SET status = :status WHERE id IN :ids AND user_id = :userId", nativeQuery = true)
+    int updateStatusForIdList(@Param("ids") List<Long> ids,
+                              @Param("userId") UUID userId,
+                              @Param("status") String status);
 }

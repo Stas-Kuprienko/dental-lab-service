@@ -1,5 +1,6 @@
 package org.dental.restclient;
 
+import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.springframework.core.ParameterizedTypeReference;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestClient;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -63,7 +65,8 @@ public class DentalWorkService {
                 .get()
                 .uri(RESOURCE)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public List<DentalWork> findAll(Consumer<HttpHeaders> headersConsumer) {
@@ -72,32 +75,35 @@ public class DentalWorkService {
                 .uri(RESOURCE)
                 .headers(headersConsumer)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public List<DentalWork> findAllByMonth(int year, int month) {
         return restClient
                 .get()
-                .uri( uriBuilder -> uriBuilder
+                .uri(uriBuilder -> uriBuilder
                         .path(RESOURCE + "/by-period")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public List<DentalWork> findAllByMonth(int year, int month, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .get()
-                .uri( uriBuilder -> uriBuilder
+                .uri(uriBuilder -> uriBuilder
                         .path(RESOURCE + "/by-period")
                         .queryParam("year", year)
                         .queryParam("month", month)
                         .build())
                 .headers(headersConsumer)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public List<DentalWork> searchDentalWorks(@Nullable String clinic, @Nullable String patient) {
@@ -109,7 +115,8 @@ public class DentalWorkService {
                         .queryParam("patient", patient)
                         .build())
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public List<DentalWork> searchDentalWorks(@Nullable String clinic, @Nullable String patient, Consumer<HttpHeaders> headersConsumer) {
@@ -122,7 +129,8 @@ public class DentalWorkService {
                         .build())
                 .headers(headersConsumer)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public DentalWork update(DentalWork updatable) {
@@ -142,6 +150,25 @@ public class DentalWorkService {
                 .body(updatable)
                 .retrieve()
                 .body(DentalWork.class);
+    }
+
+    public void updateStatus(List<Long> idList, WorkStatus status) {
+        restClient
+                .patch()
+                .uri(RESOURCE + "/set-status-" + status)
+                .body(idList)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void updateStatus(List<Long> idList, WorkStatus status, Consumer<HttpHeaders> headersConsumer) {
+        restClient
+                .patch()
+                .uri(RESOURCE + "/set-status-" + status)
+                .headers(headersConsumer)
+                .body(idList)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public void delete(long id) {
@@ -165,5 +192,28 @@ public class DentalWorkService {
         if (response.getStatusCode().isError()) {
             throw new RuntimeException();
         }
+    }
+
+    public void sortForCompletion(boolean isPreviousMonth) {
+        restClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(RESOURCE + "/sorting")
+                        .queryParam("is_previous_month", isPreviousMonth)
+                        .build())
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void sortForCompletion(boolean isPreviousMonth, Consumer<HttpHeaders> headersConsumer) {
+        restClient
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(RESOURCE + "/sorting")
+                        .queryParam("is_previous_month", isPreviousMonth)
+                        .build())
+                .headers(headersConsumer)
+                .retrieve()
+                .toBodilessEntity();
     }
 }
