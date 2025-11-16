@@ -15,6 +15,18 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation project(':common:models')
+
+	// monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.github.openfeign:feign-micrometer:${micrometer_version}")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+    implementation("ch.qos.logback:logback-classic:${logback_version}")
 }
 
 dependencyManagement {
