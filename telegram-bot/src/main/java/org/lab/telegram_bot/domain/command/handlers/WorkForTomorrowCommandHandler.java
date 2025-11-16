@@ -1,8 +1,10 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.model.DentalWork;
+import org.lab.model.Product;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
+import org.lab.telegram_bot.domain.command.TextKeys;
 import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -56,11 +58,12 @@ public class WorkForTomorrowCommandHandler extends BotCommandHandler {
 
     private SendMessage getWorkList(ChatSession session, Locale locale) {
         List<DentalWork> dentalWorks = dentalWorkService.findAll(session.getUserId());
-        LocalDate tomorrow = LocalDate.now();
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
         dentalWorks = dentalWorks.stream()
                 .filter(dw -> dw.getCompleteAt().equals(tomorrow))
                 .toList();
-        String text = workListToMessage(dentalWorks, locale);
+        dentalWorks.forEach(dw -> dw.getProducts().removeIf(p -> !p.getCompleteAt().equals(tomorrow)));
+        String text = workForTomorrowListToMessage(dentalWorks, locale);
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(DentalWorksHandler.Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
@@ -71,6 +74,40 @@ public class WorkForTomorrowCommandHandler extends BotCommandHandler {
             InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(selectButton));
             return createSendMessage(session.getChatId(), text, keyboardMarkup);
         }
+    }
+
+    private String workForTomorrowListToMessage(List<DentalWork> dentalWorks, Locale locale) {
+        if (dentalWorks == null || dentalWorks.isEmpty()) {
+            return messageSource.getMessage(TextKeys.EMPTY.name(), null, locale);
+        }
+        String template = messageSource.getMessage("WORK_FOR_TOMORROW_LIST_TEMPLATE", null, locale);
+        StringBuilder workStringBuilder = new StringBuilder();
+        StringBuilder productStringBuilder = new StringBuilder();
+        for (DentalWork dw : dentalWorks) {
+            for (Product p : dw.getProducts()) {
+                productStringBuilder.append('\t')
+                        .append(p.getTitle())
+                        .append(' ')
+                        .append('-')
+                        .append(' ')
+                        .append(p.getQuantity())
+                        .append('\n');
+            }
+            if (!productStringBuilder.isEmpty()) {
+                productStringBuilder.deleteCharAt(productStringBuilder.length() - 1);
+            }
+            String item = template.formatted(
+                    dw.getId(),
+                    dw.getPatient(),
+                    dw.getClinic(),
+                    productStringBuilder.toString());
+            workStringBuilder.append(item)
+                    .append('\n')
+                    .append(ITEM_DELIMITER)
+                    .append('\n');
+            productStringBuilder.setLength(0);
+        }
+        return workStringBuilder.toString();
     }
 
     private InlineKeyboardButton buildSelectItemButton(Locale locale) {
