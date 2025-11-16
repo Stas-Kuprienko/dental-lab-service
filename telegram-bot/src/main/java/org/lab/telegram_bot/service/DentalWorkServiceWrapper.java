@@ -48,4 +48,8 @@ public class DentalWorkServiceWrapper {
     public void delete(long id, UUID userId) {
         dentalWorkService.delete(id, httpHeaderConsumerFunction.apply(userId));
     }
+
+    public void sortForCompletion(boolean isPreviousMonth, UUID userId) {
+        dentalWorkService.sortForCompletion(isPreviousMonth, httpHeaderConsumerFunction.apply(userId));
+    }
 }

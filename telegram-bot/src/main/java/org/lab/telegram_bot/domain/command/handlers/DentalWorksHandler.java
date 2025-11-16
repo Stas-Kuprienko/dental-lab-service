@@ -60,6 +60,8 @@ public class DentalWorksHandler extends BotCommandHandler {
             case LIST_PAGING -> paging(session, locale, messageText, messageId);
             case SELECT_ITEM -> selectItem(session, locale, messageText, messageId);
             case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
+            case SORTING -> sorting(session, locale, messageId);
+            case SELECT_MONTH_FOR_SORTING -> selectMonthForSorting(session, locale, messageText, messageId);
         };
     }
 
@@ -73,6 +75,8 @@ public class DentalWorksHandler extends BotCommandHandler {
             case LIST_PAGING -> paging(session, locale, messageText, messageId);
             case SELECT_ITEM -> selectItem(session, locale, messageText, messageId);
             case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
+            case SORTING -> sorting(session, locale, messageId);
+            case SELECT_MONTH_FOR_SORTING -> selectMonthForSorting(session, locale, messageText, messageId);
         };
     }
 
@@ -91,6 +95,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         }
         if (!dentalWorks.isEmpty()) {
             buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+            buttonLists.add(List.of(buildSortingButton(locale, messageId)));
         }
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
@@ -125,6 +130,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         buttonLists.add(buttons);
         if (!dentalWorks.isEmpty()) {
             buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+            buttonLists.add(List.of(buildSortingButton(locale, messageId)));
         }
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
         session.setCommand(BotCommands.DENTAL_WORKS);
@@ -163,6 +169,31 @@ public class DentalWorksHandler extends BotCommandHandler {
                 dentalWork,
                 executor,
                 messageToDelete, messageId, messageId - 1);
+    }
+
+    private BotApiMethod<?> sorting(ChatSession session, Locale locale, int messageId) {
+        String text = messageSource.getMessage(TextKeys.SELECT_SORTING_WORKS_FOR_COMPLETION.name(), null, locale);
+        String callbackPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.SELECT_MONTH_FOR_SORTING.ordinal());
+        //'current month' button
+        String label = messageSource.getMessage(ButtonKeys.CURRENT_MONTH.name(), null, locale);
+        InlineKeyboardButton currentButton = keyboardBuilderKit.callbackButton(label, callbackPrefix + false);
+        //'previous month' button
+        label = messageSource.getMessage(ButtonKeys.PREVIOUS_MONTH.name(), null, locale);
+        InlineKeyboardButton previousButton = keyboardBuilderKit.callbackButton(label, callbackPrefix + true);
+        // //
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(currentButton, previousButton));
+        session.setCommand(BotCommands.DENTAL_WORKS);
+        session.setStep(Steps.SELECT_MONTH_FOR_SORTING.ordinal());
+        chatSessionService.save(session);
+        return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
+    }
+
+    private BotApiMethod<?> selectMonthForSorting(ChatSession session, Locale locale, String messageText, int messageId) {
+        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        boolean isPreviousMonth = Boolean.parseBoolean(callbackData[2]);
+        dentalWorkService.sortForCompletion(isPreviousMonth, session.getUserId());
+        executor.accept(deleteMessage(session.getChatId(), messageId));
+        return getList(session, locale, messageId);
     }
 
     private boolean isCancel(ChatSession session, String messageText, int messageId) {
@@ -210,6 +241,13 @@ public class DentalWorksHandler extends BotCommandHandler {
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
+    private InlineKeyboardButton buildSortingButton(Locale locale, int messageId) {
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.SORTING.ordinal());
+        String callbackQueryData = callbackQueryPrefix + messageId;
+        String callbackLabel = messageSource.getMessage(ButtonKeys.SORTING_WORKS.name(), null, locale);
+        return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
+    }
+
     private Steps getStep(ChatSession session) {
         return Steps.values()[session.getStep()];
     }
@@ -219,7 +257,9 @@ public class DentalWorksHandler extends BotCommandHandler {
         GET_WORK_LIST,
         LIST_PAGING,
         SELECT_ITEM,
-        INPUT_WORK_ID
+        INPUT_WORK_ID,
+        SORTING,
+        SELECT_MONTH_FOR_SORTING
     }
 
     enum Attributes {
