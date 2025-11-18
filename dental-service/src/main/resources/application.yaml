@@ -71,29 +71,24 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
-    prometheus:
-      access: read_only
-  prometheus:
-    metrics:
-      export:
+  metrics:
+    export:
+      prometheus:
         enabled: true
+    tags:
+      application: ${spring.application.name}
   tracing:
-    enabled: true
     sampling:
       probability: 1.0
-
-otel:
-  exporter:
-    otlp:
-      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
-      protocol: http/protobuf
-  logs:
-    exporter: none
-  metrics:
-    exporter: none
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
 logging:
-  config: "classpath:logback.xml"
+  level:
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId},%X{spanId}] %logger{36} - %msg%n"

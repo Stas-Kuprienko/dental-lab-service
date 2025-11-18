@@ -1,0 +1,63 @@
+// Сбор логов из приложения
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.containers.targets
+  forward_to = [loki.write.default.receiver]
+
+  labels = {
+    job = "docker",
+  }
+}
+
+// Discovery для Docker контейнеров
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Отправка логов в Loki
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Сбор метрик из Spring Boot
+prometheus.scrape "spring_app" {
+  targets = [
+    {"__address__" = "spring-app:8080", "job" = "spring-app"},
+  ]
+  forward_to = [prometheus.remote_write.default.receiver]
+  scrape_interval = "15s"
+  metrics_path = "/actuator/prometheus"
+}
+
+// Отправка метрик в Prometheus
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// Прием трейсов по OTLP
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces  = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Отправка трейсов в Tempo
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
