@@ -25,6 +25,19 @@ section {
     text-decoration: none;
 }
 
+.telegram-bot {
+    border: 3px solid black;
+    background-image: linear-gradient(to bottom right, dimGrey, black);
+    float: left;
+    width: 90%;
+    margin: auto;
+    padding: 1%;
+    height: 32px;
+    color: white;
+    font-size: bold;
+    text-decoration: none;
+}
+
 .main-page:hover {
     background-image: linear-gradient(to bottom right, #808080, #1f1f1f);
     font-size: 110%;

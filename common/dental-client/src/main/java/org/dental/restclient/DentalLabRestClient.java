@@ -36,7 +36,7 @@ public class DentalLabRestClient {
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
         restClientBuilder.baseUrl(baseUrl);
         AUTHENTICATION = new AuthenticationService(restClientBuilder.build());
-        RestClient restClient = restClientBuilder.requestInterceptor(interceptor).build();
+        RestClient restClient = restClientBuilder.clone().requestInterceptor(interceptor).build();
         CREDENTIALS = new CredentialService(restClient);
         USERS = new UserService(restClient);
         VERIFICATION = new VerificationService(restClient);

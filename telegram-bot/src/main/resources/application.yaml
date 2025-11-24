@@ -7,7 +7,7 @@ spring:
     import: "configserver:"
   cloud:
     config:
-      uri: http://localhost:8888
+      uri: http://host.docker.internal:8888
   kafka:
     topic: event-topic
     consumer:
@@ -18,39 +18,26 @@ spring:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    instance:
-      prefer-ip-address: true
+telegram:
+  api:
+    path: "https://api.telegram.org/file/bot"
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
+        include: "*"
   metrics:
     export:
       prometheus:
         enabled: true
-    tags:
-      application: ${spring.application.name}
+  endpoint:
+    prometheus:
+      enabled: true
   tracing:
+    enabled: true
     sampling:
       probability: 1.0
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
-logging:
-  level:
-    root: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId},%X{spanId}] %logger{36} - %msg%n"
-
-telegram:
-  api:
-    path: "https://api.telegram.org/file/bot"
+    otlp:
+      endpoint: http://host.docker.internal:4318
+      protocol: http/protobuf

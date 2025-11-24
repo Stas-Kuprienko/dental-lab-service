@@ -10,7 +10,7 @@ spring:
     import: "configserver:"
   cloud:
     config:
-      uri: http://localhost:8888
+      uri: http://host.docker.internal:8888
     gateway:
       discovery:
         locator:
@@ -30,30 +30,24 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${project.variables.eureka-server.url}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
+        include: "*"
   metrics:
     export:
       prometheus:
         enabled: true
-    tags:
-      application: ${spring.application.name}
+  endpoint:
+    prometheus:
+      enabled: true
   tracing:
+    enabled: true
     sampling:
       probability: 1.0
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
-logging:
-  level:
-    root: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId},%X{spanId}] %logger{36} - %msg%n"
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf

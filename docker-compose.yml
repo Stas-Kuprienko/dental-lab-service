@@ -4,7 +4,99 @@ networks:
   lab-networks:
     driver: bridge
 
+
 services:
+
+  config-server:
+    build:
+      context: ./cloud/config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    networks:
+      - lab-networks
+    ports:
+      - "8888:8888"
+
+
+  eureka-server:
+    build:
+      context: ./cloud/eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    networks:
+      - lab-networks
+    ports:
+      - "8761:8761"
+
+
+  gateway:
+    build:
+      context: ./cloud/gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    networks:
+      - lab-networks
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server
+      - eureka-server
+      - dental-lab-service
+
+
+  dental-lab-service:
+    build:
+      context: ./dental-service
+      dockerfile: Dockerfile
+    container_name: dental-lab-service
+    networks:
+      - lab-networks
+    ports:
+      - "8000:8000"
+    depends_on:
+      - config-server
+      - eureka-server
+      - keycloak
+      - postgres
+      - redis
+      - minio
+      - kafka
+      - grafana
+
+
+  ui-application:
+    build:
+      context: ./ui-mvc-app
+      dockerfile: Dockerfile
+    container_name: ui-application
+    networks:
+      - lab-networks
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server
+      - gateway
+      - keycloak
+      - redis
+      - grafana
+
+
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+      dockerfile: Dockerfile
+    container_name: telegram-bot
+    networks:
+      - lab-networks
+    ports:
+      - "8001:8001"
+    depends_on:
+      - config-server
+      - gateway
+      - redis
+      - kafka
+      - grafana
+
 
   postgres:
     container_name: dental_db
@@ -21,6 +113,7 @@ services:
     volumes:
       - ./volumes/postgresql/data:/var/lib/postgresql/data
       - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+
 
   keycloak:
     container_name: dental_keycloak
@@ -49,6 +142,7 @@ services:
       - ./volumes/keycloak/data:/opt/keycloak/data
       - ./volumes/keycloak/themes:/opt/keycloak/themes
 
+
   kafka:
     container_name: dental_kafka
     image: bitnami/kafka:latest
@@ -70,6 +164,7 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
 
+
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -82,6 +177,7 @@ services:
     command: server --console-address ":9001" /data
     volumes:
       - ./volumes/minio_data:/data
+
 
   redis:
     container_name: dental_redis
@@ -103,6 +199,7 @@ services:
     container_name: alloy
     ports:
       - "12345:12345"  # UI
+      - "9080:9080"
       - "4317:4317"    # OTLP gRPC
       - "4318:4318"    # OTLP HTTP
     volumes:
@@ -115,6 +212,7 @@ services:
       - --storage.path=/var/lib/alloy/data
     networks:
       - lab-networks
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -134,6 +232,7 @@ services:
     networks:
       - lab-networks
 
+
   loki:
     image: grafana/loki:latest
     container_name: loki
@@ -142,25 +241,23 @@ services:
     volumes:
       - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml
       - ./volumes/loki-data:/loki
-    command:
-      -config.file=/etc/loki/local-config.yaml
-      - mkdir /loki/chunks
     networks:
       - lab-networks
+
 
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
     ports:
       - "3200:3200"   # Tempo HTTP
-      - "4317"        # OTLP gRPC
-      - "4318"        # OTLP HTTP
     volumes:
       - ./config/tempo/tempo.yaml:/etc/tempo/tempo.yaml
-      - tempo-data:/tmp/tempo
+      - ./config/tempo/overrides.yaml:/etc/tempo/overrides.yaml
+      - ./volumes/tempo:/var/tempo
     command: -config.file=/etc/tempo/tempo.yaml
     networks:
       - lab-networks
+
 
   grafana:
     image: grafana/grafana:latest
@@ -170,14 +267,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor tracesEmbeddedFlameGraph
     volumes:
-      - ./config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
       - grafana-data:/var/lib/grafana
     networks:
       - lab-networks
     depends_on:
+      - alloy
       - prometheus
       - loki
       - tempo

@@ -1,0 +1,28 @@
+overrides:
+  # Дефолтные настройки для всех тенантов
+  "*":
+    # Настройки ingestion
+    ingestion_rate_limit_bytes: 15_000_000
+    ingestion_burst_size_bytes: 20_000_000
+    max_traces_per_user: 10_000
+
+    # Настройки хранения
+    max_bytes_per_trace: 50_000_000
+
+    # Настройки поиска
+    max_search_duration: 0s  # 0 = без ограничений
+
+    # Metrics generator
+    metrics_generator_processors:
+      - service-graphs
+      - span-metrics
+
+    # Retention
+    block_retention: 24h
+
+    # Rate limits для поиска
+    max_bytes_per_tag_values_query: 5_000_000
+
+  # Можно добавить специфичные настройки для конкретных тенантов
+  # "tenant-1":
+  #   ingestion_rate_limit_bytes: 30_000_000

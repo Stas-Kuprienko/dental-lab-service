@@ -1,10 +1,14 @@
 package org.lab.dental.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.Objects;
 
 @Entity
@@ -20,6 +24,7 @@ public class WorkPhotoFilenameEntity {
 
     @Column(name = "dental_work_id")
     private Long dentalWorkId;
+
 
 
     public WorkPhotoFilenameEntity() {}

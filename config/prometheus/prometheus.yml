@@ -15,18 +15,39 @@ rule_files: []
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['host.docker.internal:9090']
 
   - job_name: 'gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['localhost:8082']
+      - targets: ['host.docker.internal:8082']
         labels:
           application: 'gateway'
 
+  - job_name: 'dental-lab-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          application: 'dental-lab-service'
+
+  - job_name: 'ui-application'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+        labels:
+          application: 'ui-application'
+
+  - job_name: 'telegram-bot'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+        labels:
+          application: 'telegram-bot'
+
   - job_name: 'alloy'
     static_configs:
-      - targets: ['alloy:12345']
+      - targets: ['alloy:9080']
 
   - job_name: 'tempo'
     static_configs:

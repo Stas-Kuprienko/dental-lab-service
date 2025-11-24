@@ -26,14 +26,11 @@ dependencies {
     implementation 'org.apache.commons:commons-pool2'
 
 	// monitoring
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    implementation("io.micrometer:micrometer-observation")
-    implementation("io.micrometer:micrometer-tracing")
-    implementation("io.micrometer:micrometer-tracing-bridge-otel")
-    implementation("ch.qos.logback:logback-classic:${logback_version}")
-    implementation("net.logstash.logback:logstash-logback-encoder:${logstash_version}")
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation "net.logstash.logback:logstash-logback-encoder:${logback_version}"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetryVersion}"
 
 	// devtools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

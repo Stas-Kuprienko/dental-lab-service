@@ -5,17 +5,18 @@ distributor:
   receivers:
     otlp:
       protocols:
-        http:
-          endpoint: 0.0.0.0:4318
         grpc:
           endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
 
 ingester:
-  max_block_duration: 5m
+  trace_idle_period: 10s
 
 compactor:
   compaction:
-    block_retention: 1h
+    block_retention: 48h
+    compacted_block_retention: 1h
 
 storage:
   trace:
@@ -24,9 +25,3 @@ storage:
       path: /tmp/tempo/traces
     wal:
       path: /tmp/tempo/wal
-
-overrides:
-  per_tenant_override_config: /etc/tempo/overrides.yaml
-  metrics_generator_processors:
-    - service-graphs
-    - span-metrics
