@@ -6,14 +6,14 @@ import java.security.SecureRandom;
 @Component
 public class LinkingKeyGenerator {
 
-    private static final String FRIENDLY_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    private static final String CHARS = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz-_";
     private static final SecureRandom random = new SecureRandom();
 
 
     public String generate(int length) {
         StringBuilder code = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            code.append(FRIENDLY_CHARS.charAt(random.nextInt(FRIENDLY_CHARS.length())));
+            code.append(CHARS.charAt(random.nextInt(CHARS.length())));
         }
         return code.toString();
     }
