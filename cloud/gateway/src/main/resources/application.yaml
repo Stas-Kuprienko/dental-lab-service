@@ -49,5 +49,20 @@ management:
     sampling:
       probability: 1.0
     otlp:
-      endpoint: http://localhost:4318
+      endpoint: http://alloy:4318
       protocol: http/protobuf
+otel:
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://alloy:4318
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+logging:
+  level:
+    root: INFO

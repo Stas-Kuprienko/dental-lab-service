@@ -65,8 +65,9 @@ public class UiMvcConfig {
     // REDIS ************* \/
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
+    public RedisConnectionFactory redisConnectionFactory(@Value("${spring.redis.host}") String host,
+                                                         @Value("${spring.redis.port}") String port) {
+        return new LettuceConnectionFactory(host, Integer.parseInt(port));
     }
 
     @Bean

@@ -21,6 +21,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,16 +51,6 @@ public class DentalLabConfiguration {
      @Bean
     public RealmResource realmResource(Keycloak keycloak, @Value("${project.variables.keycloak.realm}") String realm) {
         return keycloak.realm(realm);
-    }
-    // ******************* /\
-
-    // CONTEXT *********** \/
-
-    @PreDestroy
-    public void close() {
-        if (keycloak != null) {
-            keycloak.close();
-        }
     }
     // ******************* /\
 
@@ -96,8 +88,9 @@ public class DentalLabConfiguration {
     // REDIS *************** \/
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
+    public RedisConnectionFactory redisConnectionFactory(@Value("${spring.redis.host}") String host,
+                                                         @Value("${spring.redis.port}") String port) {
+        return new LettuceConnectionFactory(host, Integer.parseInt(port));
     }
 
     @Bean
@@ -125,4 +118,19 @@ public class DentalLabConfiguration {
         return template;
     }
     // ******************** /\
+
+    // CONTEXT *********** \/
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @PreDestroy
+    public void close() {
+        if (keycloak != null) {
+            keycloak.close();
+        }
+    }
+    // ******************* /\
 }

@@ -1,6 +1,6 @@
-package org.lab.dental.util;
+package org.lab.dental.util.letter;
 
-public enum LetterTemplateKey {
+public enum LetterTemplateKeys {
 
     EMAIL_VERIFICATION,
     CHANGE_EMAIL_LINK,

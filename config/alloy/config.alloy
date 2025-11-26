@@ -1,47 +1,3 @@
-loki.write "local" {
-  endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
-  }
-}
-
-discovery.docker "containers" {
-  host = "unix:///var/run/docker.sock"
-  refresh_interval = "5s"
-}
-
-discovery.relabel "containers" {
-  targets = discovery.docker.containers.targets
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex = "/(.*)"
-    target_label = "container"
-  }
-  rule {
-    target_label = "job"
-    replacement = "docker"
-  }
-  rule {
-    target_label = "host"
-    replacement = constants.hostname
-  }
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex = "/(.*)"
-    target_label = "service"
-  }
-  rule {
-    source_labels = ["__meta_docker_container_log_stream"]
-    target_label = "stream"
-  }
-}
-
-loki.source.docker "containers" {
-  host = "unix:///var/run/docker.sock"
-  targets = discovery.docker.containers.targets
-  relabel_rules = discovery.relabel.containers.rules
-  forward_to = [loki.write.local.receiver]
-}
-
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
@@ -50,8 +6,12 @@ otelcol.receiver.otlp "default" {
     endpoint = "0.0.0.0:4318"
   }
   output {
-    traces = [otelcol.exporter.otlp.tempo.input]
-    metrics = [otelcol.exporter.prometheus.default.input]
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+otelcol.processor.batch "default" {
+  output {
+    traces  = [otelcol.exporter.otlp.tempo.input]
   }
 }
 
@@ -64,6 +24,57 @@ otelcol.exporter.otlp "tempo" {
   }
 }
 
-otelcol.exporter.prometheus "default" {
-  forward_to = []
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.containers.targets
+  forward_to = [loki.process.parse_json.receiver]
+}
+
+loki.process "parse_json" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.json {
+    expressions = {
+      level       = "level",
+      message     = "message",
+      service     = "service_name",
+      trace_id    = "trace_id",
+      span_id     = "span_id",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level    = "",
+      service  = "",
+    }
+  }
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+prometheus.scrape "spring_apps" {
+  targets = [
+    {"__address__" = "gateway:8082", "job" = "gateway"},
+    {"__address__" = "dental-lab-service:8000", "job" = "dental-lab-service"},
+    {"__address__" = "ui-application:8081", "job" = "ui-application"},
+    {"__address__" = "telegram-bot:8001", "job" = "telegram-bot"},
+  ]
+  forward_to      = [prometheus.remote_write.default.receiver]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
 }
