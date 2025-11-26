@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "photo_filename", schema = "dental_lab")
@@ -21,6 +22,9 @@ public class WorkPhotoFilenameEntity {
     @Id
     @Column(name = "filename")
     private String filename;
+
+    @Column(name = "user_id")
+    private UUID userId;
 
     @Column(name = "dental_work_id")
     private Long dentalWorkId;

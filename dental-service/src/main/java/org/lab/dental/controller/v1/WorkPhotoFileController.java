@@ -32,7 +32,7 @@ public class WorkPhotoFileController {
                                          @RequestParam("file") MultipartFile file) {
 
         log.info("From user '{}' received request to upload file for DentalWork ID={}", userId, workId);
-        WorkPhotoFilenameEntity entity = workPhotoFileService.uploadFile(file, workId);
+        WorkPhotoFilenameEntity entity = workPhotoFileService.uploadFile(file, workId, userId);
         return ResponseEntity.ok(entity.getFilename());
     }
 

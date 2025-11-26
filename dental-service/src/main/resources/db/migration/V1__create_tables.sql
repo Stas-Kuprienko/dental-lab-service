@@ -40,6 +40,7 @@ CREATE TABLE dental_lab.product (
 
 CREATE TABLE dental_lab.photo_filename (
     filename VARCHAR(255)   PRIMARY KEY,
+    user_id UUID            NOT NULL    REFERENCES dental_lab.users ON DELETE CASCADE,
     dental_work_id BIGINT   NOT NULL    REFERENCES dental_lab.dental_work ON DELETE CASCADE
 );
 

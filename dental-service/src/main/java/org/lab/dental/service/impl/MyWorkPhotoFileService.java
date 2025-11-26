@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -37,11 +38,15 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
 
 
     @Override
-    public WorkPhotoFilenameEntity uploadFile(MultipartFile file, long workId) {
+    public WorkPhotoFilenameEntity uploadFile(MultipartFile file, long workId, UUID userId) {
         log.info("File for DentalWork ID={} received to save: {}", workId, file);
         String filename = FILENAME_PREFIX_TEMPLATE.formatted(workId) + file.getOriginalFilename();
         s3ClientService.uploadPhoto(file, filename);
-        WorkPhotoFilenameEntity entity = new WorkPhotoFilenameEntity(filename, workId);
+        WorkPhotoFilenameEntity entity = WorkPhotoFilenameEntity.builder()
+                .filename(filename)
+                .dentalWorkId(workId)
+                .userId(userId)
+                .build();
         entity = repository.save(entity);
         log.info("Entity saved: {}", entity);
         action.accept(workId);
@@ -112,6 +117,14 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
         s3ClientService.deletePhoto(filename);
         repository.deleteById(filename);
         log.info("Photo file '{}' is deleted", filename);
+    }
+
+    @Override
+    public void deleteAllForUserId(UUID userId) {
+        List<String> filenames = repository.findAllFilenamesByUserId(userId);
+        filenames.forEach(s3ClientService::deletePhoto);
+        int result = repository.deleteAllByUserId(userId);
+        log.info("Deleted {} WorkPhotoFilename elements by user ID '{}'", result, userId);
     }
 
     @Override

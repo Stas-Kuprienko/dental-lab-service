@@ -5,11 +5,12 @@ import org.lab.model.WorkPhotoEntry;
 import org.lab.model.WorkPhotoFileData;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface WorkPhotoFileService {
 
-    WorkPhotoFilenameEntity uploadFile(MultipartFile file, long workId);
+    WorkPhotoFilenameEntity uploadFile(MultipartFile file, long workId, UUID userId);
 
     String getLinkByFilename(String filename);
 
@@ -22,6 +23,8 @@ public interface WorkPhotoFileService {
     List<WorkPhotoFileData> downloadAllFiles(List<String> filenames, long workId);
 
     void deleteFile(String filename);
+
+    void deleteAllForUserId(UUID userId);
 
     void listenFileUploading(Consumer<Long> action);
 }

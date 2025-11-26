@@ -38,13 +38,14 @@ public class KeycloakCredentialService implements CredentialService {
     @Autowired
     public KeycloakCredentialService(RealmResource realmResource,
                                      RestClient.Builder restClientBuilder,
-                                     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String keycloakUrl,
+                                     @Value("${project.variables.keycloak.url}") String keycloakUrl,
+                                     @Value("${project.variables.keycloak.realm}") String keycloakRealm,
                                      @Value("${project.variables.keycloak.client-id}") String clientId,
                                      @Value("${project.variables.keycloak.client-secret}") String clientSecret) {
         this.realmResource = realmResource;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        restClient = restClientBuilder.baseUrl(keycloakUrl).build();
+        restClient = restClientBuilder.baseUrl(keycloakUrl + "/realms/" + keycloakRealm).build();
     }
 
 

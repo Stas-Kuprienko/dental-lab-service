@@ -55,8 +55,7 @@ public class MyVerificationService implements VerificationService {
     @Override
     public void createForUserId(UUID userId, String email, boolean toChange) {
         String token = codeGenerator.generateStringCode(TOKEN_LENGTH);
-        //TODO token hashing
-        String tokenHash = token;
+        String tokenHash = codeGenerator.getEncoder().encode(token);
         EmailVerificationTokenEntity emailVerificationToken = EmailVerificationTokenEntity.builder()
                 .userId(userId)
                 .email(email)
@@ -75,12 +74,11 @@ public class MyVerificationService implements VerificationService {
     @Override
     public void createTelegramOtpForUserId(UUID userId, String email, long chatId) {
         String otp = codeGenerator.generateNumericCode(6);
-        //TODO token hashing
-        String tokenHash = otp;
+        String tokenHash = codeGenerator.getEncoder().encode(otp);
         EmailVerificationTokenEntity emailVerificationToken = EmailVerificationTokenEntity.builder()
                 .userId(userId)
                 .email(email)
-                .token(otp)
+                .token(tokenHash)
                 .createdAt(LocalDateTime.now())
                 .isVerified(false)
                 .build();
@@ -104,7 +102,8 @@ public class MyVerificationService implements VerificationService {
         if (verificationToken.isVerified()) {
             throw new IllegalArgumentException("the passed token has already been used");
         }
-        if (verificationToken.getToken().equals(token)) {
+        boolean isEqualled = codeGenerator.getEncoder().matches(token, verificationToken.getToken());
+        if (isEqualled) {
             emailVerificationTokenRepository.setIsVerified(userId, true);
             try {
                 credentialService.verifyEmail(verificationToken.getUserId(), verificationToken.getEmail());
@@ -129,11 +128,11 @@ public class MyVerificationService implements VerificationService {
             emailVerificationTokenRepository.deleteById(userId);
             throw new IllegalArgumentException("the passed token has already been expired");
         } else {
-            boolean result = verificationToken.getToken().equals(token);
-            if (result) {
+            boolean isEqualled = codeGenerator.getEncoder().matches(token, verificationToken.getToken());
+            if (isEqualled) {
                 emailVerificationTokenRepository.setIsVerified(userId, true);
             }
-            return result;
+            return isEqualled;
         }
     }
 
@@ -152,8 +151,7 @@ public class MyVerificationService implements VerificationService {
     @Override
     public void createResetPasswordToken(String email) {
         String token = codeGenerator.generateStringCode(TOKEN_LENGTH);
-        //TODO token hashing
-        String tokenHash = token;
+        String tokenHash = codeGenerator.getEncoder().encode(token);
         LocalDateTime now = LocalDateTime.now();
         ResetPasswordTokenEntity resetPasswordToken = ResetPasswordTokenEntity.builder()
                 .email(email)
@@ -175,8 +173,8 @@ public class MyVerificationService implements VerificationService {
 
     @Override
     public ResetPasswordTokenEntity getResetPasswordTokenByToken(String token) {
-        //TODO token hashing
-        return resetPasswordTokenRepository.findByToken(token)
+        String encoded = codeGenerator.getEncoder().encode(token);
+        return resetPasswordTokenRepository.findByToken(encoded)
                 .orElseThrow(() ->
                         NotFoundCustomException.byParams(ResetPasswordTokenEntity.class.getSimpleName(), Map.of("token", "***")));
     }
@@ -190,12 +188,11 @@ public class MyVerificationService implements VerificationService {
             resetPasswordTokenRepository.deleteById(email);
             throw new IllegalArgumentException("the passed token has already been expired");
         } else {
-            //TODO hash equaling
-            boolean result = resetPasswordToken.getToken().equals(token);
-            if (result) {
+            boolean isEqualled = codeGenerator.getEncoder().matches(token, resetPasswordToken.getToken());
+            if (isEqualled) {
                 resetPasswordTokenRepository.setIsVerified(email, true);
             }
-            return result;
+            return isEqualled;
         }
     }
 

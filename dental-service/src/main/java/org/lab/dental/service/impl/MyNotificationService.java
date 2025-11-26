@@ -3,8 +3,8 @@ package org.lab.dental.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.EmailNotificationService;
 import org.lab.dental.service.NotificationService;
-import org.lab.dental.util.LetterTemplateKey;
-import org.lab.dental.util.LetterTemplateUtility;
+import org.lab.dental.util.letter.LetterTemplateKeys;
+import org.lab.dental.util.letter.LetterTemplateUtility;
 import org.lab.event.EventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,12 +41,12 @@ public class MyNotificationService implements NotificationService {
 
     @Override
     public void sendEmailVerifyLink(UUID userId, String email, String data) {
-        sendEmailLink(userId, email, data, LetterTemplateKey.EMAIL_VERIFICATION);
+        sendEmailLink(userId, email, data, LetterTemplateKeys.EMAIL_VERIFICATION);
     }
 
     @Override
     public void sendEmailChangeLink(UUID userId, String email, String data) {
-        sendEmailLink(userId, email, data, LetterTemplateKey.CHANGE_EMAIL_LINK);
+        sendEmailLink(userId, email, data, LetterTemplateKeys.CHANGE_EMAIL_LINK);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MyNotificationService implements NotificationService {
         log.info("The reset password token message is accepted to send to the email '{}'", email);
         CompletableFuture.runAsync(() -> {
             String link = serviceUrl + RESET_PASSWORD_VERIFICATION_PATH.formatted(email, data);
-            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKey.RESET_PASSWORD_LINK, link);
+            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKeys.RESET_PASSWORD_LINK, link);
             emailNotificationService.sendHtmlEmail(message, email);
         }).thenAccept(v ->
                 log.info("The reset password token message was sent to the email '{}' successfully", email)
@@ -78,7 +78,7 @@ public class MyNotificationService implements NotificationService {
     }
 
 
-    private void sendEmailLink(UUID userId, String email, String data, LetterTemplateKey key) {
+    private void sendEmailLink(UUID userId, String email, String data, LetterTemplateKeys key) {
         log.info("The token message is accepted to send to the email for user '{}'", userId);
         CompletableFuture.runAsync(() -> {
             String link = serviceUrl + EMAIL_VERIFICATION_PATH + data;
