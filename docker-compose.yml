@@ -1,8 +1,14 @@
 version: '3.9'
 
 networks:
-  lab-networks:
+
+  private-network:
     driver: bridge
+    internal: true
+
+  public-network:
+    driver: bridge
+
 
 
 services:
@@ -13,9 +19,9 @@ services:
       dockerfile: Dockerfile
     container_name: config-server
     networks:
-      - lab-networks
-    ports:
-      - "8888:8888"
+      - private-network
+    expose:
+      - "8888"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
       interval: 10s
@@ -30,9 +36,9 @@ services:
       dockerfile: Dockerfile
     container_name: eureka-server
     networks:
-      - lab-networks
-    ports:
-      - "8761:8761"
+      - private-network
+    expose:
+      - "8761"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s
@@ -47,7 +53,8 @@ services:
       dockerfile: Dockerfile
     container_name: gateway
     networks:
-      - lab-networks
+      - private-network
+      - public-network
     ports:
       - "8082:8082"
     environment:
@@ -69,9 +76,9 @@ services:
       dockerfile: Dockerfile
     container_name: dental-lab-service
     networks:
-      - lab-networks
-    ports:
-      - "8000:8000"
+      - private-network
+    expose:
+      - "8000"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
@@ -99,7 +106,8 @@ services:
       dockerfile: Dockerfile
     container_name: ui-application
     networks:
-      - lab-networks
+      - private-network
+      - public-network
     ports:
       - "8081:8081"
     environment:
@@ -121,9 +129,9 @@ services:
       dockerfile: Dockerfile
     container_name: telegram-bot
     networks:
-      - lab-networks
-    ports:
-      - "8001:8001"
+      - private-network
+    expose:
+      - "8001"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
@@ -141,14 +149,14 @@ services:
     container_name: dental_db
     image: postgres:15.3-alpine
     networks:
-      - lab-networks
+      - private-network
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_DB=dental_lab
-    ports:
-      - '5432:5432'
+    expose:
+      - '5432'
     volumes:
       - ./volumes/postgresql/data:/var/lib/postgresql/data
       - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
@@ -165,7 +173,8 @@ services:
     command:
       - start
     networks:
-      - lab-networks
+      - private-network
+      - public-network
     environment:
       KC_HOSTNAME: host.docker.internal
       KC_HOSTNAME_PORT: 8080
@@ -174,7 +183,7 @@ services:
       KC_HOSTNAME_STRICT_HTTPS: false
       KC_HEALTH_ENABLED: true
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_PASSWORD: 64f4521fe3abbff2dffcc9b84526232c
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
       KC_DB_USERNAME: postgres
@@ -194,11 +203,11 @@ services:
     container_name: dental_kafka
     image: bitnami/kafka:latest
     networks:
-      - lab-networks
-    ports:
-      - '9092:9092'
+      - private-network
+    expose:
+      - '9092'
     volumes:
-      - "kafka_data:/bitnami"
+      - "./volumes/kafka_data:/bitnami"
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
@@ -214,13 +223,14 @@ services:
     image: minio/minio:latest
     container_name: minio
     networks:
-      - lab-networks
+      - private-network
+      - public-network
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: 64f4521fe3abbff2dffcc9b84526232c
     command: server --console-address ":9001" /data
     volumes:
       - ./volumes/minio_data:/data
@@ -230,9 +240,9 @@ services:
     container_name: dental_redis
     image: redis:latest
     networks:
-      - lab-networks
-    ports:
-      - '6379:6379'
+      - private-network
+    expose:
+      - '6379'
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - ./volumes/redis/data:/data
@@ -242,10 +252,10 @@ services:
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
-    ports:
-      - "12345:12345"
-      - "4317:4317"
-      - "4318:4318"
+    expose:
+      - "12345"
+      - "4317"
+      - "4318"
     volumes:
       - ./config/alloy/config.alloy:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -255,14 +265,14 @@ services:
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
     networks:
-      - lab-networks
+      - private-network
 
 
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -272,34 +282,34 @@ services:
       - '--web.enable-lifecycle'
       - '--web.enable-remote-write-receiver'
     networks:
-      - lab-networks
+      - private-network
 
 
   loki:
     image: grafana/loki:2.9.3
     container_name: loki
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
       - ./volumes/loki-data:/loki
     networks:
-      - lab-networks
+      - private-network
 
 
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
-    ports:
-      - "3200:3200"
+    expose:
+      - "3200"
     volumes:
       - ./config/tempo/tempo.yaml:/etc/tempo/tempo.yaml
       - ./config/tempo/overrides.yaml:/etc/tempo/overrides.yaml
       - ./volumes/tempo:/var/tempo
     command: -config.file=/etc/tempo/tempo.yaml
     networks:
-      - lab-networks
+      - private-network
 
 
   grafana:
@@ -309,12 +319,13 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=64f4521fe3abbff2dffcc9b84526232c
     volumes:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
     networks:
-      - lab-networks
+      - private-network
+      - public-network
     depends_on:
       alloy:
         condition: service_started
@@ -327,8 +338,6 @@ services:
 
 
 volumes:
-  kafka_data:
-    driver: local
   prometheus-data:
   loki-data:
   tempo-data:
