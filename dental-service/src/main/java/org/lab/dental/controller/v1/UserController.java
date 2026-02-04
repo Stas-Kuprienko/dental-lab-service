@@ -35,8 +35,9 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<?> create(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                     @RequestBody @Valid NewUser newUser) {
+        log.info("From service '{}' received request to create user", serviceId);
         UserEntity entity = userService.create(newUser.getLogin(), newUser.getName(), newUser.getPassword());
         return ResponseEntity
                 .created(URI.create(URL + '/' + entity.getId()))
@@ -44,27 +45,27 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<User> getUser(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<User> getUser(@RequestAttribute("X-USER-ID") UUID userId) {
         UserEntity entity = userService.getById(userId);
         return ResponseEntity.ok(userConverter.toDto(entity));
     }
 
     @PutMapping("/name")
-    public ResponseEntity<Void> updateName(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateName(@RequestAttribute("X-USER-ID") UUID userId,
                                            @RequestBody String name) {
         userService.updateName(userId, name);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/email")
-    public ResponseEntity<Void> updateEmail(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateEmail(@RequestAttribute("X-USER-ID") UUID userId,
                                             @RequestBody String email) {
         userService.updateLogin(userId, email);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> updatePassword(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updatePassword(@RequestAttribute("X-USER-ID") UUID userId,
                                                @RequestBody UpdatePasswordRequest request) {
         userService.updatePassword(
                         userId,
@@ -75,13 +76,13 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logoutById(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<Void> logoutById(@RequestAttribute("X-USER-ID") UUID userId) {
         userService.logoutById(userId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<Void> delete(@RequestAttribute("X-USER-ID") UUID userId) {
         userService.delete(userId);
         return ResponseEntity.noContent().build();
     }

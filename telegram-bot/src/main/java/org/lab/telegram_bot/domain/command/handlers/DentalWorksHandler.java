@@ -2,6 +2,7 @@ package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
+import org.lab.telegram_bot.datasource.DentalWorkRepository;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -21,6 +22,8 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +35,7 @@ public class DentalWorksHandler extends BotCommandHandler {
     private static final int PAGE_ITEMS = 10;
 
     private final DentalWorkServiceWrapper dentalWorkService;
+    private final DentalWorkRepository dentalWorkRepository;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private Consumer<BotApiMethod<?>> executor;
@@ -39,11 +43,13 @@ public class DentalWorksHandler extends BotCommandHandler {
 
     @Autowired
     public DentalWorksHandler(DentalLabRestClientWrapper dentalLabRestClient,
+                              DentalWorkRepository dentalWorkRepository,
                               KeyboardBuilderKit keyboardBuilderKit,
                               MessageSource messageSource,
                               ChatSessionService chatSessionService) {
         super(messageSource);
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
+        this.dentalWorkRepository = dentalWorkRepository;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -62,6 +68,9 @@ public class DentalWorksHandler extends BotCommandHandler {
             case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
             case SORTING -> sorting(session, locale, messageId);
             case SELECT_MONTH_FOR_SORTING -> selectMonthForSorting(session, locale, messageText, messageId);
+            case INPUT_ANOTHER_MONTH -> inputAnotherMonth(session, locale, messageId);
+            case GET_WORK_LIST_FOR_ANOTHER_MONTH -> getListForAnotherMonth(session, locale, messageText, messageId);
+            case LIST_PAGING_FOR_ANOTHER_MONTH -> pagingForAnotherMonth(session, locale, messageText, messageId);
         };
     }
 
@@ -77,6 +86,9 @@ public class DentalWorksHandler extends BotCommandHandler {
             case INPUT_WORK_ID -> inputWorkId(session, locale, messageText, messageId);
             case SORTING -> sorting(session, locale, messageId);
             case SELECT_MONTH_FOR_SORTING -> selectMonthForSorting(session, locale, messageText, messageId);
+            case INPUT_ANOTHER_MONTH -> inputAnotherMonth(session, locale, messageId);
+            case GET_WORK_LIST_FOR_ANOTHER_MONTH -> getListForAnotherMonth(session, locale, messageText, messageId);
+            case LIST_PAGING_FOR_ANOTHER_MONTH -> pagingForAnotherMonth(session, locale, messageText, messageId);
         };
     }
 
@@ -91,12 +103,14 @@ public class DentalWorksHandler extends BotCommandHandler {
         String text = workListToMessage(listPage.dentalWorks, locale);
         List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
         if (!listPage.isLast) {
-            buttonLists.add(List.of(buildNextButton(locale, 2)));
+            buttonLists.add(List.of(buildNextButton(locale, 2, false)));
         }
         if (!dentalWorks.isEmpty()) {
             buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
             buttonLists.add(List.of(buildSortingButton(locale, messageId)));
         }
+        buttonLists.add(List.of(buildAnotherMonthButton(locale, messageId)));
+        buttonLists.add(List.of(buildCancelButton(locale, messageId)));
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
         chatSessionService.save(session);
@@ -120,11 +134,11 @@ public class DentalWorksHandler extends BotCommandHandler {
         ListPage listPage = getSubListForPage(dentalWorks, page);
         String text = workListToMessage(listPage.dentalWorks, locale);
         List<InlineKeyboardButton> buttons = new ArrayList<>();
-        if (!listPage.isLast) {
-            buttons.add(buildNextButton(locale, page + 1));
-        }
         if (page > 1) {
-            buttons.add(buildPreviousButton(locale, page - 1));
+            buttons.add(buildPreviousButton(locale, page - 1, false));
+        }
+        if (!listPage.isLast) {
+            buttons.add(buildNextButton(locale, page + 1, false));
         }
         List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
         buttonLists.add(buttons);
@@ -132,6 +146,8 @@ public class DentalWorksHandler extends BotCommandHandler {
             buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
             buttonLists.add(List.of(buildSortingButton(locale, messageId)));
         }
+        buttonLists.add(List.of(buildAnotherMonthButton(locale, messageId)));
+        buttonLists.add(List.of(buildCancelButton(locale, messageId)));
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING.ordinal());
@@ -180,8 +196,10 @@ public class DentalWorksHandler extends BotCommandHandler {
         //'previous month' button
         label = messageSource.getMessage(ButtonKeys.PREVIOUS_MONTH.name(), null, locale);
         InlineKeyboardButton previousButton = keyboardBuilderKit.callbackButton(label, callbackPrefix + true);
+        //'cancel' button
+        InlineKeyboardButton cancelButton = buildCancelButton(locale, messageId);
         // //
-        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(currentButton, previousButton));
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(List.of(currentButton, previousButton, cancelButton));
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.SELECT_MONTH_FOR_SORTING.ordinal());
         chatSessionService.save(session);
@@ -194,6 +212,84 @@ public class DentalWorksHandler extends BotCommandHandler {
         dentalWorkService.sortForCompletion(isPreviousMonth, session.getUserId());
         executor.accept(deleteMessage(session.getChatId(), messageId));
         return getList(session, locale, messageId);
+    }
+
+    private BotApiMethod<?> inputAnotherMonth(ChatSession session, Locale locale, int messageId) {
+        String text = messageSource.getMessage(TextKeys.INPUT_ANOTHER_MONTH_FOR_REPORT.name(), null, locale);
+        session.setCommand(BotCommands.DENTAL_WORKS);
+        session.setStep(Steps.GET_WORK_LIST_FOR_ANOTHER_MONTH.ordinal());
+        chatSessionService.save(session);
+        return editMessageText(session.getChatId(), messageId, text);
+    }
+
+    private BotApiMethod<?> getListForAnotherMonth(ChatSession session, Locale locale, String messageText, int messageId) {
+        YearMonth yearMonth = parseYearMonth(messageText);
+        List<DentalWork> dentalWorks = dentalWorkService.findAllByMonth(yearMonth.getYear(), yearMonth.getMonthValue(), session.getUserId());
+        ListPage listPage = getSubListForPage(dentalWorks, 1);
+        String text = workListToMessage(listPage.dentalWorks, locale);
+        String listMonth = yearMonth.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, locale) + '-' + yearMonth.getYear();
+        text = listMonth + ":\n\n" + text;
+        List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
+        if (!listPage.isLast) {
+            buttonLists.add(List.of(buildNextButton(locale, 2, true)));
+        }
+        if (!dentalWorks.isEmpty()) {
+            buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+            buttonLists.add(List.of(buildSortingButton(locale, messageId)));
+        }
+        buttonLists.add(List.of(buildAnotherMonthButton(locale, messageId)));
+        buttonLists.add(List.of(buildCancelButton(locale, messageId)));
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
+        dentalWorkRepository.save(dentalWorks, yearMonth, session.getUserId());
+        session.addAttribute(Attributes.YEAR_MONTH.name(), yearMonth.toString());
+        session.setCommand(BotCommands.DENTAL_WORKS);
+        session.setStep(Steps.LIST_PAGING_FOR_ANOTHER_MONTH.ordinal());
+        chatSessionService.save(session);
+        executor.accept(deleteMessage(session.getChatId(), messageId));
+        if (buttonLists.isEmpty()) {
+            return editMessageText(session.getChatId(), messageId - 1 , text);
+        } else {
+            return editMessageText(session.getChatId(), messageId - 1 , text, keyboardMarkup);
+        }
+    }
+
+    private BotApiMethod<?> pagingForAnotherMonth(ChatSession session, Locale locale, String messageText, int messageId) {
+        String[] callbackData = ChatBotUtility.callBackQueryParse(messageText);
+        if (callbackData[2].equals(ButtonKeys.CANCEL.name())) {
+            session.reset();
+            chatSessionService.save(session);
+            return deleteMessage(session.getChatId(), messageId);
+        }
+        YearMonth yearMonth = YearMonth.parse(session.getAttribute(Attributes.YEAR_MONTH.name()));
+        int page = Integer.parseInt(callbackData[2]);
+        List<DentalWork> dentalWorks = dentalWorkRepository.getAll(session.getUserId(), yearMonth);
+        if (dentalWorks.isEmpty()) {
+            dentalWorks = dentalWorkService.findAllByMonth(yearMonth.getYear(), yearMonth.getMonthValue(), session.getUserId());
+        }
+        ListPage listPage = getSubListForPage(dentalWorks, page);
+        String text = workListToMessage(listPage.dentalWorks, locale);
+        String listMonth = yearMonth.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, locale) + '-' + yearMonth.getYear();
+        text = listMonth + ":\n\n" + text;
+        List<InlineKeyboardButton> buttons = new ArrayList<>();
+        if (page > 1) {
+            buttons.add(buildPreviousButton(locale, page - 1, true));
+        }
+        if (!listPage.isLast) {
+            buttons.add(buildNextButton(locale, page + 1, true));
+        }
+        List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
+        buttonLists.add(buttons);
+        if (!dentalWorks.isEmpty()) {
+            buttonLists.add(List.of(buildSelectItemButton(locale, messageId)));
+            buttonLists.add(List.of(buildSortingButton(locale, messageId)));
+        }
+        buttonLists.add(List.of(buildAnotherMonthButton(locale, messageId)));
+        buttonLists.add(List.of(buildCancelButton(locale, messageId)));
+        InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
+        session.setCommand(BotCommands.DENTAL_WORKS);
+        session.setStep(Steps.LIST_PAGING_FOR_ANOTHER_MONTH.ordinal());
+        chatSessionService.save(session);
+        return editMessageText(session.getChatId(), messageId, text, keyboardMarkup);
     }
 
     private boolean isCancel(ChatSession session, String messageText, int messageId) {
@@ -220,15 +316,17 @@ public class DentalWorksHandler extends BotCommandHandler {
         }
     }
 
-    private InlineKeyboardButton buildNextButton(Locale locale, int nextPageNumber) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.LIST_PAGING.ordinal());
+    private InlineKeyboardButton buildNextButton(Locale locale, int nextPageNumber, boolean forAnotherMonth) {
+        Steps step = forAnotherMonth ? Steps.LIST_PAGING_FOR_ANOTHER_MONTH : Steps.LIST_PAGING;
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, step.ordinal());
         String callbackQueryData = callbackQueryPrefix + nextPageNumber;
         String callbackLabel = messageSource.getMessage(ButtonKeys.NEXT.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
-    private InlineKeyboardButton buildPreviousButton(Locale locale, int previousPageNumber) {
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.LIST_PAGING.ordinal());
+    private InlineKeyboardButton buildPreviousButton(Locale locale, int previousPageNumber, boolean forAnotherMonth) {
+        Steps step = forAnotherMonth ? Steps.LIST_PAGING_FOR_ANOTHER_MONTH : Steps.LIST_PAGING;
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, step.ordinal());
         String callbackQueryData = callbackQueryPrefix + previousPageNumber;
         String callbackLabel = messageSource.getMessage(ButtonKeys.BACK.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
@@ -241,10 +339,24 @@ public class DentalWorksHandler extends BotCommandHandler {
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
+    private InlineKeyboardButton buildAnotherMonthButton(Locale locale, int messageId) {
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.INPUT_ANOTHER_MONTH.ordinal());
+        String callbackQueryData = callbackQueryPrefix + messageId;
+        String callbackLabel = messageSource.getMessage(ButtonKeys.ANOTHER_MONTH.name(), null, locale);
+        return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
+    }
+
     private InlineKeyboardButton buildSortingButton(Locale locale, int messageId) {
         String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.DENTAL_WORKS, Steps.SORTING.ordinal());
         String callbackQueryData = callbackQueryPrefix + messageId;
         String callbackLabel = messageSource.getMessage(ButtonKeys.SORTING_WORKS.name(), null, locale);
+        return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
+    }
+
+    private InlineKeyboardButton buildCancelButton(Locale locale, int messageId) {
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0);
+        String callbackQueryData = callbackQueryPrefix + messageId;
+        String callbackLabel = messageSource.getMessage(ButtonKeys.CANCEL.name(), null, locale);
         return keyboardBuilderKit.callbackButton(callbackLabel, callbackQueryData);
     }
 
@@ -259,11 +371,15 @@ public class DentalWorksHandler extends BotCommandHandler {
         SELECT_ITEM,
         INPUT_WORK_ID,
         SORTING,
-        SELECT_MONTH_FOR_SORTING
+        SELECT_MONTH_FOR_SORTING,
+        INPUT_ANOTHER_MONTH,
+        GET_WORK_LIST_FOR_ANOTHER_MONTH,
+        LIST_PAGING_FOR_ANOTHER_MONTH
     }
 
     enum Attributes {
-        MESSAGE_ID_TO_DELETE
+        MESSAGE_ID_TO_DELETE,
+        YEAR_MONTH
     }
 
     private record ListPage(List<DentalWork> dentalWorks, boolean isLast) {}

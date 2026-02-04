@@ -32,7 +32,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
                                  TelegramBotExceptionHandler exceptionHandler,
                                  NotificationService notificationService,
                                  @Value("${project.variables.telegram.username}") String username,
-                                 @Value("${project.variables.telegram.botToken}") String botToken) {
+                                 @Value("${project.variables.telegram.bot-token}") String botToken) {
         super(botToken);
         this.username = username;
         this.commandDispatcher = commandDispatcher;

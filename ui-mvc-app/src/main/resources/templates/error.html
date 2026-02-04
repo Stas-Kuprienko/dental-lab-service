@@ -15,14 +15,14 @@
 <div th:replace="fragments/nav :: main-menu"></div>
 
 <section>
-    <div th:if="${error.code}" class="work">
+    <div th:if="${error?.code}" class="work">
         <label style="font-size: 80%;">Ошибка:</label><br>
         <label style="font-size: 120%;" th:text="${error.code}">400</label>
         <p style="font-size: 36px; font-weight: bold; margin-top: 20px;" th:text="${error.message}">
             Сорян, что-то пошло не так, бывает...
         </p>
     </div>
-    <div th:unless="${error.code}" class="work">
+    <div th:unless="${error?.code}" class="work">
         <label style="font-size: 80%;">Ошибка:</label><br>
         <label style="font-size: 120%;">400</label>
         <p style="font-size: 36px; font-weight: bold; margin-top: 20px;" th:text="${error.message}">

@@ -1,16 +1,9 @@
 server:
-  port: 0
+  port: 8082
 
 spring:
   application:
     name: dental-lab-service
-  profiles:
-    active: dev
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      uri: http://host.docker.internal:8888
   security:
     oauth2:
       resourceserver:
@@ -47,11 +40,6 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
-  kafka:
-    topic: event-topic
-    bootstrap-servers: ${project.variables.kafka.url}
-    partitions: 3
-    replicas: 3
   mail:
     host: ${project.variables.mail.smtp.host}
     port: ${project.variables.mail.port}
@@ -67,46 +55,3 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
-
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${project.variables.eureka-server.url}
-    instance:
-      prefer-ip-address: true
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-  endpoint:
-    prometheus:
-      enabled: true
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://alloy:4318
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
-logging:
-  level:
-    root: INFO

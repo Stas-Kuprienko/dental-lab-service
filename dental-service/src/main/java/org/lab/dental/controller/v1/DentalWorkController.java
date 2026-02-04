@@ -33,7 +33,7 @@ public class DentalWorkController {
 
 
     @PostMapping
-    public ResponseEntity<DentalWork> create(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> create(@RequestAttribute("X-USER-ID") UUID userId,
                                              @RequestBody @Valid NewDentalWork newDentalWork) {
         log.info("From user '{}' received request: {}", userId, newDentalWork);
         DentalWork dentalWork = dentalWorkManager.create(newDentalWork, userId);
@@ -42,7 +42,7 @@ public class DentalWorkController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DentalWork> findById(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> findById(@RequestAttribute("X-USER-ID") UUID userId,
                                                @PathVariable("id") Long id) {
         log.info("From user '{}' received request with parameter: id={}", userId, id);
         DentalWork dentalWork = dentalWorkManager.getByIdAndUserId(id, userId);
@@ -50,14 +50,14 @@ public class DentalWorkController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DentalWork>> findAllActualByUserId(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<List<DentalWork>> findAllActualByUserId(@RequestAttribute("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get all DentalWorks for current month", userId);
         List<DentalWork> dentalWorks = dentalWorkManager.getAllActualByUserId(userId);
         return ResponseEntity.ok(dentalWorks);
     }
 
     @GetMapping("/by-period")
-    public ResponseEntity<List<DentalWork>> findAllMonth(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<List<DentalWork>> findAllMonth(@RequestAttribute("X-USER-ID") UUID userId,
                                                          @RequestParam("year") Integer year,
                                                          @RequestParam("month") Integer month) {
         log.info("From user '{}' received request with parameter: year={}, month={}", userId, year, month);
@@ -67,7 +67,7 @@ public class DentalWorkController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<DentalWork>> findByClinicAndPatient(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<List<DentalWork>> findByClinicAndPatient(@RequestAttribute("X-USER-ID") UUID userId,
                                                                    @RequestParam(value = "clinic", required = false) String clinic,
                                                                    @RequestParam(value = "patient", required = false) String patient) {
         log.info("From user '{}' received request with parameter: clinic={}, patient={}", userId, clinic, patient);
@@ -76,7 +76,7 @@ public class DentalWorkController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DentalWork> updateDentalWork(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> updateDentalWork(@RequestAttribute("X-USER-ID") UUID userId,
                                                        @PathVariable("id") Long id,
                                                        @RequestBody @Valid DentalWork updatable) {
         log.info("From user '{}' received request: {}", userId, updatable);
@@ -85,7 +85,7 @@ public class DentalWorkController {
     }
 
     @PatchMapping("/{id}/set-status-{status}")
-    public ResponseEntity<Void> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateStatus(@RequestAttribute("X-USER-ID") UUID userId,
                                              @PathVariable("id") Long id,
                                              @PathVariable("status") WorkStatus status) {
         log.info("From user '{}' received request to set 'status': {}", userId, status);
@@ -94,7 +94,7 @@ public class DentalWorkController {
     }
 
     @PatchMapping("/set-status-{status}")
-    public ResponseEntity<Void> updateStatus(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateStatus(@RequestAttribute("X-USER-ID") UUID userId,
                                              @RequestBody List<Long> idList,
                                              @PathVariable("status") WorkStatus status) {
         log.info("From user '{}' received request to set 'status': {}", userId, status);
@@ -103,7 +103,7 @@ public class DentalWorkController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDentalWork(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> deleteDentalWork(@RequestAttribute("X-USER-ID") UUID userId,
                                                  @PathVariable("id") Long id) {
         log.info("From user '{}' received request to delete by ID={}", userId, id);
         dentalWorkManager.delete(id, userId);
@@ -111,8 +111,8 @@ public class DentalWorkController {
     }
 
     @PutMapping("/sorting")
-    public ResponseEntity<Void> sortForCompletion(@RequestHeader("X-USER-ID") UUID userId,
-                                                              @RequestParam(name = "is_previous_month", defaultValue = "false") boolean isPreviousMonth) {
+    public ResponseEntity<Void> sortForCompletion(@RequestAttribute("X-USER-ID") UUID userId,
+                                                  @RequestParam(name = "is_previous_month", defaultValue = "false") boolean isPreviousMonth) {
         log.info("From user '{}' received request to sorting", userId);
         dentalWorkManager.sortForCompletion(userId, isPreviousMonth);
         return ResponseEntity.ok().build();

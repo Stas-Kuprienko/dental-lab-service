@@ -18,6 +18,6 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException {
         log.info(exception.getMessage() + '\n' + request.getRequestURI());
         String redirect = MvcControllerUtil.REDIRECT + MvcControllerUtil.MAIN_PATH;
-        response.sendRedirect(redirect);
+        response.sendRedirect(MvcControllerUtil.MAIN_FULL_PATH);
     }
 }

@@ -1,19 +1,9 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: telegram-bot
-  profiles:
-    active: dev
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      uri: http://host.docker.internal:8888
-  kafka:
-    topic: event-topic
-    consumer:
-      bootstrap-servers: ${project.variables.kafka.url}
-      group-id: telegram-bot-group
-      auto-offset-reset: earliest
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
@@ -21,38 +11,3 @@ spring:
 telegram:
   api:
     path: "https://api.telegram.org/file/bot"
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-  endpoint:
-    prometheus:
-      enabled: true
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://alloy:4318
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
-logging:
-  level:
-    root: INFO

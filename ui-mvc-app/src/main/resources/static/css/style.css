@@ -126,6 +126,23 @@ a.tr:hover {
     cursor: pointer;
 }
 
+/* Узкая колонка с чекбоксами */
+.checkbox-col {
+    flex: 0 0 36px !important; /* flex: grow shrink basis */
+    max-width: 36px !important;
+    min-width: 36px !important;
+
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Центровка чекбокса */
+.checkbox-col input[type="checkbox"] {
+    transform: scale(1.3);     /* чтобы не выглядел мелким */
+    margin: 0;
+}
+
 /* МЕНЮ */
 .menu {
     background-image: linear-gradient(#808080, #1f1f1f);
@@ -218,6 +235,14 @@ select {
     cursor: pointer;
     font-weight: bold;
     background-color: #fffed4;
+}
+
+/* Гамбургер нижнего меню (мобилки) */
+.low-burger {
+    display: none;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 10px;
 }
 
 /* КНОПКИ */
@@ -481,35 +506,47 @@ select {
         width: auto;
     }
 
+    .checkbox-col {
+        flex: 0 0 28px !important;
+        max-width: 28px !important;
+        min-width: 28px !important;
+    }
 
     /* Контейнер нижнего меню */
+    .low-burger {
+        display: block;
+    }
+
+    /* выравнивание */
     .low-menu {
         position: fixed;
         bottom: 0;
         right: 0;
-        width: auto;          /* не растягиваем на ширину */
+        padding: 10px;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        padding: 10px;
-        gap: 10px;
-        background: transparent;
     }
 
     /* Каждая кнопка */
     .low-menu a,
     .low-menu form {
-        width: auto;
-        display: block;
-        text-align: right;
+        display: none;
     }
 
+    /* показываем при активном состоянии */
+    body.low-menu-open .low-menu a,
+    body.low-menu-open .low-menu form {
+        display: block;
+        margin-top: 8px;
+    }
+
+    /* кнопки */
     .low-menu button,
     .low-menu input[type="submit"] {
-        width: 150px;               /* одинаковая ширина для красоты */
+        width: 160px;
         font-size: 16px;
         padding: 8px;
-        margin: 0;
     }
 
     /* Выпадающие формы под кнопками */
@@ -534,6 +571,7 @@ select {
     /* 📱 Горизонтальная прокрутка таблицы на мобильных */
     .table-wrapper {
         width: 100%;
+        margin-bottom: 64px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch; /* плавная прокрутка на iPhone */
     }

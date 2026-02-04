@@ -3,42 +3,22 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-ext {
-	set('springCloudVersion', "2025.0.0")
-}
-
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "org.telegram:telegrambots-spring-boot-starter:${telegram_version}"
 
 	implementation project(':common:models')
 	implementation project(':common:dental-client')
 
-    // cloud
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-	// event-driving
-	implementation 'org.springframework.kafka:spring-kafka'
-
 	// monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation "net.logstash.logback:logstash-logback-encoder:${logback_version}"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetryVersion}"
 
     // tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
 }
 
 tasks.named('test') {

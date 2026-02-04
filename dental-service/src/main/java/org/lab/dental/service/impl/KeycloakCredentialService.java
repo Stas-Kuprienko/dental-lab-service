@@ -1,6 +1,7 @@
 package org.lab.dental.service.impl;
 
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class KeycloakCredentialService implements CredentialService {
 
@@ -46,6 +48,7 @@ public class KeycloakCredentialService implements CredentialService {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         restClient = restClientBuilder.baseUrl(keycloakUrl + "/realms/" + keycloakRealm).build();
+        clientLogin(clientId, clientSecret);
     }
 
 
@@ -69,6 +72,7 @@ public class KeycloakCredentialService implements CredentialService {
         Response response = realmResource.users().create(representation);
         try (response) {
             if (response.getStatus() == 201) {
+                log.info("User '{}' is signed up", email);
                 return extractId(response);
             } else if (response.getStatus() == 409) {
                 throw new KeycloakEmailDuplicationException(email);
@@ -85,7 +89,9 @@ public class KeycloakCredentialService implements CredentialService {
         params.add("grant_type", "client_credentials");
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
-        return requestToken(params);
+        AuthToken token = requestToken(params);
+        log.info("Keycloak client '{}' is logged in.", clientId);
+        return token;
     }
 
     @Override
@@ -96,7 +102,9 @@ public class KeycloakCredentialService implements CredentialService {
         params.add("client_secret", clientSecret);
         params.add("username", email);
         params.add("password", password);
-        return requestToken(params);
+        AuthToken token = requestToken(params);
+        log.info("Keycloak user '{}' is logged in.", email);
+        return token;
     }
 
     @Override
@@ -106,7 +114,9 @@ public class KeycloakCredentialService implements CredentialService {
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
         params.add("refresh_token", refreshToken);
-        return requestToken(params);
+        AuthToken token = requestToken(params);
+        log.info("Keycloak client '{}' is refreshed token.", clientId);
+        return token;
     }
 
     @Override
@@ -118,6 +128,7 @@ public class KeycloakCredentialService implements CredentialService {
                     .users()
                     .get(userId.toString())
                     .update(representation);
+            log.info("Email is verified for user '{}'", userId);
         } else {
             throw new BadRequestCustomException("Passed email not equals to user email");
         }
@@ -132,6 +143,7 @@ public class KeycloakCredentialService implements CredentialService {
                 .users()
                 .get(userId.toString())
                 .update(representation);
+        log.info("Email is updated for user '{}'", userId);
     }
 
     @Override
@@ -142,6 +154,7 @@ public class KeycloakCredentialService implements CredentialService {
                 .users()
                 .get(userId.toString())
                 .update(representation);
+        log.info("Name is updated for user '{}'", userId);
     }
 
     @Override
@@ -155,6 +168,7 @@ public class KeycloakCredentialService implements CredentialService {
             UserResource resource = realmResource.users().get(userId.toString());
             if (resource.toRepresentation().getEmail().equals(email)) {
                 resource.resetPassword(representation);
+                log.info("Password is updated for user '{}'", email);
             }
         } catch (HttpClientErrorException.Unauthorized e) {
             throw new ForbiddenCustomException("Incorrect credentials, access to the update is denied", e);
@@ -170,6 +184,7 @@ public class KeycloakCredentialService implements CredentialService {
         String userId = realmResource.users().search(email).getFirst().getId();
         UserResource resource = realmResource.users().get(userId);
         resource.resetPassword(credentialRepresentation);
+        log.info("Password is reset for user '{}'", email);
     }
 
     @Override
@@ -178,6 +193,7 @@ public class KeycloakCredentialService implements CredentialService {
                 .users()
                 .get(userId.toString())
                 .logout();
+        log.info("User '{}' is logged out", userId);
     }
 
     @Override
@@ -186,6 +202,7 @@ public class KeycloakCredentialService implements CredentialService {
                 .users()
                 .get(userId.toString())
                 .remove();
+        log.info("User '{}' is deleted", userId);
     }
 
 

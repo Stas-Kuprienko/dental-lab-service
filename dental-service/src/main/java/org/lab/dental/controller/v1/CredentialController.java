@@ -25,7 +25,7 @@ public class CredentialController {
 
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> sendResetPasswordLink(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Void> sendResetPasswordLink(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                                       @RequestBody String email) {
         log.info("From service '{}' received request to send ResetPasswordLink", serviceId);
         verificationService.createResetPasswordToken(email);
@@ -33,15 +33,16 @@ public class CredentialController {
     }
 
     @PatchMapping("/reset-password/{token}")
-    public ResponseEntity<Boolean> verifyResetPasswordToken(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Boolean> verifyResetPasswordToken(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                                             @PathVariable("token") String token,
                                                             @RequestBody String email) {
+        log.info("From service '{}' received request to verify ResetPasswordLink", serviceId);
         boolean result = verificationService.verifyResetPasswordToken(email, token);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<?> resetPassword(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                            @RequestBody ResetPasswordRequest request) {
         boolean isVerified = verificationService.isVerifiedResetPasswordToken(request.getEmail());
         if (isVerified) {
@@ -53,7 +54,7 @@ public class CredentialController {
     }
 
     @DeleteMapping("/reset-password")
-    public ResponseEntity<Void> deleteResetPasswordToken(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Void> deleteResetPasswordToken(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                                          @RequestParam("email") String email) {
         verificationService.deleteResetPasswordToken(email);
         return ResponseEntity.noContent().build();

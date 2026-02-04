@@ -22,8 +22,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -220,5 +220,30 @@ public abstract class BotCommandHandler {
             throw new IncorrectInputException(value, e);
         }
         return completeAt;
+    }
+
+    protected YearMonth parseYearMonth(String value) {
+        String[] dateValue = value.strip().split("\\.");
+        if (dateValue.length > 2) {
+            throw new IncorrectInputException(value);
+        }
+        if (dateValue.length == 1) {
+            if (value.length() == 1) {
+                value = '0' + value;
+            }
+            value += "." + LocalDate.now().getYear();
+        }
+        if (dateValue.length == 2) {
+            String m = dateValue[0];
+            if (m.length() == 1) {
+                m = '0' + m;
+                dateValue[0] = m;
+            }
+        }
+        try {
+            return YearMonth.parse(value, DateTimeFormatter.ofPattern("MM.yyyy"));
+        } catch (DateTimeParseException e) {
+            throw new IncorrectInputException(value, e);
+        }
     }
 }

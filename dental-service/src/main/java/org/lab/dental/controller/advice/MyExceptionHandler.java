@@ -1,19 +1,22 @@
 package org.lab.dental.controller.advice;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
-import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import java.util.List;
 
 @Slf4j
@@ -78,6 +81,15 @@ public class MyExceptionHandler {
     public ResponseEntity<ErrorResponse> forbiddenHandle(ForbiddenCustomException e) {
         log.warn(e.getMessage(), e);
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> forbiddenHandle(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
+        log.info(request.getRequestURI(), e);
+        HttpStatus httpStatus = HttpStatus.METHOD_NOT_ALLOWED;
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));

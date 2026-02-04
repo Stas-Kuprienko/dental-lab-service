@@ -14,6 +14,7 @@ import org.lab.enums.WorkStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -45,7 +46,9 @@ public class MyDentalWorkService implements DentalWorkService {
             throw PersistenceCustomException.saveEntityWithId(dentalWork);
         }
         dentalWork.setAcceptedAt(LocalDate.now());
-        dentalWork.setStatus(WorkStatus.MAKING);
+        if (dentalWork.getStatus() == null) {
+            dentalWork.setStatus(WorkStatus.MAKING);
+        }
         log.info("Entity received to save: {}", dentalWork);
         DentalWorkEntity saved = dentalWorkRepository.save(dentalWork);
         log.info("Entity saved: {}", saved);
@@ -93,7 +96,7 @@ public class MyDentalWorkService implements DentalWorkService {
     public List<DentalWorkEntity> getAllActualByUserId(UUID userId) {
         YearMonth yearMonth = YearMonth.now();
         LocalDate from = yearMonth.atDay(1);
-        List<DentalWorkEntity> dentalWorks = dentalWorkRepository.findAllFromMonthAndNotPaidByUserId(userId, from);
+        List<DentalWorkEntity> dentalWorks = dentalWorkRepository.findAllFromMonthOrNotPaidByUserId(userId, from);
         log.info("Found {} DentalWorks for current month by parameters: userId='{}'", dentalWorks.size(), userId);
         return dentalWorks;
     }
@@ -175,6 +178,25 @@ public class MyDentalWorkService implements DentalWorkService {
         dentalWork.getProducts().add(productRepository.save(product));
         log.info("Product '{}' added to '{}'", product, dentalWork);
         return dentalWork;
+    }
+
+    @Override
+    public void addProduct(Long id, UUID userId, ProductEntity product) {
+        DentalWorkEntity dentalWork = getByIdAndUserId(id, userId);
+        for (ProductEntity p : dentalWork.getProducts()) {
+            if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
+                p.setQuantity(p.getQuantity() + product.getQuantity());
+                p.setCompleteAt(product.getCompleteAt());
+                ProductEntity updated = productRepository.save(p);
+                log.info("Product '{}' updated for '{}'", updated, dentalWork);
+                setCompleteAtIfIsLater(dentalWork, product.getCompleteAt());
+                log.info("Product '{}' added to '{}'", product, dentalWork);
+                return;
+            }
+        }
+        productRepository.save(product);
+        setCompleteAtIfIsLater(dentalWork, product.getCompleteAt());
+        log.info("Product '{}' added to '{}'", product, dentalWork);
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.lab.dental.service.VerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +26,7 @@ public class VerificationController {
 
 
     @PostMapping("/email")
-    public ResponseEntity<Void> sendVerificationLink(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> sendVerificationLink(@RequestAttribute("X-USER-ID") UUID userId,
                                                      @RequestBody String email,
                                                      @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
         verificationService.createForUserId(userId, email, toChange);
@@ -35,7 +34,7 @@ public class VerificationController {
     }
 
     @PostMapping("/telegram-otp")
-    public ResponseEntity<Void> sendTelegramOtp(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> sendTelegramOtp(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @RequestBody String email) {
         TelegramChatEntity telegramChat = userService.getTelegramChat(userId);
         verificationService.createTelegramOtpForUserId(userId, email, telegramChat.getChatId());
@@ -43,7 +42,7 @@ public class VerificationController {
     }
 
     @PutMapping("/email/{token}")
-    public ResponseEntity<Boolean> verifyUserEmail(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Boolean> verifyUserEmail(@RequestAttribute("X-USER-ID") UUID userId,
                                                    @PathVariable("token") String token,
                                                    @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
         boolean result;
@@ -56,7 +55,7 @@ public class VerificationController {
     }
 
     @PostMapping("/email/{email}")
-    public ResponseEntity<Boolean> isVerified(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Boolean> isVerified(@RequestAttribute("X-USER-ID") UUID userId,
                                               @PathVariable("email") String email) {
         EmailVerificationTokenEntity verificationToken = verificationService.getByUserId(userId);
         if (verificationToken.getEmail().equals(email)) {

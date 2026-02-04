@@ -13,7 +13,6 @@ import org.lab.request.OtpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 @Slf4j
@@ -34,39 +33,32 @@ public class TelegramChatController {
 
 
     @PostMapping
-    public ResponseEntity<Void> createLink(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Void> createLink(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                            @RequestBody NewTelegramOtpLink newTelegramOtpLink) {
-
         log.info("From service '{}' received request to create TelegramOtpLink", serviceId);
         otpLinkService.create(newTelegramOtpLink.getKey(), newTelegramOtpLink.getChatId());
         return ResponseEntity.ok().build();
     }
 
-
     @PutMapping("/link/{key}")
-    public ResponseEntity<Void> setUserIdToLink(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> setUserIdToLink(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @PathVariable("key") String key) {
-
         otpLinkService.setUserId(key, userId);
         return ResponseEntity.ok().build();
     }
 
-
     @GetMapping("/link/{key}")
-    public ResponseEntity<String> getOtpByKey(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<String> getOtpByKey(@RequestAttribute("X-USER-ID") UUID userId,
                                               @PathVariable("key") String key) {
-
         log.info("From user '{}' received request to get OTP", userId);
         TelegramOtpLinkEntity otpLink = otpLinkService.find(key);
         return ResponseEntity.ok(otpLink.getOtp());
     }
 
-
     @PostMapping("/link/{key}")
-    public ResponseEntity<UUID> bindTelegram(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<UUID> bindTelegram(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                              @PathVariable("key") String key,
                                              @RequestBody OtpRequest otp) {
-
         log.info("From service '{}' received request to bind TelegramChat", serviceId);
         TelegramOtpLinkEntity link = otpLinkService.find(key);
         if (otpLinkService.validate(link, otp.getOtp())) {
@@ -78,19 +70,16 @@ public class TelegramChatController {
         }
     }
 
-
     @GetMapping("/{chat_id}")
-    public ResponseEntity<TelegramChat> findByChatId(@RequestHeader("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<TelegramChat> findByChatId(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                                      @PathVariable("chat_id") Long chatId) {
-
         log.info("From service '{}' received request to get TelegramChat: {}", serviceId, chatId);
         TelegramChatEntity entity = userService.getTelegramChat(chatId);
         return ResponseEntity.ok(userConverter.telegramChatToDto(entity));
     }
 
-
     @GetMapping("/user")
-    public ResponseEntity<TelegramChat> findByUserId(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<TelegramChat> findByUserId(@RequestAttribute("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get TelegramChat", userId);
         TelegramChatEntity entity = userService.getTelegramChat(userId);
         return ResponseEntity.ok(userConverter.telegramChatToDto(entity));

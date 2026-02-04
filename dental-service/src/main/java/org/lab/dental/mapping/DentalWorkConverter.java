@@ -1,7 +1,9 @@
 package org.lab.dental.mapping;
 
 import org.lab.dental.entity.DentalWorkEntity;
+import org.lab.dental.entity.ProductEntity;
 import org.lab.model.DentalWork;
+import org.lab.model.Product;
 import org.lab.request.NewDentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,5 +57,9 @@ public class DentalWorkConverter {
                 .comment(newDentalWork.getComment())
                 .userId(userId)
                 .build();
+    }
+
+    public ProductEntity toEntity(Product dto) {
+        return productConverter.toEntity(dto);
     }
 }

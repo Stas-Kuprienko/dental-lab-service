@@ -21,10 +21,10 @@
     <h3><strong th:text="${headerMonth.value()}">Июль - 2025</strong></h3>
 
     <!-- 🟦 Легенда -->
-    <h4 style="float: left;">
+    <h4>
         <label style="background-color: #002d73; border: 5px solid #002d73">ВЫПОЛНЕНО</label> &emsp;
         <label style="background-color: #075700; border: 5px solid #075700">ОПЛАЧЕНО</label>
-    </h4>
+    </h4><br>
 
     <form id="bulk-form" th:action="@{/main/dental-works/bulk-update}" method="post">
 
@@ -36,7 +36,7 @@
 
                 <div class="thead">
                     <div class="tr">
-                        <div class="th" style="width:40px;">
+                        <div class="th" style="max-width:16px;">
                             <input type="checkbox" id="select-all">
                         </div>
                         <div class="th">ПАЦИЕНТ</div>
@@ -49,7 +49,7 @@
                     <div th:each="work : ${works}"
                          th:class="${work.status.name == 'COMPLETED'} ? 'tr-closed' : (${work.status.name == 'PAID'} ? 'tr-paid' : 'tr')">
 
-                        <div class="td" style="width:40px;">
+                        <div class="td checkbox-col">
                             <input type="checkbox" name="ids" th:value="${work.id}" class="row-check">
                         </div>
 

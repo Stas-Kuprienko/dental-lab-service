@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
@@ -119,14 +118,7 @@ public class GetReportCommandHandler extends BotCommandHandler {
     }
 
     private BotApiMethod<?> anotherMonth(ChatSession session, String messageText, int messageId) {
-        String[] dateValue = messageText.strip().split("\\.");
-        if (dateValue.length > 2) {
-            throw new BadRequestCustomException("Incorrect value inputted: " + messageText);
-        }
-        if (dateValue.length == 1) {
-            messageText += "." + LocalDate.now().getYear();
-        }
-        YearMonth yearMonth = YearMonth.parse(messageText, DateTimeFormatter.ofPattern("MM.yyyy"));
+        YearMonth yearMonth = parseYearMonth(messageText);
         return sendReport(session, yearMonth, messageId);
     }
 
