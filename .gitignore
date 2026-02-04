@@ -43,3 +43,6 @@ bin/
 /.idea/
 /volumes/
 /cloud/config-server/src/main/resources/application.yaml
+/dental-service/src/main/resources/application-local.yaml
+/telegram-bot/src/main/resources/application-local.yaml
+/ui-mvc-app/src/main/resources/application-local.yaml

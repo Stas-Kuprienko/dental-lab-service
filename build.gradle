@@ -18,14 +18,16 @@ subprojects {
     	toolchain {
     		languageVersion = JavaLanguageVersion.of(21)
     	}
+        java {
+        	sourceCompatibility = '21'
+        	targetCompatibility = '21'
+        }
     }
 
     apply plugin: 'java'
 
     group = 'org.lab'
     version = '1.0'
-
-    sourceCompatibility = '21'
 
     dependencies {
     	compileOnly "org.projectlombok:lombok:${lombok_version}"

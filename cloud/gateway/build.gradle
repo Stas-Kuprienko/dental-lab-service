@@ -16,17 +16,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation project(':common:models')
 
-	// monitoring
+	// observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation "net.logstash.logback:logstash-logback-encoder:${logback_version}"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetryVersion}"
-
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation "net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}"
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${opentelemetry_bom_version}"
 	}
 }

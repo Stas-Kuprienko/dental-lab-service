@@ -6,12 +6,12 @@ otelcol.receiver.otlp "default" {
     endpoint = "0.0.0.0:4318"
   }
   output {
-    traces  = [otelcol.processor.batch.default.input]
+    traces = [otelcol.processor.batch.default.input]
   }
 }
 otelcol.processor.batch "default" {
   output {
-    traces  = [otelcol.exporter.otlp.tempo.input]
+    traces = [otelcol.exporter.otlp.tempo.input]
   }
 }
 
@@ -49,8 +49,8 @@ loki.process "parse_json" {
 
   stage.labels {
     values = {
-      level    = "",
-      service  = "",
+      level   = "",
+      service = "",
     }
   }
 }
@@ -63,10 +63,9 @@ loki.write "default" {
 
 prometheus.scrape "spring_apps" {
   targets = [
-    {"__address__" = "gateway:8082", "job" = "gateway"},
-    {"__address__" = "dental-lab-service:8000", "job" = "dental-lab-service"},
+    {"__address__" = "dental-lab-service:8082", "job" = "dental-lab-service"},
     {"__address__" = "ui-application:8081", "job" = "ui-application"},
-    {"__address__" = "telegram-bot:8001", "job" = "telegram-bot"},
+    {"__address__" = "telegram-bot:8083", "job" = "telegram-bot"},
   ]
   forward_to      = [prometheus.remote_write.default.receiver]
   metrics_path    = "/actuator/prometheus"

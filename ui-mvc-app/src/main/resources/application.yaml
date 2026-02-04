@@ -43,3 +43,17 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
+
+otel:
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://alloy:4318
+  traces:
+    exporter: otlp
+    sampler: always_on
+  metrics:
+    exporter: none
+  logs:
+    exporter: none

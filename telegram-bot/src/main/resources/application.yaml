@@ -11,3 +11,17 @@ spring:
 telegram:
   api:
     path: "https://api.telegram.org/file/bot"
+
+otel:
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://alloy:4318
+  traces:
+    exporter: otlp
+    sampler: always_on
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
