@@ -36,33 +36,28 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+        include: health,prometheus,metrics,info
   endpoint:
-    prometheus:
-      enabled: true
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: production
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
 otel:
   service:
     name: ${spring.application.name}
   exporter:
     otlp:
-      endpoint: http://alloy:4318
+      endpoint: ${project.variables.alloy.url}
   traces:
     exporter: otlp
+    sampler: always_on
   metrics:
     exporter: none
   logs:
     exporter: none
-logging:
-  level:
-    root: INFO

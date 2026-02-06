@@ -2,8 +2,6 @@ server:
   port: 8082
 
 spring:
-  profiles:
-    active: local
   application:
     name: dental-lab-service
   security:
@@ -58,12 +56,28 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics,info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: production
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
 otel:
   service:
     name: ${spring.application.name}
   exporter:
     otlp:
-      endpoint: http://alloy:4318
+      endpoint: ${project.variables.alloy.url}
   traces:
     exporter: otlp
     sampler: always_on

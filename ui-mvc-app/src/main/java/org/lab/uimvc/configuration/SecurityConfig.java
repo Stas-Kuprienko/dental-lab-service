@@ -6,13 +6,10 @@ import org.lab.uimvc.configuration.auth.MyAccessDeniedHandler;
 import org.lab.uimvc.controller.MvcControllerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,9 +19,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -32,13 +27,10 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig {
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
-    private final String adminEmail;
 
     @Autowired
-    public SecurityConfig(@Qualifier("myAuthenticationSuccessHandler") AuthenticationSuccessHandler authenticationSuccessHandler,
-                          @Value("${project.variables.admin-email}") String adminEmail) {
+    public SecurityConfig(@Qualifier("myAuthenticationSuccessHandler") AuthenticationSuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.adminEmail = adminEmail;
     }
 
 
@@ -52,7 +44,6 @@ public class SecurityConfig {
                         .requestMatchers("/guide").permitAll()
                         .requestMatchers(MvcControllerUtil.LOGIN_PATH, "/login", "/sign-up", "/sign-up/*").anonymous()
                         .requestMatchers("/auth/*").anonymous()
-                        .requestMatchers("/main/admin/**").access(access())
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -93,10 +84,5 @@ public class SecurityConfig {
             cookieProcessor.setSameSiteCookies("Strict");
             context.setCookieProcessor(cookieProcessor);
         });
-    }
-
-
-    private AuthorizationManager<RequestAuthorizationContext> access() {
-        return (a, rac) -> new AuthorizationDecision(adminEmail.equals(((OidcUser) a.get().getPrincipal()).getEmail()));
     }
 }

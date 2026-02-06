@@ -12,12 +12,28 @@ telegram:
   api:
     path: "https://api.telegram.org/file/bot"
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics,info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: production
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
 otel:
   service:
     name: ${spring.application.name}
   exporter:
     otlp:
-      endpoint: http://alloy:4318
+      endpoint: ${project.variables.alloy.url}
   traces:
     exporter: otlp
     sampler: always_on
