@@ -46,3 +46,4 @@ bin/
 /dental-service/src/main/resources/application-local.yaml
 /telegram-bot/src/main/resources/application-local.yaml
 /ui-mvc-app/src/main/resources/application-local.yaml
+/.env
