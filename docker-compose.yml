@@ -35,6 +35,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   ui-application:
@@ -54,6 +57,9 @@ services:
         condition: service_started
       redis:
         condition: service_started
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   telegram-bot:
@@ -71,6 +77,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   postgres:
@@ -88,6 +97,8 @@ services:
     volumes:
       - ./volumes/postgresql/data:/var/lib/postgresql/data
       - ./config/postgesql/create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -126,6 +137,8 @@ services:
     volumes:
       - ./config/keycloak/realms:/opt/keycloak/data/import
       - ./config/keycloak/themes:/opt/keycloak/themes
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   minio:
@@ -147,6 +160,8 @@ services:
     command: server --console-address ":9001" /data
     volumes:
       - ./volumes/minio_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   redis:
@@ -160,6 +175,8 @@ services:
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - ./volumes/redis/data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   nginx:
@@ -174,6 +191,8 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - public
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
@@ -185,19 +204,20 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
-    ports:
-      - "12345:12345"  # Alloy UI
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
+    expose:
+      - "12345"  # Alloy UI
+      - "4317"   # OTLP gRPC
+      - "4318"   # OTLP HTTP
     networks:
       - internal
-      - public
     command:
       - run
       - /etc/alloy/config.alloy
@@ -206,12 +226,22 @@ services:
     volumes:
       - ./config/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+
 
   prometheus:
     image: prom/prometheus:v2.48.1
     container_name: prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     networks:
       - internal
     command:
@@ -223,7 +253,9 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./volumes/prometheus:/prometheus
+      - prometheus-data:/prometheus
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
       interval: 30s
@@ -233,14 +265,16 @@ services:
   loki:
     image: grafana/loki:2.9.3
     container_name: loki
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
     networks:
       - internal
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
-      - ./volumes/loki-data:/loki
+      - loki-data:/loki
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
       interval: 30s
@@ -250,16 +284,18 @@ services:
   tempo:
     image: grafana/tempo:2.3.1
     container_name: tempo
-    ports:
-      - "3200:3200"   # Tempo HTTP
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
+    expose:
+      - "3200"   # Tempo HTTP
+      - "4317"   # OTLP gRPC
+      - "4318"   # OTLP HTTP
     networks:
       - internal
     command: -config.file=/etc/tempo/tempo.yaml
     volumes:
       - ./config/tempo/tempo-config.yaml:/etc/tempo/tempo.yaml:ro
       - ./volumes/tempo:/var/tempo
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
       interval: 30s
@@ -269,30 +305,36 @@ services:
   grafana:
     image: grafana/grafana:10.2.3
     container_name: grafana
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     networks:
       - public
       - internal
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-#      - GF_SERVER_ROOT_URL=https://grafana.dental-lab-service.ru
-#      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-#      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
-#      - GF_AUTH_ANONYMOUS_ENABLED=false
-#      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SERVER_ROOT_URL=https://dental-lab-service.ru/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
       - ./config/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
       - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./volumes/grafana:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
-      - prometheus
-      - loki
-      - tempo
+      - alloy
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+
+volumes:
+  prometheus-data:
+  loki-data:
+  grafana-data:
