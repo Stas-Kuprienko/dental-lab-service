@@ -2,6 +2,8 @@ server:
   port: 8082
 
 spring:
+  profiles:
+    active: local
   application:
     name: dental-lab-service
   security:
@@ -56,6 +58,20 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+springdoc:
+  info:
+    title: Dental Lab Service
+    description: Open API for Dental Lab Service
+    version: 1.0.0
+    url:
+  swagger-ui:
+    path: /index.html
+  api-docs:
+    path: /v3/api-docs
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  paths-to-match: /api/v1/**
+
 management:
   endpoints:
     web:
@@ -71,17 +87,3 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
-
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: ${project.variables.alloy.url}
-  traces:
-    exporter: otlp
-    sampler: always_on
-  metrics:
-    exporter: none
-  logs:
-    exporter: none

@@ -1,5 +1,7 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.ReportService;
 import org.lab.dental.util.RequestParamsConverter;
 import org.lab.model.ProfitRecord;
@@ -14,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.time.YearMonth;
 import java.util.UUID;
 
+@Slf4j
+@Tag(name = "Reports")
 @RestController
 @RequestMapping("/api/v1/reports")
 public class ReportController {
@@ -30,6 +34,7 @@ public class ReportController {
     public ResponseEntity<Resource> downloadWorkReport(@RequestAttribute("X-USER-ID") UUID userId,
                                                        @RequestParam int year,
                                                        @RequestParam int month) {
+        log.info("From user '{}' received request to get report: {}", userId, year + "-" + month);
         YearMonth yearMonth = YearMonth.of(year, month);
         ByteArrayInputStream stream = reportService.createFile(userId, yearMonth);
         String fileName = yearMonth.getMonth() + "_" + yearMonth.getYear();
@@ -40,6 +45,7 @@ public class ReportController {
     public ResponseEntity<ProfitRecord> countProfitForMonth(@RequestAttribute("X-USER-ID") UUID userId,
                                                             @RequestParam("year") Integer year,
                                                             @RequestParam("month") Integer month) {
+        log.info("From user '{}' received request to count profit: {}", userId, year + "-" + month);
         YearMonth yearMonth = RequestParamsConverter.converToYearMonth(year, month);
         ProfitRecord profitRecord = reportService.countProfits(userId, yearMonth);
         return ResponseEntity.ok(profitRecord);

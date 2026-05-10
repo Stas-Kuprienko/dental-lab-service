@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.DentalWorkManager;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Dental Works")
 @RestController
 @RequestMapping("/api/v1/dental_works")
 public class DentalWorkController {
@@ -35,7 +37,7 @@ public class DentalWorkController {
     @PostMapping
     public ResponseEntity<DentalWork> create(@RequestAttribute("X-USER-ID") UUID userId,
                                              @RequestBody @Valid NewDentalWork newDentalWork) {
-        log.info("From user '{}' received request: {}", userId, newDentalWork);
+        log.info("From user '{}' received request to create DentalWork: {}", userId, newDentalWork);
         DentalWork dentalWork = dentalWorkManager.create(newDentalWork, userId);
         return ResponseEntity
                 .created(URI.create(URL + '/' + dentalWork.getId())).body(dentalWork);
@@ -44,14 +46,14 @@ public class DentalWorkController {
     @GetMapping("/{id}")
     public ResponseEntity<DentalWork> findById(@RequestAttribute("X-USER-ID") UUID userId,
                                                @PathVariable("id") Long id) {
-        log.info("From user '{}' received request with parameter: id={}", userId, id);
+        log.info("From user '{}' received request to find DentalWork by id={}", userId, id);
         DentalWork dentalWork = dentalWorkManager.getByIdAndUserId(id, userId);
         return ResponseEntity.ok(dentalWork);
     }
 
     @GetMapping
     public ResponseEntity<List<DentalWork>> findAllActualByUserId(@RequestAttribute("X-USER-ID") UUID userId) {
-        log.info("From user '{}' received request to get all DentalWorks for current month", userId);
+        log.info("From user '{}' received request to get DentalWork list for current month", userId);
         List<DentalWork> dentalWorks = dentalWorkManager.getAllActualByUserId(userId);
         return ResponseEntity.ok(dentalWorks);
     }
@@ -60,7 +62,7 @@ public class DentalWorkController {
     public ResponseEntity<List<DentalWork>> findAllMonth(@RequestAttribute("X-USER-ID") UUID userId,
                                                          @RequestParam("year") Integer year,
                                                          @RequestParam("month") Integer month) {
-        log.info("From user '{}' received request with parameter: year={}, month={}", userId, year, month);
+        log.info("From user '{}' received request to get DentalWork list for {}", userId, year + "-" + month);
         List<DentalWork> dentalWorks = dentalWorkManager
                 .getAllForMonthByUserId(userId, RequestParamsConverter.converToYearMonth(year, month));
         return ResponseEntity.ok(dentalWorks);
@@ -70,7 +72,7 @@ public class DentalWorkController {
     public ResponseEntity<List<DentalWork>> findByClinicAndPatient(@RequestAttribute("X-USER-ID") UUID userId,
                                                                    @RequestParam(value = "clinic", required = false) String clinic,
                                                                    @RequestParam(value = "patient", required = false) String patient) {
-        log.info("From user '{}' received request with parameter: clinic={}, patient={}", userId, clinic, patient);
+        log.info("From user '{}' received request to get DentalWork list by parameters: clinic={}, patient={}", userId, clinic, patient);
         List<DentalWork> dentalWorks = dentalWorkManager.getAllByClinicAndPatientAndUserId(userId, clinic, patient);
         return ResponseEntity.ok(dentalWorks);
     }
@@ -79,7 +81,7 @@ public class DentalWorkController {
     public ResponseEntity<DentalWork> updateDentalWork(@RequestAttribute("X-USER-ID") UUID userId,
                                                        @PathVariable("id") Long id,
                                                        @RequestBody @Valid DentalWork updatable) {
-        log.info("From user '{}' received request: {}", userId, updatable);
+        log.info("From user '{}' received request to update DentalWork by ID={}: {}", userId, id, updatable);
         DentalWork dentalWork = dentalWorkManager.update(updatable, id);
         return ResponseEntity.ok(dentalWork);
     }
@@ -88,7 +90,7 @@ public class DentalWorkController {
     public ResponseEntity<Void> updateStatus(@RequestAttribute("X-USER-ID") UUID userId,
                                              @PathVariable("id") Long id,
                                              @PathVariable("status") WorkStatus status) {
-        log.info("From user '{}' received request to set 'status': {}", userId, status);
+        log.info("From user '{}' received request to set status '{}' by ID={}", userId, status, id);
         dentalWorkManager.updateStatus(id, userId, status);
         return ResponseEntity.ok().build();
     }
@@ -97,7 +99,7 @@ public class DentalWorkController {
     public ResponseEntity<Void> updateStatus(@RequestAttribute("X-USER-ID") UUID userId,
                                              @RequestBody List<Long> idList,
                                              @PathVariable("status") WorkStatus status) {
-        log.info("From user '{}' received request to set 'status': {}", userId, status);
+        log.info("From user '{}' received request to set status '{}' for ID list: {}", userId, status, idList);
         dentalWorkManager.updateStatusForIdList(idList, userId, status);
         return ResponseEntity.ok().build();
     }
@@ -105,7 +107,7 @@ public class DentalWorkController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDentalWork(@RequestAttribute("X-USER-ID") UUID userId,
                                                  @PathVariable("id") Long id) {
-        log.info("From user '{}' received request to delete by ID={}", userId, id);
+        log.info("From user '{}' received request to delete DentalWork by ID={}", userId, id);
         dentalWorkManager.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
@@ -113,7 +115,7 @@ public class DentalWorkController {
     @PutMapping("/sorting")
     public ResponseEntity<Void> sortForCompletion(@RequestAttribute("X-USER-ID") UUID userId,
                                                   @RequestParam(name = "is_previous_month", defaultValue = "false") boolean isPreviousMonth) {
-        log.info("From user '{}' received request to sorting", userId);
+        log.info("From user '{}' received request to sorting DentalWorks", userId);
         dentalWorkManager.sortForCompletion(userId, isPreviousMonth);
         return ResponseEntity.ok().build();
     }

@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.TelegramOtpLinkEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Telegram Chats")
 @RestController
 @RequestMapping("/api/v1/telegram_chat")
 public class TelegramChatController {
@@ -43,6 +45,7 @@ public class TelegramChatController {
     @PutMapping("/link/{key}")
     public ResponseEntity<Void> setUserIdToLink(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @PathVariable("key") String key) {
+        log.info("From user '{}' received request to set user ID to Telegram OTP", userId);
         otpLinkService.setUserId(key, userId);
         return ResponseEntity.ok().build();
     }
@@ -50,7 +53,7 @@ public class TelegramChatController {
     @GetMapping("/link/{key}")
     public ResponseEntity<String> getOtpByKey(@RequestAttribute("X-USER-ID") UUID userId,
                                               @PathVariable("key") String key) {
-        log.info("From user '{}' received request to get OTP", userId);
+        log.info("From user '{}' received request to get Telegram OTP", userId);
         TelegramOtpLinkEntity otpLink = otpLinkService.find(key);
         return ResponseEntity.ok(otpLink.getOtp());
     }

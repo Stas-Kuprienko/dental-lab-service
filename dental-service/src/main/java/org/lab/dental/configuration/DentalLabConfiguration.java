@@ -4,6 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
@@ -132,6 +140,39 @@ public class DentalLabConfiguration {
         }
     }
     // ******************* /\
+
+    // OPEN-API ********** \/
+
+    @Bean
+    public OpenAPI openAPI(@Value("${springdoc.info.title}") String title,
+                           @Value("${springdoc.info.description}") String description,
+                           @Value("${springdoc.info.version}") String version,
+                           @Value("${project.variables.service-api-url}") String url,
+                           @Value("${project.variables.keycloak.url}") String authServerUrl,
+                           @Value("${project.variables.keycloak.realm}") String realm) {
+        Info info = new Info()
+                .title(title)
+                .description(description)
+                .version(version);
+        SecurityScheme oauth2Scheme = new SecurityScheme()
+                .type(SecurityScheme.Type.OAUTH2)
+                .openIdConnectUrl(authServerUrl + "/realms/" + realm + "/.well-known/openid-configuration")
+                .flows(new OAuthFlows()
+                        .implicit(new OAuthFlow()
+                                .authorizationUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/auth")
+                                .tokenUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token")
+                        ));
+        String oauth2SchemeVar = SecurityScheme.Type.OAUTH2.toString();
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(oauth2SchemeVar);
+        OpenAPI openAPI = new OpenAPI()
+                .info(info)
+                .addServersItem(new Server().description(title).url(url))
+                .addSecurityItem(securityRequirement)
+                .components(new Components().addSecuritySchemes(oauth2SchemeVar, oauth2Scheme));
+        log.info("OpenAPI for '{}' version={} by URL='{}' is created with '{}' security", title, version, url, oauth2SchemeVar);
+        return openAPI;
+    }
+    // /\ **************** /\
 
     // CONTEXT *********** \/
 

@@ -27,17 +27,3 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
-
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: ${project.variables.alloy.url}
-  traces:
-    exporter: otlp
-    sampler: always_on
-  metrics:
-    exporter: none
-  logs:
-    exporter: none

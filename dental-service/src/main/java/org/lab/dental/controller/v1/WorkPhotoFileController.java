@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.WorkPhotoFilenameEntity;
 import org.lab.dental.service.WorkPhotoFileService;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Work Photo Files")
 @RestController
 @RequestMapping("/api/v1/dental_works/{work_id}/photo")
 public class WorkPhotoFileController {

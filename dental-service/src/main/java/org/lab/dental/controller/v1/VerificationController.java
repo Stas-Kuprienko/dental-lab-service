@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.EmailVerificationTokenEntity;
 import org.lab.dental.entity.TelegramChatEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Verification")
 @RestController
 @RequestMapping("/api/v1/verification")
 public class VerificationController {
@@ -29,6 +31,11 @@ public class VerificationController {
     public ResponseEntity<Void> sendVerificationLink(@RequestAttribute("X-USER-ID") UUID userId,
                                                      @RequestBody String email,
                                                      @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
+        if (toChange) {
+            log.info("From user '{}' received request to send email changing link: {}", userId, email);
+        } else {
+            log.info("From user '{}' received request to send email verification link: {}", userId, email);
+        }
         verificationService.createForUserId(userId, email, toChange);
         return ResponseEntity.noContent().build();
     }
@@ -36,6 +43,7 @@ public class VerificationController {
     @PostMapping("/telegram-otp")
     public ResponseEntity<Void> sendTelegramOtp(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @RequestBody String email) {
+        log.info("From user '{}' received request to send Telegram OTP: {}", userId, email);
         TelegramChatEntity telegramChat = userService.getTelegramChat(userId);
         verificationService.createTelegramOtpForUserId(userId, email, telegramChat.getChatId());
         return ResponseEntity.noContent().build();
@@ -47,8 +55,10 @@ public class VerificationController {
                                                    @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
         boolean result;
         if (toChange) {
+            log.info("From user '{}' received request to change email", userId);
             result = verificationService.verifyForChangeEmail(userId, token);
         } else {
+            log.info("From user '{}' received request to verify email", userId);
             result = verificationService.verifyUserEmail(userId, token);
         }
         return ResponseEntity.ok(result);
@@ -57,6 +67,7 @@ public class VerificationController {
     @PostMapping("/email/{email}")
     public ResponseEntity<Boolean> isVerified(@RequestAttribute("X-USER-ID") UUID userId,
                                               @PathVariable("email") String email) {
+        log.info("From user '{}' received request to check email verification {}", userId, email);
         EmailVerificationTokenEntity verificationToken = verificationService.getByUserId(userId);
         if (verificationToken.getEmail().equals(email)) {
             if (verificationToken.isVerified()) {

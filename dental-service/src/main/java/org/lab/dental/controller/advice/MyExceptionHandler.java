@@ -34,11 +34,10 @@ public class MyExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException e) {
+        log.info(e.getMessage());
         StringBuilder stringBuilder = new StringBuilder();
-        List<FieldError> errors = ex.getBindingResult().getFieldErrors();
-
+        List<FieldError> errors = e.getBindingResult().getFieldErrors();
         for (int i = 0; i < errors.size(); i++) {
             FieldError error = errors.get(i);
             stringBuilder.append(error.getField()).append(" ").append(error.getDefaultMessage());
