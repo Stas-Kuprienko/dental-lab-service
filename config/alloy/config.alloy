@@ -27,9 +27,20 @@ otelcol.exporter.otlp "tempo" {
 
 discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
+  filter {
+    name   = "label"
+    values = ["dental-lab-service",
+              "ui-application",
+              "telegram-bot",
+              "dental_keycloak",
+              "dental_db",
+              "dental_redis",
+              "minio"]
+  }
 }
 
 loki.relabel "docker" {
+
   forward_to = []
 
   rule {
@@ -58,7 +69,16 @@ loki.source.docker "default" {
   host             = "unix:///var/run/docker.sock"
   targets          = discovery.docker.containers.targets
   forward_to       = [loki.write.default.receiver]
-  relabel_rules    = loki.relabel.docker.rules
+}
+
+loki.process "add_labels" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.static_labels {
+    values = {
+      job     = "docker"
+    }
+  }
 }
 
 loki.write "default" {
@@ -69,9 +89,9 @@ loki.write "default" {
 
 prometheus.scrape "spring_apps" {
   targets = [
-    {"__address__" = "dental-lab-service:8000", "job" = "dental-lab-service"},
+    {"__address__" = "dental-lab-service:8082", "job" = "dental-lab-service"},
     {"__address__" = "ui-application:8081", "job" = "ui-application"},
-    {"__address__" = "telegram-bot:8001", "job" = "telegram-bot"},
+    {"__address__" = "telegram-bot:8083", "job" = "telegram-bot"},
   ]
   forward_to      = [prometheus.remote_write.default.receiver]
   metrics_path    = "/actuator/prometheus"

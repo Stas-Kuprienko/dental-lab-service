@@ -27,7 +27,7 @@ subprojects {
     apply plugin: 'java'
 
     group = 'org.lab'
-    version = '1.0'
+    version = '1.1'
 
     dependencies {
     	compileOnly "org.projectlombok:lombok:${lombok_version}"
