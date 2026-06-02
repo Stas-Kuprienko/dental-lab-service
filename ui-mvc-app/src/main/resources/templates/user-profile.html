@@ -67,6 +67,25 @@
         <span th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy')}">01-01-2024</span>
     </div>
 
+    <div th:if="${user.mailingType != null}" class="work">
+        <label >Уведомления о работах на завтра:</label>
+        <label th:text="${user.mailingType.name}">TELEGRAM</label><br>
+        <form th:action="@{/main/user/notification/unsubscribe}" method="post" onsubmit="return confirm('Отключить уведомления?')">
+            <button type="submit" class="small-button">Отключить</button>
+        </form>
+    </div>
+
+    <div th:if="${user.mailingType == null}" class="work">
+        <label >Уведомления о работах на завтра не включены</label>
+        <form th:action="@{/main/user/notification/subscribe}" method="post">
+            <select name="type" required>
+                <option value="TELEGRAM">Telegram</option>
+                <option value="EMAIL">Email</option>
+            </select>
+            <button type="submit" class="small-button">ВКЛЮЧИТЬ</button>
+        </form>
+    </div>
+
     <!-- Удалить аккаунт -->
     <div class="work">
         <form th:action="@{/main/user/delete}" method="post" onsubmit="return confirm('Удалить аккаунт?')">

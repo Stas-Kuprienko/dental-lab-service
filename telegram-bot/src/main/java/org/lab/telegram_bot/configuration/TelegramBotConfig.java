@@ -21,10 +21,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestClient;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 @Configuration
@@ -33,7 +35,27 @@ public class TelegramBotConfig {
 
     public static final String SERVICE_CLIENT_ID = "TELEGRAM-BOT-SERVICE";
     public static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final Locale DEFAULT_LOCALE = Locale.of("RU");
 
+
+    /**
+     * Configuration of proxy TG-bot options for local development. Just Russian realities... :|
+     * @return Bot options with proxy configurations.
+     */
+    @Bean(name = "myBotOptions")
+    public DefaultBotOptions myBotOptions(@Value("${project.telegram.proxy.enable:false}") Boolean isProxy,
+                                          @Value("${project.telegram.proxy.host:127.0.0.1}") String host,
+                                          @Value("${project.telegram.proxy.port:10808}") Integer port,
+                                          @Value("${project.telegram.proxy.type:HTTP}") String type) {
+        DefaultBotOptions botOptions = new DefaultBotOptions();
+        if (isProxy) {
+            botOptions.setProxyHost(host);
+            botOptions.setProxyPort(port);
+            botOptions.setProxyType(DefaultBotOptions.ProxyType.valueOf(type));
+            log.info("Configured bot options with PROXY for Telegram API, type={}, address={}:{}", type, host, port);
+        }
+        return botOptions;
+    }
 
     @Bean("setMyCommandsExecutor")
     public Consumer<SetMyCommands> setMyCommandsExecutor(TelegramBotController telegramBotController) {

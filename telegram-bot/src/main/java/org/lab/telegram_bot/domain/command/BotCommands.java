@@ -15,6 +15,7 @@ public enum BotCommands {
     GET_REPORT("/get_report", true),
     COUNT_PROFIT("/count_profit", true),
     PHOTO_FILES("/photo_files", false),
+    NOTIFICATIONS("/notifications", true),
     CANCEL("/cancel", false);
 
 

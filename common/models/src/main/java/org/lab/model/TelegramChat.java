@@ -19,6 +19,9 @@ public class TelegramChat {
     @JsonProperty("user_id")
     private UUID userId;
 
+    @JsonProperty("language")
+    private String language;
+
     @JsonProperty("status")
     private UserStatus status;
 

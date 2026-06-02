@@ -25,6 +25,8 @@ public interface DentalWorkService {
 
     List<DentalWorkEntity> getAllByClinicAndPatientAndUserId(UUID userId, @Nullable String clinic, @Nullable String patient);
 
+    List<DentalWorkEntity> getForTomorrowByUserId(UUID userId);
+
     DentalWorkEntity update(DentalWorkEntity updatable);
 
     void updateStatus(Long id, UUID userId, WorkStatus status);

@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: telegram-bot
+  profiles:
+    active: local
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
@@ -27,3 +29,30 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+
+
+project:
+  variables:
+    dental-lab-api:
+      url: http://localhost:8082/api/v1
+    dental-lab-site:
+      url: http://localhost:8081/dental-lab
+    redis:
+      host: localhost
+      port: 6379
+    telegram:
+      username: dental_mechanic_service_bot
+      bot-token: ???????????????????
+    keycloak:
+      client-id: keycloak-client
+      client-secret: ???????????????????
+    tempo:
+      url: http://localhost:4318/v1/traces
+  telegram:
+    link-duration-minutes: 10
+    otp-length: 7
+    proxy:
+      enable: false
+      host: "127.0.0.1"
+      port: 10808
+      type: HTTP

@@ -1,15 +1,15 @@
 package org.lab.dental.service;
 
-import org.lab.dental.entity.TelegramChatEntity;
-import org.lab.dental.entity.UserEntity;
 import org.lab.enums.UserStatus;
+import org.lab.model.TelegramChat;
+import org.lab.model.User;
 import java.util.UUID;
 
 public interface UserService {
 
-    UserEntity create(String login, String name, String password);
+    User create(String login, String name, String password);
 
-    UserEntity getById(UUID id);
+    User getById(UUID id);
 
     void setStatus(UUID id, UserStatus status);
 
@@ -23,9 +23,9 @@ public interface UserService {
 
     void delete(UUID id);
 
-    void addTelegram(UUID id, Long chatId);
+    void addTelegram(UUID id, Long chatId, String language);
 
-    TelegramChatEntity getTelegramChat(Long chatId);
+    TelegramChat getTelegramChat(Long chatId);
 
-    TelegramChatEntity getTelegramChat(UUID userId);
+    TelegramChat getTelegramChat(UUID userId);
 }

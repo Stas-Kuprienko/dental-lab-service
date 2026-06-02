@@ -2,7 +2,6 @@ package org.lab.dental.service.impl;
 
 import org.lab.dental.entity.EmailVerificationTokenEntity;
 import org.lab.dental.entity.ResetPasswordTokenEntity;
-import org.lab.dental.entity.UserEntity;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.repository.EmailVerificationTokenRepository;
 import org.lab.dental.repository.ResetPasswordTokenRepository;
@@ -13,6 +12,7 @@ import org.lab.dental.service.VerificationService;
 import org.lab.dental.util.CodeGenerator;
 import org.lab.enums.UserStatus;
 import org.lab.event.EventMessage;
+import org.lab.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
@@ -95,7 +95,7 @@ public class MyVerificationService implements VerificationService {
     @Override
     public boolean verifyUserEmail(UUID userId, String token) {
         EmailVerificationTokenEntity verificationToken = getByUserId(userId);
-        UserEntity user = userService.getById(userId);
+        User user = userService.getById(userId);
         if (!user.getLogin().equals(verificationToken.getEmail())) {
             throw new IllegalArgumentException("the user's email does not match the email of the token");
         }

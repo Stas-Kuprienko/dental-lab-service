@@ -25,8 +25,8 @@ public class TelegramChatServiceWrapper {
         telegramChatService.createLink(newTelegramOtpLink, httpHeadersConsumer);
     }
 
-    public UUID bindTelegram(String key, OtpRequest otp) {
-        return telegramChatService.bindTelegram(key, otp, httpHeadersConsumer);
+    public UUID bindTelegram(String key, OtpRequest otp, String language) {
+        return telegramChatService.bindTelegram(key, otp, language, httpHeadersConsumer);
     }
 
     public Optional<TelegramChat> get(long chatId) {

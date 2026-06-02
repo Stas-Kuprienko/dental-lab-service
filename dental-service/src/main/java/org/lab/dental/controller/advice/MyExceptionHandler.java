@@ -16,6 +16,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -101,6 +102,15 @@ public class MyExceptionHandler {
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(e.email);
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
+    public ResponseEntity<ErrorResponse> unauthorizedHandle(HttpClientErrorException.Unauthorized e) {
+        log.warn(e.getMessage(), e);
+        HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
     @ExceptionHandler(ApplicationCustomException.class)

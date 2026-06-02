@@ -2,6 +2,7 @@ package org.lab.dental.repository;
 
 import org.lab.dental.entity.TelegramChatEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,4 +12,7 @@ public interface TelegramChatRepository extends JpaRepository<TelegramChatEntity
 
 
     Optional<TelegramChatEntity> findByUserId(UUID userId);
+
+    @Modifying
+    void deleteByUserId(UUID userId);
 }

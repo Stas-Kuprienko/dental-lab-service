@@ -2,9 +2,7 @@ package org.lab.dental.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.TelegramOtpLinkEntity;
-import org.lab.dental.mapping.UserConverter;
 import org.lab.dental.service.TelegramOtpLinkService;
 import org.lab.dental.service.UserService;
 import org.lab.exception.BadRequestCustomException;
@@ -24,13 +22,11 @@ public class TelegramChatController {
 
     private final TelegramOtpLinkService otpLinkService;
     private final UserService userService;
-    private final UserConverter userConverter;
 
     @Autowired
-    public TelegramChatController(TelegramOtpLinkService otpLinkService, UserService userService, UserConverter userConverter) {
+    public TelegramChatController(TelegramOtpLinkService otpLinkService, UserService userService) {
         this.otpLinkService = otpLinkService;
         this.userService = userService;
-        this.userConverter = userConverter;
     }
 
 
@@ -61,11 +57,12 @@ public class TelegramChatController {
     @PostMapping("/link/{key}")
     public ResponseEntity<UUID> bindTelegram(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                              @PathVariable("key") String key,
+                                             @RequestParam(value = "lang", defaultValue = "RU") String lang,
                                              @RequestBody OtpRequest otp) {
         log.info("From service '{}' received request to bind TelegramChat", serviceId);
         TelegramOtpLinkEntity link = otpLinkService.find(key);
         if (otpLinkService.validate(link, otp.getOtp())) {
-            userService.addTelegram(link.getUserId(), link.getChatId());
+            userService.addTelegram(link.getUserId(), link.getChatId(), lang);
             otpLinkService.delete(key);
             return ResponseEntity.ok(link.getUserId());
         } else {
@@ -77,14 +74,14 @@ public class TelegramChatController {
     public ResponseEntity<TelegramChat> findByChatId(@RequestAttribute("X-SERVICE-ID") String serviceId,
                                                      @PathVariable("chat_id") Long chatId) {
         log.info("From service '{}' received request to get TelegramChat: {}", serviceId, chatId);
-        TelegramChatEntity entity = userService.getTelegramChat(chatId);
-        return ResponseEntity.ok(userConverter.telegramChatToDto(entity));
+        TelegramChat telegramChat = userService.getTelegramChat(chatId);
+        return ResponseEntity.ok(telegramChat);
     }
 
     @GetMapping("/user")
     public ResponseEntity<TelegramChat> findByUserId(@RequestAttribute("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get TelegramChat", userId);
-        TelegramChatEntity entity = userService.getTelegramChat(userId);
-        return ResponseEntity.ok(userConverter.telegramChatToDto(entity));
+        TelegramChat telegramChat = userService.getTelegramChat(userId);
+        return ResponseEntity.ok(telegramChat);
     }
 }

@@ -107,7 +107,7 @@ public class LoginCommandHandler extends BotCommandHandler {
         if (userLink == null || userLink.isExpired()) {
             text = messageSource.getMessage(LINK_EXPIRED, null, locale);
         } else {
-            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText));
+            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText), locale.getLanguage());
             chatSessionService.create(chatId, userId);
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
         }

@@ -47,3 +47,4 @@ bin/
 /telegram-bot/src/main/resources/application-local.yaml
 /ui-mvc-app/src/main/resources/application-local.yaml
 /.env
+/logs/

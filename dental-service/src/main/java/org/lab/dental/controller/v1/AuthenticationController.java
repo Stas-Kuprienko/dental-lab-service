@@ -1,6 +1,7 @@
 package org.lab.dental.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.util.LoginUtil;
@@ -11,10 +12,7 @@ import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Tag(name = "Authentication")
@@ -31,7 +29,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginCredential> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginCredential> login(@RequestBody @Valid LoginRequest request) {
         log.info("User '{}' request to log in", request.email());
         AuthToken authToken = credentialService.userLogin(request.email(), request.password());
         return ResponseEntity.ok(LoginUtil.buildLoginCredential(authToken));

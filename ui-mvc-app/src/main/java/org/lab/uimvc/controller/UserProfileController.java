@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
 import org.dental.restclient.VerificationService;
+import org.lab.enums.MailingType;
 import org.lab.exception.ForbiddenCustomException;
 import org.lab.model.ErrorResponse;
 import org.lab.model.User;
@@ -190,6 +191,19 @@ public class UserProfileController extends MvcControllerUtil {
         }
         String message = messageSource.getMessage(messageKey, null, DEFAULT_LOCALE);
         redirect.addFlashAttribute("message", message);
+        return REDIRECT + USER_PROFILE_PATH;
+    }
+
+    @PostMapping("/notification/subscribe")
+    public String notificationSubscribe(@RequestParam("type") String typeParam) {
+        MailingType type = MailingType.valueOf(typeParam);
+        userService.subscribeForNotifications(type);
+        return REDIRECT + USER_PROFILE_PATH;
+    }
+
+    @PostMapping("/notification/unsubscribe")
+    public String notificationUnsubscribe() {
+        userService.unsubscribeForNotifications();
         return REDIRECT + USER_PROFILE_PATH;
     }
 }

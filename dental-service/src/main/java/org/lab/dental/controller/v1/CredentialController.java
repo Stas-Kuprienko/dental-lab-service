@@ -1,6 +1,7 @@
 package org.lab.dental.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.VerificationService;
@@ -45,7 +46,7 @@ public class CredentialController {
 
     @PutMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestAttribute("X-SERVICE-ID") String serviceId,
-                                           @RequestBody ResetPasswordRequest request) {
+                                           @RequestBody @Valid ResetPasswordRequest request) {
         log.info("From service '{}' received request to reset password for user '{}'", serviceId, request.getEmail());
         boolean isVerified = verificationService.isVerifiedResetPasswordToken(request.getEmail());
         if (isVerified) {

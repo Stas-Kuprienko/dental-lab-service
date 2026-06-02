@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.lab.enums.MailingType;
 import org.lab.enums.UserStatus;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -29,6 +29,9 @@ public class User implements Serializable {
 
     @JsonProperty("status")
     private UserStatus status;
+
+    @JsonProperty("mailing_type")
+    private MailingType mailingType;
 
 
     public User() {}
