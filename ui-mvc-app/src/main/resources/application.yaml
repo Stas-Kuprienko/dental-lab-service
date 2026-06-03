@@ -1,7 +1,6 @@
 server:
   port: 8081
   servlet:
-    context-path: /dental-lab
     session:
       cookie:
         secure: false
@@ -11,19 +10,14 @@ server:
       max-request-size: 100MB
 
 spring:
+  profiles:
+    active: local
   servlet:
     multipart:
       max-file-size: 30MB
       max-request-size: 50MB
   application:
     name: ui-application
-  profiles:
-    active: dev
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      uri: http://host.docker.internal:8888
   thymeleaf:
     cache: true
   web:
@@ -56,33 +50,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+        include: health,prometheus,metrics,info
   endpoint:
-    prometheus:
-      enabled: true
-  tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://alloy:4318
-  traces:
-    exporter: otlp
+    health:
+      show-details: always
   metrics:
-    exporter: none
-  logs:
-    exporter: none
-logging:
-  level:
-    root: INFO
+    tags:
+      application: ${spring.application.name}
+      environment: production
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

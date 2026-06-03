@@ -2,10 +2,11 @@ package org.lab.telegram_bot.domain.element;
 
 public enum ButtonKeys {
 
-    YES,
     NO,
+    YES,
     BACK,
     NEXT,
+    OPEN,
     CANCEL,
     UPDATE,
     DELETE,

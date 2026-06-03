@@ -115,8 +115,13 @@ public class AuthenticationController extends MvcControllerUtil {
         }
     }
 
-    @GetMapping("/main")
+    @GetMapping(value = {"/main", "/"})
     public String mainPage() {
         return MAIN_PAGE;
+    }
+
+    @GetMapping("/guide")
+    public String instruction() {
+        return "instruction";
     }
 }

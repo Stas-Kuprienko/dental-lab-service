@@ -1,19 +1,11 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: telegram-bot
   profiles:
-    active: dev
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      uri: http://host.docker.internal:8888
-  kafka:
-    topic: event-topic
-    consumer:
-      bootstrap-servers: ${project.variables.kafka.url}
-      group-id: telegram-bot-group
-      auto-offset-reset: earliest
+    active: local
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
@@ -26,33 +18,41 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+        include: health,info,prometheus,metrics
   endpoint:
-    prometheus:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
       enabled: true
+    readinessstate:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
   tracing:
-    enabled: true
     sampling:
       probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://alloy:4318
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+  otlp:
+    tracing:
+      endpoint: ${project.variables.tempo.url}
 logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
   level:
     root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  file:
+    name:

@@ -61,7 +61,8 @@
 </section>
 
 <!-- ⏬ Нижнее меню -->
-<nav class="low-menu">
+<div class="low-menu">
+    <div class="low-burger">☰</div>
     <!-- PROFIT -->
     <a id="profit-label"><button>посчитать доход</button></a>
     <div id="profit-form" style="display:none;">
@@ -117,7 +118,7 @@
             <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
         </form>
     </a>
-</nav>
+</div>
 
 <!-- ⚙️ Скрипты -->
 <script>
@@ -135,6 +136,16 @@
         $('#profit-label').click(() => $('#profit-form').toggle("show"));
         $('#sort-label').click(() => $('#sort-form').toggle("show"));
         $('#monthly-label').click(() => $('#monthly-form').toggle("show"));
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+        const lowBurger = document.querySelector(".low-burger");
+        const body = document.body;
+
+        if (lowBurger) {
+            lowBurger.addEventListener("click", () => {
+                body.classList.toggle("low-menu-open");
+            });
+        }
     });
 </script>
 

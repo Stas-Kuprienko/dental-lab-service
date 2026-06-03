@@ -1,44 +1,36 @@
 plugins {
-	id 'org.springframework.boot' version '3.5.0'
-	id 'io.spring.dependency-management' version '1.1.7'
-}
-
-ext {
-	set('springCloudVersion', "2025.0.0")
+	id 'org.springframework.boot' version "${spring_boot_version}"
+	id 'io.spring.dependency-management' version "${spring_dependency_management}"
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "org.telegram:telegrambots-spring-boot-starter:${telegram_version}"
 
 	implementation project(':common:models')
 	implementation project(':common:dental-client')
 
-    // cloud
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-	// event-driving
-	implementation 'org.springframework.kafka:spring-kafka'
+	// observability
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation platform("io.opentelemetry:opentelemetry-bom:1.39.0")
+	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+	implementation 'net.ttddyy.observation:datasource-micrometer-spring-boot:1.0.3'
+	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
-	// monitoring
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation "net.logstash.logback:logstash-logback-encoder:${logback_version}"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetryVersion}"
-
-    // tests
+	// tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${opentelemetry_bom_version}"
+    }
 }
 
 tasks.named('test') {

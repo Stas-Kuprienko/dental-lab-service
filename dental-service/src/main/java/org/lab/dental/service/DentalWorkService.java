@@ -1,6 +1,7 @@
 package org.lab.dental.service;
 
 import org.lab.dental.entity.DentalWorkEntity;
+import org.lab.dental.entity.ProductEntity;
 import org.lab.enums.WorkStatus;
 import org.springframework.lang.Nullable;
 import java.time.LocalDate;
@@ -31,6 +32,8 @@ public interface DentalWorkService {
     void updateStatusForIdList(List<Long> idList, UUID userId, WorkStatus status);
 
     DentalWorkEntity addProduct(Long id, UUID userId, UUID productTypeId, Integer quantity, LocalDate completeAt);
+
+    void addProduct(Long id, UUID userId, ProductEntity product);
 
     DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt);
 

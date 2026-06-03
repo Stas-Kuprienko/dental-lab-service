@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.service.DentalWorkManager;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Products")
 @RestController
 @RequestMapping("/api/v1/dental_works/{work_id}/products")
 public class ProductController {
@@ -25,18 +27,16 @@ public class ProductController {
 
 
     @PostMapping
-    public ResponseEntity<DentalWork> addProduct(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> addProduct(@RequestAttribute("X-USER-ID") UUID userId,
                                                  @PathVariable("work_id") Long workId,
                                                  @RequestBody @Valid NewProduct newProduct) {
-
-        log.info("From user '{}' received request to add: {}", userId, newProduct);
+        log.info("From user '{}' received request to add product by work ID={}: {}", userId, workId, newProduct);
         DentalWork dentalWork = dentalWorkManager.addProduct(workId, userId, newProduct);
         return ResponseEntity.ok(dentalWork);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<DentalWork> updateCompletion(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> updateCompletion(@RequestAttribute("X-USER-ID") UUID userId,
                                                        @PathVariable("work_id") Long workId,
                                                        @PathVariable("id") UUID productId,
                                                        @RequestBody LocalDate completeAt) {
@@ -45,13 +45,11 @@ public class ProductController {
         return ResponseEntity.ok(dentalWork);
     }
 
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<DentalWork> deleteProduct(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> deleteProduct(@RequestAttribute("X-USER-ID") UUID userId,
                                                     @PathVariable("work_id") Long workId,
                                                     @PathVariable("id") UUID id) {
-
-        log.info("From user '{}' received request to delete by ID='{}' and workID={}", userId, id, workId);
+        log.info("From user '{}' received request to delete product by ID='{}' and workID={}", userId, id, workId);
         DentalWork dentalWork = dentalWorkManager.deleteProduct(workId, userId, id);
         return ResponseEntity.ok(dentalWork);
     }

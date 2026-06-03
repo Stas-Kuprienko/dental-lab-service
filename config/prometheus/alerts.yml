@@ -1,0 +1,61 @@
+groups:
+  - name: spring-boot-alerts
+
+    rules:
+
+      - alert: ApplicationDown
+        expr: up{job="dental-lab-service"} == 0
+        for: 1m
+
+        labels:
+          severity: critical
+
+        annotations:
+          summary: "Dental-Lab-Service is down"
+          description: "Dental-Lab-Service has not been reachable for 1 minute"
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) * 100 > 5
+
+        for: 2m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "High error rate"
+          description: "More than 5% of requests return 5xx"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_server_requests_seconds_bucket[5m])) by (le)
+          ) > 1
+
+        for: 5m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "High latency"
+          description: "p95 latency is above 1 second"
+
+      - alert: BusinessFailures
+        expr: |
+          increase(business_users_creation_failed_total[10m]) > 10
+
+        for: 1m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "Business failures detected"
+          description: "More than 10 user sign-up failures in 10 minutes"

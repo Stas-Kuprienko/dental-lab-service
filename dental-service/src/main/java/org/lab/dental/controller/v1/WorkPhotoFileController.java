@@ -1,5 +1,6 @@
 package org.lab.dental.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.WorkPhotoFilenameEntity;
 import org.lab.dental.service.WorkPhotoFileService;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
+@Tag(name = "Work Photo Files")
 @RestController
 @RequestMapping("/api/v1/dental_works/{work_id}/photo")
 public class WorkPhotoFileController {
@@ -27,61 +29,50 @@ public class WorkPhotoFileController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> create(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<String> create(@RequestAttribute("X-USER-ID") UUID userId,
                                          @PathVariable("work_id") Long workId,
                                          @RequestParam("file") MultipartFile file) {
-
         log.info("From user '{}' received request to upload file for DentalWork ID={}", userId, workId);
         WorkPhotoFilenameEntity entity = workPhotoFileService.uploadFile(file, workId, userId);
         return ResponseEntity.ok(entity.getFilename());
     }
 
-
     @GetMapping("/{filename}")
-    public ResponseEntity<String> findById(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<String> findById(@RequestAttribute("X-USER-ID") UUID userId,
                                            @PathVariable("work_id") Long workId,
                                            @PathVariable("filename") String filename) {
-
         log.info("From user '{}' received request to get file link '{}' for DentalWork ID={}", userId, filename, workId);
         return ResponseEntity.ok(workPhotoFileService.getLinkByFilename(filename));
     }
 
-
     @GetMapping
-    public ResponseEntity<List<WorkPhotoEntry>> findAll(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<List<WorkPhotoEntry>> findAll(@RequestAttribute("X-USER-ID") UUID userId,
                                                         @PathVariable("work_id") Long workId) {
-
         log.info("From user '{}' received request to all file links for DentalWork ID={}", userId, workId);
         return ResponseEntity.ok(workPhotoFileService.getAllLinksByWorkId(workId));
     }
 
-
     @GetMapping("/download/{filename}")
-    public ResponseEntity<WorkPhotoFileData> download(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<WorkPhotoFileData> download(@RequestAttribute("X-USER-ID") UUID userId,
                                                       @PathVariable("work_id") Long workId,
                                                       @PathVariable("filename") String filename) {
-
         log.info("From user '{}' received request to download file '{}' for DentalWork ID={}", userId, filename, workId);
         return ResponseEntity.ok(workPhotoFileService.downloadFile(filename));
     }
 
-
     @GetMapping("/download")
-    public ResponseEntity<List<WorkPhotoFileData>> downloadAllById(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<List<WorkPhotoFileData>> downloadAllById(@RequestAttribute("X-USER-ID") UUID userId,
                                                                    @PathVariable("work_id") Long workId) {
-
         log.info("From user '{}' received request to download all files for DentalWork ID={}", userId, workId);
         List<String> filenames = workPhotoFileService.getAllFilenamesByWorkId(workId);
         List<WorkPhotoFileData> files = workPhotoFileService.downloadAllFiles(filenames, workId);
         return ResponseEntity.ok(files);
     }
 
-
     @DeleteMapping("/{filename}")
-    public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> delete(@RequestAttribute("X-USER-ID") UUID userId,
                                        @PathVariable("work_id") Long workId,
                                        @PathVariable("filename") String filename) {
-
         log.info("From user '{}' received request to delete file '{}' for DentalWork ID={}", userId, filename, workId);
         workPhotoFileService.deleteFile(filename);
         return ResponseEntity.noContent().build();

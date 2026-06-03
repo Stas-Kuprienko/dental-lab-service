@@ -1,19 +1,23 @@
 package org.lab.dental.controller.advice;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.exception.NotFoundCustomException;
 import org.lab.dental.exception.PersistenceCustomException;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.exception.ForbiddenCustomException;
-import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.KeycloakEmailDuplicationException;
 import org.lab.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+
 import java.util.List;
 
 @Slf4j
@@ -31,11 +35,10 @@ public class MyExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<ErrorResponse> validationExceptionHandle(MethodArgumentNotValidException e) {
+        log.info(e.getMessage());
         StringBuilder stringBuilder = new StringBuilder();
-        List<FieldError> errors = ex.getBindingResult().getFieldErrors();
-
+        List<FieldError> errors = e.getBindingResult().getFieldErrors();
         for (int i = 0; i < errors.size(); i++) {
             FieldError error = errors.get(i);
             stringBuilder.append(error.getField()).append(" ").append(error.getDefaultMessage());
@@ -83,6 +86,15 @@ public class MyExceptionHandler {
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> forbiddenHandle(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
+        log.info(request.getRequestURI(), e);
+        HttpStatus httpStatus = HttpStatus.METHOD_NOT_ALLOWED;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
+    }
+
     @ExceptionHandler(KeycloakEmailDuplicationException.class)
     public ResponseEntity<String> keycloakEmailDuplication(KeycloakEmailDuplicationException e) {
         log.info(e.getMessage());
@@ -90,6 +102,15 @@ public class MyExceptionHandler {
         return ResponseEntity
                 .status(httpStatus.value())
                 .body(e.email);
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
+    public ResponseEntity<ErrorResponse> unauthorizedHandle(HttpClientErrorException.Unauthorized e) {
+        log.warn(e.getMessage(), e);
+        HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
     @ExceptionHandler(ApplicationCustomException.class)

@@ -22,8 +22,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public abstract class BotCommandHandler {
 
     protected static final String LOG_MESSAGE_FOR_STEP_HANDLING = "Handling case for the step '{}' is switched";
     protected static final DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    protected static final DateTimeFormatter yearMonthFormat = DateTimeFormatter.ofPattern("MM.yyyy");
     protected static final String DENTAL_WORK_TEMPLATE = "DENTAL_WORK_TEMPLATE";
     protected static final String CANCEL_RESPONSE = "CANCEL_RESPONSE";
     protected static final String WORK_LIST_TEMPLATE = "WORK_LIST_TEMPLATE";
@@ -212,13 +214,41 @@ public abstract class BotCommandHandler {
         LocalDate completeAt;
         try {
             String dateValue = value.strip();
-            if (dateValue.split("\\.").length == 2) {
-                dateValue += "." + LocalDate.now().getYear();
+            String[] dateValues = dateValue.split("\\.");
+            if (dateValues[0].length() == 1) {
+                dateValues[0] = '0' + dateValues[0];
             }
+            if (dateValues[1].length() == 1) {
+                dateValues[1] = '0' + dateValues[1];
+            }
+            dateValue = new StringBuilder(dateValues[0])
+                    .append('.')
+                    .append(dateValues[1])
+                    .append('.')
+                    .append(dateValues.length == 2 ? Year.now() : dateValues[2])
+                    .toString();
             completeAt = LocalDate.parse(dateValue, format);
         } catch (DateTimeParseException e) {
             throw new IncorrectInputException(value, e);
         }
         return completeAt;
+    }
+
+    protected YearMonth parseYearMonth(String value) {
+        String[] dateValue = value.strip().split("\\.");
+        if (dateValue.length > 2) {
+            throw new IncorrectInputException(value);
+        }
+        if (dateValue[0].length() == 1) {
+            value = '0' + value;
+        }
+        if (dateValue.length == 1) {
+            value += "." + Year.now();
+        }
+        try {
+            return YearMonth.parse(value, yearMonthFormat);
+        } catch (DateTimeParseException e) {
+            throw new IncorrectInputException(value, e);
+        }
     }
 }

@@ -57,7 +57,7 @@ public class LetterTemplateUtility {
                     String filename = resource.getFilename();
                     String key = filename.split("\\.")[0];
                     map.put(key, readFile(resourceLoader, filename));
-                    log.info("Has been loaded letter template '{}'", filename);
+                    log.info("Has been loaded letter template '{}'", key);
                 });
 
         return map;

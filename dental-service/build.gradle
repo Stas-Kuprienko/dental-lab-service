@@ -1,20 +1,19 @@
 plugins {
-	id 'org.springframework.boot' version '3.5.0'
-	id 'io.spring.dependency-management' version '1.1.7'
-}
-
-ext {
-	set('springCloudVersion', "2025.0.0")
+	id 'org.springframework.boot' version "${spring_boot_version}"
+	id 'io.spring.dependency-management' version "${spring_dependency_management}"
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	implementation project(':common:models')
+    // validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// cloud
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    // security
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	implementation project(':common:models')
 
     // keycloak
     implementation "org.keycloak:keycloak-admin-client:${keycloak_version}"
@@ -37,32 +36,30 @@ dependencies {
     //jwt
 	implementation 'com.auth0:java-jwt:4.4.0'
 
-	// event-driving
-	implementation 'org.springframework.kafka:spring-kafka'
-
 	// open-api
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${swagger_version}"
 
     // validation
 	implementation "org.springframework.boot:spring-boot-starter-validation"
 
-	// monitoring
+	// observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation "net.logstash.logback:logstash-logback-encoder:${logback_version}"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetryVersion}"
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation platform("io.opentelemetry:opentelemetry-bom:1.39.0")
+	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+	implementation 'net.ttddyy.observation:datasource-micrometer-spring-boot:1.0.3'
+	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
 	// tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${opentelemetry_bom_version}"
+    }
 }
 
 tasks.named('test') {

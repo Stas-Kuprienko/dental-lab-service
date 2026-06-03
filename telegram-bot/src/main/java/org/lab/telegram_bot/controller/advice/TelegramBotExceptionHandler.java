@@ -6,6 +6,7 @@ import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.exception.UnregisteredUserException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,7 +27,9 @@ public class TelegramBotExceptionHandler {
     private final Map<String, BiFunction<Throwable, Update, SendMessage>> functionMap;
 
     @Autowired
-    public TelegramBotExceptionHandler(MessageSource messageSource) {
+    public TelegramBotExceptionHandler(MessageSource messageSource,
+                                       @Value("${project.variables.telegram.username}") String username) {
+        log.info("Telegram-bot username: " + username);
         this.messageSource = messageSource;
         functionMap = collectExceptionHandlers();
     }

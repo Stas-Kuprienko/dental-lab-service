@@ -58,7 +58,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                                     ChatSessionService chatSessionService,
                                     KeyboardBuilderKit keyboardBuilderKit,
                                     @Value("${telegram.api.path}") String telegramApiPath,
-                                    @Value("${project.variables.telegram.botToken}") String botToken) {
+                                    @Value("${project.variables.telegram.bot-token}") String botToken) {
         super(messageSource);
         this.dentalWorkService = dentalLabRestClientWrapper.DENTAL_WORKS;
         this.workPhotoLinkService = dentalLabRestClientWrapper.PHOTO_LINKS;

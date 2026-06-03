@@ -1,5 +1,6 @@
 package org.lab.uimvc.configuration;
 
+import jakarta.servlet.DispatcherType;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.lab.uimvc.configuration.auth.MyAccessDeniedHandler;
 import org.lab.uimvc.controller.MvcControllerUtil;
@@ -38,8 +39,10 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/error", "/error/**").permitAll()
-                        .requestMatchers(MvcControllerUtil.LOGIN_PATH, "/sign-up", "/sign-up/*").anonymous()
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/error", "/error/**").permitAll()
+                        .requestMatchers("/guide").permitAll()
+                        .requestMatchers(MvcControllerUtil.LOGIN_PATH, "/login", "/sign-up", "/sign-up/*").anonymous()
                         .requestMatchers("/auth/*").anonymous()
                         .anyRequest().authenticated()
                 )

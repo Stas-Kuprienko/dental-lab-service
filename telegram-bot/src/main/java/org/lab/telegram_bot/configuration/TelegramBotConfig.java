@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.dental.restclient.DentalLabRestClient;
-import org.lab.event.EventMessage;
+import org.lab.exception.ApplicationCustomException;
 import org.lab.model.ProductMap;
 import org.lab.telegram_bot.controller.TelegramBotController;
+import org.lab.telegram_bot.datasource.redis.DentalWorkList;
 import org.lab.telegram_bot.domain.session.ChatSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -22,17 +20,11 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.web.client.RestClient;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 @Configuration
@@ -41,17 +33,6 @@ public class TelegramBotConfig {
 
     public static final String SERVICE_CLIENT_ID = "TELEGRAM-BOT-SERVICE";
     public static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private final String bootstrapServers;
-    private final String groupId;
-
-
-    @Autowired
-    public TelegramBotConfig(@Value("${spring.kafka.consumer.bootstrap-servers}") String bootstrapServers,
-                             @Value("${spring.kafka.consumer.group-id}") String groupId) {
-        this.bootstrapServers = bootstrapServers;
-        this.groupId = groupId;
-    }
 
 
     @Bean("setMyCommandsExecutor")
@@ -128,42 +109,32 @@ public class TelegramBotConfig {
         template.afterPropertiesSet();
         return template;
     }
+
+    @Bean("dentalWorkRedisSerializer")
+    public Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer(ObjectMapper objectMapper) {
+        return new Jackson2JsonRedisSerializer<>(objectMapper, DentalWorkList.class);
+    }
+
+    @Bean("dentalWorkRedisTemplate")
+    public RedisTemplate<String, DentalWorkList> dentalWorkRedisTemplate(RedisConnectionFactory redisConnectionFactory,
+                                                                         StringRedisSerializer stringRedisSerializer,
+                                                                         Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer) {
+
+        RedisTemplate<String, DentalWorkList> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(stringRedisSerializer);
+        template.setValueSerializer(dentalWorkRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+        template.setHashValueSerializer(dentalWorkRedisSerializer);
+        template.afterPropertiesSet();
+        if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
+            log.info("RedisTemplate has been initialized");
+            return template;
+        } else {
+            throw new ApplicationCustomException("Redis connection is failure");
+        }
+    }
     // ******************** /\
-
-    // KAFKA ************** \/
-
-    @Bean
-    public <V> ConsumerFactory<String, V> consumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        config.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-        config.put(
-                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
-        config.put(
-                JsonDeserializer.TRUSTED_PACKAGES, EventMessage.class.getPackage().toString());
-        config.put(
-                ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        config.put(
-                JsonDeserializer.KEY_DEFAULT_TYPE, String.class);
-        config.put(
-                JsonDeserializer.VALUE_DEFAULT_TYPE, EventMessage.class);
-
-        return new DefaultKafkaConsumerFactory<>(config);
-    }
-
-    @Bean
-    public <V> ConcurrentKafkaListenerContainerFactory<String, V> kafkaListenerContainerFactory(
-            ConsumerFactory<String, V> consumerFactory) {
-
-        ConcurrentKafkaListenerContainerFactory<String, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
-        return factory;
-    }
-    // /\ ***************** /\
 
     // MESSAGES *********** \/
 

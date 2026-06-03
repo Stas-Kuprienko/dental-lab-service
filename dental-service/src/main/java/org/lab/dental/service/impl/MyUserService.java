@@ -10,6 +10,7 @@ import org.lab.dental.repository.UserRepository;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.UserService;
 import org.lab.dental.service.WorkPhotoFileService;
+import org.lab.dental.util.metrics.ServiceMetrics;
 import org.lab.enums.UserStatus;
 import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +29,20 @@ public class MyUserService implements UserService {
     private final UserRepository userRepository;
     private final TelegramChatRepository telegramChatRepository;
     private final WorkPhotoFileService workPhotoFileService;
+    private final ServiceMetrics metrics;
 
 
     @Autowired
     public MyUserService(CredentialService credentialService,
                          UserRepository userRepository,
                          TelegramChatRepository telegramChatRepository,
-                         WorkPhotoFileService workPhotoFileService) {
+                         WorkPhotoFileService workPhotoFileService,
+                         ServiceMetrics metrics) {
         this.credentialService = credentialService;
         this.userRepository = userRepository;
         this.telegramChatRepository = telegramChatRepository;
         this.workPhotoFileService = workPhotoFileService;
+        this.metrics = metrics;
     }
 
 
@@ -55,9 +59,11 @@ public class MyUserService implements UserService {
                     .build();
             user = userRepository.save(user);
             log.info("Created user: " + user);
+            metrics.getUserOkCreations().increment();
             return user;
         } catch (PersistenceException | DataAccessException e) {
             credentialService.deleteUser(id);
+            metrics.getUserFailedCreations().increment();
             throw new ApplicationCustomException(e);
         }
     }
@@ -119,9 +125,13 @@ public class MyUserService implements UserService {
                 credentialService.deleteUser(id);
             } catch (Exception e) {
                 userRepository.save(user);
+                metrics.getUserFailedDeletions().increment();
                 throw new ApplicationCustomException(e);
             }
-        }).thenAccept(v -> log.info("User '{}' is deleted", id));
+        }).thenAccept(v -> {
+            log.info("User '{}' is deleted", id);
+            metrics.getUserOkDeletions().increment();
+        });
     }
 
     @Override

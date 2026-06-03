@@ -1,10 +1,12 @@
 package org.lab.dental.service;
 
 import org.lab.dental.entity.DentalWorkEntity;
+import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.repository.DentalWorkCacheRepository;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
+import org.lab.model.Product;
 import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,6 +183,21 @@ public class DentalWorkManager {
                 .map(converter::toDto)
                 .toList();
         cacheRepository.save(dentalWorks, userId);
+    }
+
+    public void oldRecordTransfer(List<DentalWork> dentalWorks, UUID userId) {
+        for (DentalWork dw : dentalWorks) {
+            List<Product> products = dw.getProducts();
+            dw.setProducts(null);
+            DentalWorkEntity entity = converter.toEntity(dw);
+            entity = dentalWorkService.create(entity);
+            long workId = entity.getId();
+            for (Product p : products) {
+                p.setDentalWorkId(workId);
+                ProductEntity productEntity = converter.toEntity(p);
+                dentalWorkService.addProduct(workId, userId, productEntity);
+            }
+        }
     }
 
 

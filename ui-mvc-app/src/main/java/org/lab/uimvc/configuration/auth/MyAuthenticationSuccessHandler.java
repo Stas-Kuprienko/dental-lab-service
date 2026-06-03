@@ -19,7 +19,6 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        System.out.println(request.getRequestURI());
         OidcUser user = (OidcUser) authentication.getPrincipal();
         HttpSession session = request.getSession();
         session.setAttribute(MvcControllerUtil.ATTRIBUTE_KEY_USER_ID, UUID.fromString(user.getSubject()));

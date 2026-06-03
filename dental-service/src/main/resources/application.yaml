@@ -1,16 +1,11 @@
 server:
-  port: 0
+  port: 8082
 
 spring:
   application:
     name: dental-lab-service
   profiles:
-    active: dev
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      uri: http://host.docker.internal:8888
+    active: local
   security:
     oauth2:
       resourceserver:
@@ -47,11 +42,6 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
-  kafka:
-    topic: event-topic
-    bootstrap-servers: ${project.variables.kafka.url}
-    partitions: 3
-    replicas: 3
   mail:
     host: ${project.variables.mail.smtp.host}
     port: ${project.variables.mail.port}
@@ -68,45 +58,59 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${project.variables.eureka-server.url}
-    instance:
-      prefer-ip-address: true
+springdoc:
+  info:
+    title: Dental Lab Service
+    description: Open API for Dental Lab Service
+    version: 1.0.0
+    url:
+  swagger-ui:
+    path: /index.html
+  api-docs:
+    path: /v3/api-docs
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  paths-to-match: /api/v1/**
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+        include: health,info,prometheus,metrics
   endpoint:
-    prometheus:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
       enabled: true
+    readinessstate:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
   tracing:
-    enabled: true
     sampling:
       probability: 1.0
-    otlp:
-      endpoint: http://alloy:4318
-      protocol: http/protobuf
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://alloy:4318
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+  otlp:
+    tracing:
+      endpoint: ${project.variables.tempo.url}
 logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
   level:
     root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  file:
+    name: logs/application.log

@@ -5,12 +5,14 @@ import org.lab.request.OtpRequest;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
+import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.TelegramChatServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.lab.telegram_bot.utils.LinkingKeyGenerator;
+import org.lab.telegram_bot.utils.metrics.TGBotMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -18,7 +20,12 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +43,7 @@ public class LoginCommandHandler extends BotCommandHandler {
     private final LinkingKeyGenerator keyGenerator;
     private final TelegramChatServiceWrapper telegramChatService;
     private final ChatSessionService chatSessionService;
+    private final TGBotMetrics metrics;
     private final String bindingPage;
     private final ConcurrentHashMap<Long, UserLink> userLinkMap;
 
@@ -45,11 +53,13 @@ public class LoginCommandHandler extends BotCommandHandler {
                                DentalLabRestClientWrapper dentalLabRestClient,
                                MessageSource messageSource,
                                ChatSessionService chatSessionService,
+                               TGBotMetrics metrics,
                                @Value("${project.variables.dental-lab-site.url}") String serviceSiteUrl) {
         super(messageSource);
         this.keyGenerator = keyGenerator;
         this.telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
         this.chatSessionService = chatSessionService;
+        this.metrics = metrics;
         this.bindingPage = serviceSiteUrl + "/telegram-bind/link/";
         userLinkMap = new ConcurrentHashMap<>();
     }
@@ -84,12 +94,15 @@ public class LoginCommandHandler extends BotCommandHandler {
                 .build();
         telegramChatService.createLink(newTelegramOtpLink);
         userLinkMap.put(chatId, new UserLink(key));
-        String link = bindingPage + key;
         String messageKey = session.getUserId() == null ? LINK_CREATED : LINK_CREATED_FOR_LINKED_USER;
-        String text = messageSource.getMessage(messageKey, new Object[]{userName, link}, locale);
+        String text = messageSource.getMessage(messageKey, new Object[]{userName}, locale);
+        String linkButtonLabel = messageSource.getMessage(ButtonKeys.OPEN.name(), null, locale);
+        String link = bindingPage + key;
+        InlineKeyboardMarkup markup = urlButton(linkButtonLabel, link);
         session.setStep(Steps.INPUT_OTP.ordinal());
         chatSessionService.save(session);
-        return createSendMessage(chatId, text);
+        metrics.getLinkCreations().increment();
+        return createSendMessage(chatId, text, markup);
     }
 
     private SendMessage inputOtp(ChatSession session, Locale locale, String messageText, String userName) {
@@ -102,9 +115,20 @@ public class LoginCommandHandler extends BotCommandHandler {
             UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText));
             chatSessionService.create(chatId, userId);
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
+            metrics.getLinkLoginSuccesses().increment();
         }
         userLinkMap.remove(chatId);
         return createSendMessage(chatId, text);
+    }
+
+    private InlineKeyboardMarkup urlButton(String buttonText, String link) {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<InlineKeyboardButton> buttons = new ArrayList<>();
+        InlineKeyboardButton button = new InlineKeyboardButton(buttonText);
+        button.setUrl(link);
+        buttons.add(button);
+        markup.setKeyboard(List.of(buttons));
+        return markup;
     }
 
     private Steps getStep(ChatSession session) {

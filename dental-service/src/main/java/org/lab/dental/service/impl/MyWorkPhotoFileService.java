@@ -122,6 +122,7 @@ public class MyWorkPhotoFileService implements WorkPhotoFileService {
     @Override
     public void deleteAllForUserId(UUID userId) {
         List<String> filenames = repository.findAllFilenamesByUserId(userId);
+        log.debug("Found {} filename elements from repository by user ID='{}'", filenames.size(), userId);
         filenames.forEach(s3ClientService::deletePhoto);
         int result = repository.deleteAllByUserId(userId);
         log.info("Deleted {} WorkPhotoFilename elements by user ID '{}'", result, userId);
