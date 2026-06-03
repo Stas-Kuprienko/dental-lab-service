@@ -72,50 +72,6 @@ springdoc:
   default-consumes-media-type: application/json
   paths-to-match: /api/v1/**
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus,metrics
-  endpoint:
-    health:
-      show-details: always
-      probes:
-        enabled: true
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5,0.95,0.99
-  tracing:
-    sampling:
-      probability: 1.0
-  otlp:
-    tracing:
-      endpoint: ${project.variables.tempo.url}
-logging:
-  pattern:
-    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG
-  file:
-    name: logs/application.log
-
-
 
 project:
   variables:
@@ -129,8 +85,8 @@ project:
       username: admin
       password: admin
       realm: dental-lab
-      client-id: keycloak-client
-      client-secret: ????????????????????????????????
+      client-id: dental-lab-client
+      client-secret: 9S95xSQgkdxbt1VxNPdHoULyTyaLZIWG
     datasource:
       database: dental_lab
       url: localhost:5432
@@ -159,5 +115,5 @@ project:
     secret-key: 2f254abc113f76adf4461fd558074a40967f522bd8fd71a4366703a9ee224868
   mailing:
     schedule:
-      cron: "0 30 0 * * *"
+      cron: "0 30 9 * * *" #pattern: S M H(24)
       zone: "Asia/Omsk"

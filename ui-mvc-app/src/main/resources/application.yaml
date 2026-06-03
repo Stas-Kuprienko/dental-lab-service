@@ -10,14 +10,14 @@ server:
       max-request-size: 100MB
 
 spring:
+  application:
+    name: ui-application
   profiles:
     active: local
   servlet:
     multipart:
       max-file-size: 30MB
       max-request-size: 50MB
-  application:
-    name: ui-application
   thymeleaf:
     cache: true
   web:
@@ -46,18 +46,20 @@ spring:
         max-idle: 8
         min-idle: 0
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,prometheus,metrics,info
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: production
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
+
+project:
+  variables:
+    dental-lab-api:
+      url: http://localhost:8082/api/v1
+    keycloak:
+      url: http://localhost:8080
+      username: admin
+      password: admin
+      realm: dental-lab
+      client-id: dental-lab-client
+      client-secret: 9S95xSQgkdxbt1VxNPdHoULyTyaLZIWG
+      service-client-id: ui-mvc-client
+      service-client-secret: k2tMAw4AV1zZbcW8MuUFiQUjDHx4ZMDz
+    redis:
+      host: localhost
+      port: 6379
