@@ -194,8 +194,8 @@ public class DentalLabConfiguration {
         return executorService;
     }
 
-    @Bean(name = "applicationTaskExecutor")
-    public AsyncTaskExecutor asyncTaskExecutor() {
+    @Bean(name = "taskExecutor")
+    public AsyncTaskExecutor taskExecutor() {
         return new ConcurrentTaskExecutor(virtualThreadPerTaskExecutor());
     }
 

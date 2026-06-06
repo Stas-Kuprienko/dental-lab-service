@@ -1,6 +1,7 @@
 package org.lab.dental.service.impl;
 
 import jakarta.persistence.PersistenceException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.entity.UserEntity;
@@ -52,6 +53,7 @@ public class MyUserService implements UserService {
     }
 
 
+    @Transactional
     @Override
     public User create(String login, String name, String password) {
         UUID id = credentialService.signUp(login, password, name);
@@ -72,6 +74,7 @@ public class MyUserService implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public User getById(UUID id) {
         UserEntity user = userRepository.findById(id)
@@ -91,6 +94,7 @@ public class MyUserService implements UserService {
         log.info("For user '{}' updated status '{}'", id, status);
     }
 
+    @Transactional
     @Override
     public void updateName(UUID id, String newName) {
         userRepository.updateName(id, newName);
@@ -98,6 +102,7 @@ public class MyUserService implements UserService {
         log.info("For user '{}' updated name '{}'", id, newName);
     }
 
+    @Transactional
     @Override
     public void updateLogin(UUID id, String newLogin) {
         UserEntity user = findById(id);
@@ -112,6 +117,7 @@ public class MyUserService implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public void updatePassword(UUID id, String email, String oldPassword, String newPassword) {
         credentialService.updatePassword(id, email, oldPassword, newPassword);
@@ -124,6 +130,7 @@ public class MyUserService implements UserService {
         log.info("User '{}' logged out", userId);
     }
 
+    @Transactional
     @Override
     public void delete(UUID id) {
         UserEntity user = findById(id);
@@ -139,6 +146,7 @@ public class MyUserService implements UserService {
         }).thenAccept(v -> log.info("User '{}' is deleted", id));
     }
 
+    @Transactional
     @Override
     public void addTelegram(UUID id, Long chatId, String language) {
         TelegramChatEntity telegramChat = TelegramChatEntity.builder()
