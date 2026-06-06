@@ -28,7 +28,7 @@ public class CredentialController {
 
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> sendResetPasswordLink(@RequestAttribute("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Void> sendResetPasswordLink(@RequestHeader("X-SERVICE-ID") String serviceId,
                                                       @RequestBody String email) {
         log.info("From service '{}' received request to send reset password link", serviceId);
         verificationService.createResetPasswordToken(email);
@@ -36,7 +36,7 @@ public class CredentialController {
     }
 
     @PatchMapping("/reset-password/{token}")
-    public ResponseEntity<Boolean> verifyResetPasswordToken(@RequestAttribute("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Boolean> verifyResetPasswordToken(@RequestHeader("X-SERVICE-ID") String serviceId,
                                                             @PathVariable("token") String token,
                                                             @RequestBody String email) {
         log.info("From service '{}' received request to verify reset password link", serviceId);
@@ -45,7 +45,7 @@ public class CredentialController {
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestAttribute("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<?> resetPassword(@RequestHeader("X-SERVICE-ID") String serviceId,
                                            @RequestBody @Valid ResetPasswordRequest request) {
         log.info("From service '{}' received request to reset password for user '{}'", serviceId, request.getEmail());
         boolean isVerified = verificationService.isVerifiedResetPasswordToken(request.getEmail());
@@ -58,7 +58,7 @@ public class CredentialController {
     }
 
     @DeleteMapping("/reset-password")
-    public ResponseEntity<Void> deleteResetPasswordToken(@RequestAttribute("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<Void> deleteResetPasswordToken(@RequestHeader("X-SERVICE-ID") String serviceId,
                                                          @RequestParam("email") String email) {
         log.info("From service '{}' received request to delete ResetPassword link for user '{}'", serviceId, email);
         verificationService.deleteResetPasswordToken(email);

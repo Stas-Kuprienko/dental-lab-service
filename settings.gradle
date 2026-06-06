@@ -14,4 +14,6 @@ include 'common:dental-client'
 findProject(':common:dental-client')?.name = 'dental-client'
 include 'ui-mvc-app'
 include 'telegram-bot'
+include 'common:dental-feign'
+findProject(':common:dental-feign')?.name = 'dental-feign'
 

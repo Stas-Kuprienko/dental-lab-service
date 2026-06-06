@@ -3,11 +3,11 @@ server:
 
 spring:
   application:
-    name: gateway
+    name: api-gateway
   profiles:
-    active: dev
+    active: local
   config:
-    import: "configserver:"
+    import: "optional:configserver:"
   cloud:
     config:
       uri: http://host.docker.internal:8888
@@ -36,28 +36,18 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus,metrics,info
+        include: health,info,prometheus,metrics
   endpoint:
     health:
       show-details: always
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: production
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-
-otel:
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: ${project.variables.alloy.url}
-  traces:
-    exporter: otlp
-    sampler: always_on
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true

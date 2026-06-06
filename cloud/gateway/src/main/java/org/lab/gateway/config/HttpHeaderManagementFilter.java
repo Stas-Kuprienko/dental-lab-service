@@ -53,6 +53,7 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
                 .mutate()
                 .header(USER_ID_HEADER, userId)
                 .build();
+        log.info("set HTTP header {}:{}", SERVICE_ID_HEADER, UI_MVC_CLIENT_ID);
         return exchange.mutate().request(mutatedRequest).build();
     }
 

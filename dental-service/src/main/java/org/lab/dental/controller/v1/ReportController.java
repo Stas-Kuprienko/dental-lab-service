@@ -31,9 +31,9 @@ public class ReportController {
 
 
     @GetMapping("/works")
-    public ResponseEntity<Resource> downloadWorkReport(@RequestAttribute("X-USER-ID") UUID userId,
-                                                       @RequestParam int year,
-                                                       @RequestParam int month) {
+    public ResponseEntity<Resource> downloadWorkReport(@RequestHeader("X-USER-ID") UUID userId,
+                                                       @RequestParam("year") Integer year,
+                                                       @RequestParam("month") Integer month) {
         log.info("From user '{}' received request to get report: {}", userId, year + "-" + month);
         YearMonth yearMonth = YearMonth.of(year, month);
         ByteArrayInputStream stream = reportService.createFile(userId, yearMonth);
@@ -42,7 +42,7 @@ public class ReportController {
     }
 
     @GetMapping("/profit")
-    public ResponseEntity<ProfitRecord> countProfitForMonth(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<ProfitRecord> countProfitForMonth(@RequestHeader("X-USER-ID") UUID userId,
                                                             @RequestParam("year") Integer year,
                                                             @RequestParam("month") Integer month) {
         log.info("From user '{}' received request to count profit: {}", userId, year + "-" + month);

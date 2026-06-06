@@ -28,7 +28,7 @@ public class VerificationController {
 
 
     @PostMapping("/email")
-    public ResponseEntity<Void> sendVerificationLink(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> sendVerificationLink(@RequestHeader("X-USER-ID") UUID userId,
                                                      @RequestBody String email,
                                                      @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
         if (toChange) {
@@ -41,7 +41,7 @@ public class VerificationController {
     }
 
     @PostMapping("/telegram-otp")
-    public ResponseEntity<Void> sendTelegramOtp(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> sendTelegramOtp(@RequestHeader("X-USER-ID") UUID userId,
                                                 @RequestBody String email) {
         log.info("From user '{}' received request to send Telegram OTP: {}", userId, email);
         TelegramChat telegramChat = userService.getTelegramChat(userId);
@@ -50,7 +50,7 @@ public class VerificationController {
     }
 
     @PutMapping("/email/{token}")
-    public ResponseEntity<Boolean> verifyUserEmail(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Boolean> verifyUserEmail(@RequestHeader("X-USER-ID") UUID userId,
                                                    @PathVariable("token") String token,
                                                    @RequestParam(value = "to-change", defaultValue = "false") boolean toChange) {
         boolean result;
@@ -65,7 +65,7 @@ public class VerificationController {
     }
 
     @PostMapping("/email/{email}")
-    public ResponseEntity<Boolean> isVerified(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Boolean> isVerified(@RequestHeader("X-USER-ID") UUID userId,
                                               @PathVariable("email") String email) {
         log.info("From user '{}' received request to check email verification {}", userId, email);
         EmailVerificationTokenEntity verificationToken = verificationService.getByUserId(userId);

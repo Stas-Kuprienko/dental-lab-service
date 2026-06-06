@@ -3,12 +3,19 @@ plugins {
 	id 'io.spring.dependency-management' version "${spring_dependency_management}"
 }
 
+ext {
+	set('springCloudVersion', "${spring_cloud}")
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	implementation project(':common:models')
 	implementation project(':common:dental-client')
+
+	// cloud
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -28,7 +35,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${opentelemetry_bom_version}"
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 

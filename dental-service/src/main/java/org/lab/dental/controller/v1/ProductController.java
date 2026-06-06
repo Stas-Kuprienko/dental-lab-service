@@ -27,7 +27,7 @@ public class ProductController {
 
 
     @PostMapping
-    public ResponseEntity<DentalWork> addProduct(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> addProduct(@RequestHeader("X-USER-ID") UUID userId,
                                                  @PathVariable("work_id") Long workId,
                                                  @RequestBody @Valid NewProduct newProduct) {
         log.info("From user '{}' received request to add product by work ID={}: {}", userId, workId, newProduct);
@@ -36,7 +36,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DentalWork> updateCompletion(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> updateCompletion(@RequestHeader("X-USER-ID") UUID userId,
                                                        @PathVariable("work_id") Long workId,
                                                        @PathVariable("id") UUID productId,
                                                        @RequestBody LocalDate completeAt) {
@@ -46,7 +46,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<DentalWork> deleteProduct(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<DentalWork> deleteProduct(@RequestHeader("X-USER-ID") UUID userId,
                                                     @PathVariable("work_id") Long workId,
                                                     @PathVariable("id") UUID id) {
         log.info("From user '{}' received request to delete product by ID='{}' and workID={}", userId, id, workId);

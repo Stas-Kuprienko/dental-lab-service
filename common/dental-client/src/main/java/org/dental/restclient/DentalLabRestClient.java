@@ -15,7 +15,6 @@ public class DentalLabRestClient {
     public final ProductService PRODUCTS;
     public final ReportService REPORTS;
     public final WorkPhotoLinkService PHOTO_LINKS;
-    public final OldRecordTransferService OLD_RECORD_TRANSFER;
 
 
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder) {
@@ -32,7 +31,6 @@ public class DentalLabRestClient {
         PRODUCTS = new ProductService(restClient);
         REPORTS = new ReportService(restClient);
         PHOTO_LINKS = new WorkPhotoLinkService(restClient);
-        OLD_RECORD_TRANSFER = new OldRecordTransferService(restClient);
     }
 
     public DentalLabRestClient(String baseUrl, RestClient.Builder restClientBuilder, ClientHttpRequestInterceptor interceptor) {
@@ -48,7 +46,6 @@ public class DentalLabRestClient {
         PRODUCTS = new ProductService(restClient);
         REPORTS = new ReportService(restClient);
         PHOTO_LINKS = new WorkPhotoLinkService(restClient);
-        OLD_RECORD_TRANSFER = new OldRecordTransferService(restClient);
     }
 
 

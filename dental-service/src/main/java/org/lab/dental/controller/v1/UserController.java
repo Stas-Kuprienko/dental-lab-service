@@ -37,7 +37,7 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestAttribute("X-SERVICE-ID") String serviceId,
+    public ResponseEntity<User> create(@RequestHeader("X-SERVICE-ID") String serviceId,
                                        @RequestBody @Valid NewUser newUser) {
         log.info("From service '{}' received request to create user with email='{}'", serviceId, newUser.getLogin());
         User user = userService.create(newUser.getLogin(), newUser.getName(), newUser.getPassword());
@@ -47,14 +47,14 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<User> getUser(@RequestAttribute("X-USER-ID") UUID userId) {
+    public ResponseEntity<User> getUser(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get user data", userId);
         User user = userService.getById(userId);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/name")
-    public ResponseEntity<Void> updateName(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateName(@RequestHeader("X-USER-ID") UUID userId,
                                            @RequestBody String name) {
         log.info("From user '{}' received request to update name", userId);
         userService.updateName(userId, name);
@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @PutMapping("/email")
-    public ResponseEntity<Void> updateEmail(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateEmail(@RequestHeader("X-USER-ID") UUID userId,
                                             @RequestBody String email) {
         log.info("From user '{}' received request to update email", userId);
         userService.updateLogin(userId, email);
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> updatePassword(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updatePassword(@RequestHeader("X-USER-ID") UUID userId,
                                                @RequestBody UpdatePasswordRequest request) {
         log.info("From user '{}' received request to update password", userId);
         userService.updatePassword(
@@ -82,21 +82,21 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logoutById(@RequestAttribute("X-USER-ID") UUID userId) {
+    public ResponseEntity<Void> logoutById(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to log out", userId);
         userService.logoutById(userId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@RequestAttribute("X-USER-ID") UUID userId) {
+    public ResponseEntity<Void> delete(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("Received request to delete user '{}'", userId);
         userService.delete(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/notification/subscribe")
-    public ResponseEntity<Void> subscribeForNotifications(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> subscribeForNotifications(@RequestHeader("X-USER-ID") UUID userId,
                                                           @RequestParam(name = "type", defaultValue = "EMAIL") String type) {
         log.info("Received request to subscribe for notifications, user '{}'", userId);
         MailingType mailingType = MailingType.valueOf(type);
@@ -105,7 +105,7 @@ public class UserController {
     }
 
     @PutMapping("/notification/unsubscribe")
-    public ResponseEntity<Void> unsubscribeForNotifications(@RequestAttribute("X-USER-ID") UUID userId) {
+    public ResponseEntity<Void> unsubscribeForNotifications(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("Received request to unsubscribe for notifications, user '{}'", userId);
         notificationService.unsubscribe(userId);
         return ResponseEntity.ok().build();
