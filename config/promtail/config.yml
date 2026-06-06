@@ -15,7 +15,7 @@ scrape_configs:
           - localhost
         labels:
           application: dental-lab-service
-          __path__: /logs/dental-lab-service.log
+          __path__: /logs/dental-lab-service/application.log
 
   - job_name: telegram-bot
     static_configs:
@@ -23,4 +23,4 @@ scrape_configs:
           - localhost
         labels:
           application: telegram-bot
-          __path__: /logs/telegram-bot.log
+          __path__: /logs/telegram-bot/application.log

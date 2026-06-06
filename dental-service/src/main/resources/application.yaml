@@ -43,11 +43,11 @@ spring:
         max-idle: 8
         min-idle: 0
   mail:
-    host: ${project.variables.mail.smtp.host}
-    port: ${project.variables.mail.port}
-    username: ${project.variables.mail.service.user}
-    password: ${project.variables.mail.service.password}
-    protocol: ${project.variables.mail.protocol}
+    host: ${project.mail.smtp.host}
+    port: ${project.mail.port}
+    username: ${project.mail.service.user}
+    password: ${project.mail.service.password}
+    protocol: ${project.mail.protocol}
     properties:
       mail:
         smtp:
@@ -114,3 +114,45 @@ logging:
     org.hibernate.SQL: DEBUG
   file:
     name: logs/application.log
+
+
+project:
+  variables:
+    service-label: Dental-Lab-Service
+    service-url: http://localhost:8081/dental-lab
+    service-api-url: http://localhost:8082
+    telegram-bot:
+      url: http://localhost:8083
+    keycloak:
+      url: http://localhost:8080
+      username: admin
+      password: admin
+      realm: dental-lab
+      client-id: dental-lab-client
+      client-secret: 9S95xSQgkdxbt9VxNPdHoULyTyaLZIWG
+    datasource:
+      database: dental_lab
+      url: localhost:5432
+      username: postgres
+      password: postgres
+    redis:
+      host: localhost
+      port: 6379
+    minio:
+      url: http://localhost:9000
+      access-key: minioadmin
+      secret-key: minioadmin
+      bucket: dental-photos
+      duration-minutes: 30
+    tempo:
+      url: http://localhost:4318/v1/traces
+  mail:
+    protocol: smtp
+    service:
+      user: example@email.com
+      password: password
+    smtp:
+      host: smtp.host.com
+    port: 587
+  encryption:
+    secret-key: f51ccac616cedc5cb39176b7efc7adaafea38c8efb557739c1b131d26b74a3e6

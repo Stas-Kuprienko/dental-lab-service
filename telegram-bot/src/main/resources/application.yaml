@@ -56,3 +56,30 @@ logging:
     org.hibernate.SQL: DEBUG
   file:
     name:
+
+
+project:
+  variables:
+    dental-lab-api:
+      url: http://localhost:8082/api/v1
+    dental-lab-site:
+      url: http://localhost:8081/
+    redis:
+      host: localhost
+      port: 6379
+    telegram:
+      username: dental_lab_service_bot
+      bot-token: ????????
+    keycloak:
+      client-id: telegram-bot-client
+      client-secret: lRPMOwOylXUUhlUXcHYqye92jLLZh11R
+    tempo:
+      url: http://localhost:4318/v1/traces
+  telegram:
+    link-duration-minutes: 10
+    otp-length: 7
+    proxy:
+      enable: false
+      host: "127.0.0.1"
+      port: 10808
+      type: HTTP
