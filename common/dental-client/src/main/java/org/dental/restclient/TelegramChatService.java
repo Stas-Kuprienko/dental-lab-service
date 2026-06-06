@@ -76,19 +76,25 @@ public class TelegramChatService {
                 .body(String.class);
     }
 
-    public UUID bindTelegram(String key, String otp) {
+    public UUID bindTelegram(String key, String otp, String language) {
         return restClient
                 .post()
-                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
+                .uri(uriBuilder -> uriBuilder
+                        .path(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
+                        .queryParam("lang", language)
+                        .build())
                 .body(otp)
                 .retrieve()
                 .body(UUID.class);
     }
 
-    public UUID bindTelegram(String key, OtpRequest otp, Consumer<HttpHeaders> headersConsumer) {
+    public UUID bindTelegram(String key, OtpRequest otp, String language, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
-                .uri(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
+                .uri(uriBuilder -> uriBuilder
+                        .path(RESOURCE + "/link" + DentalLabRestClient.uriById(key))
+                        .queryParam("lang", language)
+                        .build())
                 .headers(headersConsumer)
                 .body(otp)
                 .retrieve()

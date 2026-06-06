@@ -19,6 +19,9 @@ public class EventMessage implements Serializable {
     @JsonProperty("chat_id")
     private Long chatId;
 
+    @JsonProperty("language")
+    private String language;
+
     @JsonProperty("text")
     private String text;
 

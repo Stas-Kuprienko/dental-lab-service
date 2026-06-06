@@ -22,19 +22,29 @@ import org.lab.exception.ApplicationCustomException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
+@EnableAsync
+@EnableScheduling
 @Configuration
 public class DentalLabConfiguration {
+
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     private Keycloak keycloak;
     private MinioClient minioClient;
@@ -176,11 +186,16 @@ public class DentalLabConfiguration {
 
     // CONTEXT *********** \/
 
-    @Bean
-    public ExecutorService executorService() {
+    @Bean(name = "virtualThreadPerTaskExecutor")
+    public ExecutorService virtualThreadPerTaskExecutor() {
         this.executorService = Executors.newVirtualThreadPerTaskExecutor();
         log.info("VirtualThreadPerTaskExecutor has been initialized");
         return executorService;
+    }
+
+    @Bean(name = "taskExecutor")
+    public AsyncTaskExecutor taskExecutor() {
+        return new ConcurrentTaskExecutor(virtualThreadPerTaskExecutor());
     }
 
     @Bean

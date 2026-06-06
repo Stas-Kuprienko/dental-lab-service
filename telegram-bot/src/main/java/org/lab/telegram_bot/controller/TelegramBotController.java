@@ -8,8 +8,10 @@ import org.lab.telegram_bot.domain.command.handlers.*;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -31,9 +33,10 @@ public class TelegramBotController extends TelegramLongPollingBot {
     public TelegramBotController(CommandDispatcher commandDispatcher,
                                  TelegramBotExceptionHandler exceptionHandler,
                                  NotificationService notificationService,
+                                 @Qualifier("myBotOptions") DefaultBotOptions botOptions,
                                  @Value("${project.variables.telegram.username}") String username,
                                  @Value("${project.variables.telegram.bot-token}") String botToken) {
-        super(botToken);
+        super(botOptions, botToken);
         this.username = username;
         this.commandDispatcher = commandDispatcher;
         this.exceptionHandler = exceptionHandler;

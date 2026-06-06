@@ -108,6 +108,17 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
                                                            @Param("patient") String patient);
 
 
+    @Query("""
+            SELECT DISTINCT dw
+            FROM DentalWorkEntity dw
+            LEFT JOIN FETCH dw.products p
+            WHERE p.completeAt = :completeAt
+            AND dw.userId = :userId
+            """)
+    List<DentalWorkEntity> findByProductCompletionAndUserId(@Param("userId") UUID userId,
+                                                            @Param("completeAt") LocalDate completeAt);
+
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE dental_lab.dental_work SET status = :status WHERE id = :id AND user_id = :userId", nativeQuery = true)

@@ -22,7 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +111,7 @@ public class LoginCommandHandler extends BotCommandHandler {
         if (userLink == null || userLink.isExpired()) {
             text = messageSource.getMessage(LINK_EXPIRED, null, locale);
         } else {
-            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText));
+            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText), locale.getLanguage());
             chatSessionService.create(chatId, userId);
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
             metrics.getLinkLoginSuccesses().increment();

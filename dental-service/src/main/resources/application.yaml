@@ -155,4 +155,8 @@ project:
       host: smtp.host.com
     port: 587
   encryption:
-    secret-key: f51ccac616cedc5cb39176b7efc7adaafea38c8efb557739c1b131d26b74a3e6
+    secret-key: 2f254abc113f76adf4461fd558074a40967f522bd8fd71a4366703a9ee224868
+  mailing:
+    schedule:
+      cron: "0 30 9 * * *" #pattern: S M H (24)
+      zone: "Asia/Omsk"

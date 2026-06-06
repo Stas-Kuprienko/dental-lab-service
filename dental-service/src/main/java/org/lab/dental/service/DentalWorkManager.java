@@ -1,17 +1,15 @@
 package org.lab.dental.service;
 
+import jakarta.transaction.Transactional;
 import org.lab.dental.entity.DentalWorkEntity;
-import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.repository.DentalWorkCacheRepository;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
-import org.lab.model.Product;
 import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -40,6 +38,7 @@ public class DentalWorkManager {
     }
 
 
+    @Transactional
     public DentalWork create(NewDentalWork newDentalWork, UUID userId) {
         DentalWorkEntity entity = converter.fromRequest(newDentalWork, userId);
         entity = dentalWorkService.create(entity);
@@ -104,6 +103,7 @@ public class DentalWorkManager {
                 .toList();
     }
 
+    @Transactional
     public DentalWork update(DentalWork updatable, long id) {
         updatable.setId(id);
         DentalWorkEntity entity = converter.toEntity(updatable);
@@ -115,6 +115,7 @@ public class DentalWorkManager {
         return dw;
     }
 
+    @Transactional
     public void updateStatus(long id, UUID userId, WorkStatus status) {
         dentalWorkService.updateStatus(id, userId, status);
         Optional<DentalWork> dentalWork = cacheRepository.getByIdAndUserId(id, userId);
@@ -124,6 +125,7 @@ public class DentalWorkManager {
         });
     }
 
+    @Transactional
     public void updateStatusForIdList(List<Long> id, UUID userId, WorkStatus status) {
         dentalWorkService.updateStatusForIdList(id, userId, status);
         List<DentalWork> dentalWorks = dentalWorkService.getAllActualByUserId(userId)
@@ -133,6 +135,7 @@ public class DentalWorkManager {
         cacheRepository.save(dentalWorks, userId);
     }
 
+    @Transactional
     public DentalWork addProduct(long id, UUID userId, NewProduct newProduct) {
         UUID productTypeId = newProduct.getProductTypeId();
         int quantity = newProduct.getQuantity();
@@ -144,6 +147,7 @@ public class DentalWorkManager {
         return dentalWork;
     }
 
+    @Transactional
     public DentalWork addProduct(DentalWork dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt) {
         DentalWorkEntity entity = converter.toEntity(dentalWork);
         entity = dentalWorkService.addProduct(entity, productTypeId, quantity, completeAt);
@@ -153,6 +157,7 @@ public class DentalWorkManager {
         return dentalWork;
     }
 
+    @Transactional
     public DentalWork updateProductCompletion(long id, UUID userId, UUID productId, LocalDate completeAt) {
         DentalWorkEntity entity = dentalWorkService.updateProductCompletion(id, userId, productId, completeAt);
         DentalWork dentalWork = converter.toDto(entity);
@@ -161,6 +166,7 @@ public class DentalWorkManager {
         return dentalWork;
     }
 
+    @Transactional
     public DentalWork deleteProduct(long id, UUID userId, UUID productId) {
         DentalWorkEntity entity = dentalWorkService.deleteProduct(id, userId, productId);
         DentalWork dentalWork = converter.toDto(entity);
@@ -169,6 +175,7 @@ public class DentalWorkManager {
         return dentalWork;
     }
 
+    @Transactional
     public void delete(long id, UUID userId) {
         List<String> filenames = workPhotoFileService.getAllFilenamesByWorkId(id);
         filenames.forEach(workPhotoFileService::deleteFile);
@@ -176,6 +183,7 @@ public class DentalWorkManager {
         dentalWorkService.delete(id, userId);
     }
 
+    @Transactional
     public void sortForCompletion(UUID userId, boolean isPreviousMonth) {
         dentalWorkService.sortForCompletion(userId, isPreviousMonth);
         List<DentalWork> dentalWorks = dentalWorkService.getAllActualByUserId(userId)
@@ -183,21 +191,6 @@ public class DentalWorkManager {
                 .map(converter::toDto)
                 .toList();
         cacheRepository.save(dentalWorks, userId);
-    }
-
-    public void oldRecordTransfer(List<DentalWork> dentalWorks, UUID userId) {
-        for (DentalWork dw : dentalWorks) {
-            List<Product> products = dw.getProducts();
-            dw.setProducts(null);
-            DentalWorkEntity entity = converter.toEntity(dw);
-            entity = dentalWorkService.create(entity);
-            long workId = entity.getId();
-            for (Product p : products) {
-                p.setDentalWorkId(workId);
-                ProductEntity productEntity = converter.toEntity(p);
-                dentalWorkService.addProduct(workId, userId, productEntity);
-            }
-        }
     }
 
 

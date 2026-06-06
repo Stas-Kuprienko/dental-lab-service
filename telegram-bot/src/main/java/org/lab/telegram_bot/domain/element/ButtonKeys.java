@@ -10,6 +10,8 @@ public enum ButtonKeys {
     CANCEL,
     UPDATE,
     DELETE,
+    ENABLE,
+    DISABLE,
     ADD_PHOTO,
     OPEN_PHOTO,
     SELECT_ITEM,

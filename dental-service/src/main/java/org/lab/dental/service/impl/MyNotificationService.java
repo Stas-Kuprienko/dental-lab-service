@@ -1,6 +1,7 @@
 package org.lab.dental.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lab.dental.configuration.DentalLabConfiguration;
 import org.lab.dental.service.EmailNotificationService;
 import org.lab.dental.service.EventMessageService;
 import org.lab.dental.service.NotificationService;
@@ -10,9 +11,10 @@ import org.lab.event.EventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -53,36 +55,35 @@ public class MyNotificationService implements NotificationService {
     @Override
     public void sendResetPasswordLink(String email, String data) {
         log.info("The reset password token message is accepted to send to the email '{}'", email);
-        CompletableFuture.runAsync(() -> {
-            String link = serviceUrl + RESET_PASSWORD_VERIFICATION_PATH.formatted(email, data);
-            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKeys.RESET_PASSWORD_LINK, link);
-            emailNotificationService.sendHtmlEmail(message, email);
-        }).thenAccept(v ->
-                log.info("The reset password token message was sent to the email '{}' successfully", email)
-        ).exceptionally(throwable -> {
-            log.error("Failure to send the reset password token message to the email '%s'".formatted(email),throwable.getMessage());
-            return null;
-        });
+        String link = serviceUrl + RESET_PASSWORD_VERIFICATION_PATH.formatted(email, data);
+        String message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKeys.RESET_PASSWORD_LINK, link);
+        emailNotificationService.sendHtmlEmail(message, email);
+    }
+
+    @Override
+    public void sendEmailWithWorksForTomorrow(UUID userId, String email, String data) {
+        log.info("The message with works for tomorrow is accepted to send to the email '{}' for userID='{}'", email, userId);
+        String message;
+        String localDateTomorrow = LocalDate.now().plusDays(1).format(DentalLabConfiguration.DATE_FORMATTER);
+        if (data == null || data.isEmpty()) {
+            message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKeys.WORKS_FOR_TOMORROW_NULL, localDateTomorrow);
+        } else {
+            message = letterTemplateUtility.construct(DEFAULT_LOCALE, LetterTemplateKeys.WORKS_FOR_TOMORROW, localDateTomorrow, data);
+        }
+        emailNotificationService.sendHtmlEmail(message, email);
     }
 
     @Override
     public void sendTelegramMessage(EventMessage message) {
-        log.info("The message '{}' is accepted to send to Kafka-service", message.getId());
+        log.info("The message '{}' is accepted to send to EventMessageService ({})", message.getId(), eventMessageService.getClass().getName());
         eventMessageService.send(message);
     }
 
 
     private void sendEmailLink(UUID userId, String email, String data, LetterTemplateKeys key) {
         log.info("The token message is accepted to send to the email for user '{}'", userId);
-        CompletableFuture.runAsync(() -> {
-            String link = serviceUrl + EMAIL_VERIFICATION_PATH + data;
-            String message = letterTemplateUtility.construct(DEFAULT_LOCALE, key, link);
-            emailNotificationService.sendHtmlEmail(message, email);
-        }).thenAccept(v ->
-                log.info("The token message was sent to the email for user email '{}' successfully", email)
-        ).exceptionally(throwable -> {
-            log.error("Failure to send the token message to the email for user email '%s'".formatted(email),throwable.getMessage());
-            return null;
-        });
+        String link = serviceUrl + EMAIL_VERIFICATION_PATH + data;
+        String message = letterTemplateUtility.construct(DEFAULT_LOCALE, key, link);
+        emailNotificationService.sendHtmlEmail(message, email);
     }
 }

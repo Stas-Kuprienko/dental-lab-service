@@ -34,6 +34,7 @@ public class UserConverter {
         return TelegramChat.builder()
                 .chatId(entity.getChatId())
                 .userId(entity.getUserId())
+                .language(entity.getLanguage())
                 .status(entity.getStatus())
                 .createdAt(entity.getCreatedAt())
                 .build();

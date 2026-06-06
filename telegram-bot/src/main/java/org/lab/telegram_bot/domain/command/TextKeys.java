@@ -28,6 +28,7 @@ public enum TextKeys {
     PHOTO_IS_ADDED,
     PHOTO_IS_FAILED,
     OPEN_PHOTO_FOR_WORK,
+    NOTIFICATION_STATUS,
     EMPTY;
 
 

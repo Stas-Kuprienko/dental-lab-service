@@ -6,7 +6,6 @@ import org.lab.telegram_bot.domain.element.CommandMenuList;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
-import org.lab.telegram_bot.utils.metrics.TGBotMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -20,17 +19,14 @@ import java.util.function.Consumer;
 public class StartCommandHandler extends BotCommandHandler {
 
     private final CommandMenuList commandMenuList;
-    private final TGBotMetrics metrics;
     private Consumer<SetMyCommands> executor;
 
 
     @Autowired
     public StartCommandHandler(MessageSource messageSource,
-                               TGBotMetrics metrics,
                                CommandMenuList commandMenuList) {
         super(messageSource);
         this.commandMenuList = commandMenuList;
-        this.metrics = metrics;
     }
 
 
@@ -44,7 +40,6 @@ public class StartCommandHandler extends BotCommandHandler {
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
         SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
         executor.accept(commands);
-        metrics.getBotStartCommands().increment();
         return createSendMessage(session.getChatId(), text);
     }
 
@@ -57,7 +52,6 @@ public class StartCommandHandler extends BotCommandHandler {
         String text = messageSource.getMessage(BotCommands.START.name(), new Object[]{userName}, locale);
         SetMyCommands commands = commandMenuList.getMenuForLocale(locale);
         executor.accept(commands);
-        metrics.getBotStartCommands().increment();
         return createSendMessage(session.getChatId(), text);
     }
 

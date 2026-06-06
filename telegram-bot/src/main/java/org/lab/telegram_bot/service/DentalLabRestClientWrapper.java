@@ -22,6 +22,7 @@ public class DentalLabRestClientWrapper {
     public final ProductServiceWrapper PRODUCTS;
     public final ReportServiceWrapper REPORTS;
     public final WorkPhotoLinkServiceWrapper PHOTO_LINKS;
+    public final UserServiceWrapper USERS;
 
 
     @Autowired
@@ -34,6 +35,7 @@ public class DentalLabRestClientWrapper {
         PRODUCTS = new ProductServiceWrapper(dentalLabRestClient.PRODUCTS, this::httpHeadersConsumer);
         REPORTS = new ReportServiceWrapper(dentalLabRestClient.REPORTS, this::httpHeadersConsumer);
         PHOTO_LINKS = new WorkPhotoLinkServiceWrapper(dentalLabRestClient.PHOTO_LINKS, this::httpHeadersConsumer);
+        USERS = new UserServiceWrapper(dentalLabRestClient.USERS, this::httpHeadersConsumer);
     }
 
 

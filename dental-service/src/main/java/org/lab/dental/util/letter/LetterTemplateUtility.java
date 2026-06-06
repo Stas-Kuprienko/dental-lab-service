@@ -7,6 +7,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,10 +35,22 @@ public class LetterTemplateUtility {
 
     public String construct(Locale locale, LetterTemplateKeys key, String... payload) {
         String template = templates.get(key.name());
-        template = template.formatted((Object[]) payload);
+        if (payload.length > 0) {
+            Object[] fixedPayload = new Object[payload.length];
+            for (int i = 0; i < payload.length; i++) {
+                fixedPayload[i] = safeAndCorrectFixText(payload[i]);
+            }
+            template = template.formatted(fixedPayload);
+        } else {
+            template = template.formatted((Object[]) payload);
+        }
         return template;
     }
 
+    public String safeAndCorrectFixText(String text) {
+        text = HtmlUtils.htmlEscape(text);
+        return text.replace("\n", "<br>");
+    }
 
 
     // *** INITIALIZATION METHODS ***

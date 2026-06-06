@@ -120,6 +120,14 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public List<DentalWorkEntity> getForTomorrowByUserId(UUID userId) {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        List<DentalWorkEntity> works = dentalWorkRepository.findByProductCompletionAndUserId(userId, tomorrow);
+        log.info("Found {} DentalWorks for 'tomorrow' ({}) by userId='{}'", works.size(), tomorrow, userId);
+        return works;
+    }
+
+    @Override
     public DentalWorkEntity update(DentalWorkEntity updatable) {
         if (updatable.getId() == null) {
             throw PersistenceCustomException.updateEntityWithoutId(updatable);

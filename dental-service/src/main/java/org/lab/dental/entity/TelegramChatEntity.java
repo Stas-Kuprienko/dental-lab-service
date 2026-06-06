@@ -24,6 +24,9 @@ public class TelegramChatEntity {
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "language")
+    private String language;
+
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
     private UserStatus status;

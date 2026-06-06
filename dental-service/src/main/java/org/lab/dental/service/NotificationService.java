@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public interface NotificationService {
 
+    void sendEmailWithWorksForTomorrow(UUID userId, String email, String data);
+
     void sendEmailVerifyLink(UUID userId, String email, String data);
 
     void sendEmailChangeLink(UUID userId, String email, String data);

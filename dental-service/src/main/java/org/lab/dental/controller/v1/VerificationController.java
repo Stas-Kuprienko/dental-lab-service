@@ -3,9 +3,9 @@ package org.lab.dental.controller.v1;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.entity.EmailVerificationTokenEntity;
-import org.lab.dental.entity.TelegramChatEntity;
 import org.lab.dental.service.UserService;
 import org.lab.dental.service.VerificationService;
+import org.lab.model.TelegramChat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +44,7 @@ public class VerificationController {
     public ResponseEntity<Void> sendTelegramOtp(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @RequestBody String email) {
         log.info("From user '{}' received request to send Telegram OTP: {}", userId, email);
-        TelegramChatEntity telegramChat = userService.getTelegramChat(userId);
+        TelegramChat telegramChat = userService.getTelegramChat(userId);
         verificationService.createTelegramOtpForUserId(userId, email, telegramChat.getChatId());
         return ResponseEntity.noContent().build();
     }
