@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.ReportService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.ProfitRecord;
 import org.lab.telegram_bot.domain.command.BotCommands;
@@ -10,8 +11,6 @@ import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.ReportServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -33,7 +32,7 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.COUNT_PROFIT)
 public class CountProfitCommandHandler extends BotCommandHandler {
 
-    private final ReportServiceWrapper reportService;
+    private final ReportService reportService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private Consumer<BotApiMethod<?>> executor;
@@ -41,11 +40,11 @@ public class CountProfitCommandHandler extends BotCommandHandler {
 
     @Autowired
     public CountProfitCommandHandler(MessageSource messageSource,
-                                     DentalLabRestClientWrapper dentalLabRestClient,
+                                     ReportService reportService,
                                      ChatSessionService chatSessionService,
                                      KeyboardBuilderKit keyboardBuilderKit) {
         super(messageSource);
-        this.reportService = dentalLabRestClient.REPORTS;
+        this.reportService = reportService;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
     }

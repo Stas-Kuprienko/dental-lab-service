@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.model.DentalWork;
 import org.lab.model.Product;
 import org.lab.telegram_bot.domain.command.BotCommands;
@@ -9,8 +10,6 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -27,18 +26,18 @@ import java.util.Locale;
 @CommandHandler(command = BotCommands.WORK_FOR_TOMORROW)
 public class WorkForTomorrowCommandHandler extends BotCommandHandler {
 
-    private final DentalWorkServiceWrapper dentalWorkService;
+    private final DentalWorkService dentalWorkService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
 
 
     @Autowired
     public WorkForTomorrowCommandHandler(MessageSource messageSource,
-                                         DentalLabRestClientWrapper dentalLabRestClient,
+                                         DentalWorkService dentalWorkService,
                                          ChatSessionService chatSessionService,
                                          KeyboardBuilderKit keyboardBuilderKit) {
         super(messageSource);
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
+        this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
     }
@@ -57,7 +56,7 @@ public class WorkForTomorrowCommandHandler extends BotCommandHandler {
 
 
     private SendMessage getWorkList(ChatSession session, Locale locale) {
-        List<DentalWork> dentalWorks = dentalWorkService.findAll(session.getUserId());
+        List<DentalWork> dentalWorks = dentalWorkService.findAllActualByUserId(session.getUserId());
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         dentalWorks = dentalWorks.stream()
                 .filter(dw -> dw.getCompleteAt().equals(tomorrow))

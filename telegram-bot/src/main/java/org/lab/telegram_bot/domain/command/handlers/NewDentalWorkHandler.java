@@ -2,6 +2,7 @@ package org.lab.telegram_bot.domain.command.handlers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.model.ProductMap;
@@ -16,8 +17,6 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.service.ProductMapMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.NEW_DENTAL_WORK)
 public class NewDentalWorkHandler extends BotCommandHandler {
 
-    private final DentalWorkServiceWrapper dentalWorkService;
+    private final DentalWorkService dentalWorkService;
     private final ProductMapMvcService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
@@ -45,16 +44,16 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
 
     @Autowired
-    public NewDentalWorkHandler(DentalLabRestClientWrapper dentalLabRestClient,
-                                ProductMapMvcService productMapService,
+    public NewDentalWorkHandler(ProductMapMvcService productMapService,
                                 KeyboardBuilderKit keyboardBuilderKit,
                                 MessageSource messageSource,
+                                DentalWorkService dentalWorkService,
                                 ChatSessionService chatSessionService,
                                 ObjectMapper objectMapper) {
         super(messageSource);
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
         this.productMapService = productMapService;
         this.keyboardBuilderKit = keyboardBuilderKit;
+        this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
         this.objectMapper = objectMapper;
     }

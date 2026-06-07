@@ -1,5 +1,7 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductService;
 import org.lab.enums.WorkStatus;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
@@ -16,10 +18,7 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.service.ProductMapMvcService;
-import org.lab.telegram_bot.service.ProductServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -41,8 +40,8 @@ import java.util.function.Consumer;
 public class ViewDentalWorkHandler extends BotCommandHandler {
 
     private final ProductMapMvcService productMapService;
-    private final DentalWorkServiceWrapper dentalWorkService;
-    private final ProductServiceWrapper productService;
+    private final DentalWorkService dentalWorkService;
+    private final ProductService productService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private Consumer<BotApiMethod<?>> executor;
@@ -51,13 +50,14 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
     @Autowired
     public ViewDentalWorkHandler(MessageSource messageSource,
                                  ProductMapMvcService productMapService,
-                                 DentalLabRestClientWrapper dentalLabRestClient,
+                                 DentalWorkService dentalWorkService,
+                                 ProductService productService,
                                  KeyboardBuilderKit keyboardBuilderKit,
                                  ChatSessionService chatSessionService) {
         super(messageSource);
         this.productMapService = productMapService;
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
-        this.productService = dentalLabRestClient.PRODUCTS;
+        this.dentalWorkService = dentalWorkService;
+        this.productService = productService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -318,7 +318,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
         DentalWork dentalWork = dentalWorkService.findById(workId, session.getUserId());
         String messageData = ChatBotUtility.callBackQueryParse(messageText)[2];
         dentalWork.setStatus(WorkStatus.valueOf(messageData.toUpperCase()));
-        dentalWork = dentalWorkService.update(dentalWork, session.getUserId());
+        dentalWork = dentalWorkService.update(workId, dentalWork, session.getUserId());
         int messageToDelete = Integer.parseInt(session.getAttribute(DentalWorksHandler.Attributes.MESSAGE_ID_TO_DELETE.name()));
         return viewDentalWork(
                 keyboardBuilderKit,
@@ -347,7 +347,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
             case COMMENT -> dentalWork.setComment(messageText.strip());
             default -> throw new ApplicationCustomException("Argument 'field' is not expected: " + field);
         }
-        dentalWork = dentalWorkService.update(dentalWork, session.getUserId());
+        dentalWork = dentalWorkService.update(workId, dentalWork, session.getUserId());
         int messageToDelete = Integer.parseInt(session.getAttribute(DentalWorksHandler.Attributes.MESSAGE_ID_TO_DELETE.name()));
         return viewDentalWork(
                 keyboardBuilderKit,

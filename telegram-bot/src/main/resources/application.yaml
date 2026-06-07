@@ -9,7 +9,12 @@ spring:
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
-
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
 telegram:
   api:
     path: "https://api.telegram.org/file/bot"
@@ -71,6 +76,8 @@ project:
       username: dental_lab_service_bot
       bot-token: ????????
     keycloak:
+      url: http://localhost:8080
+      realm: dental-lab
       client-id: telegram-bot-client
       client-secret: lRPMOwOylXUUhlUXcHYqye92jLLZh11R
     tempo:

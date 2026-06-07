@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.model.DentalWork;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
@@ -8,8 +9,6 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -19,25 +18,24 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.util.List;
 import java.util.Locale;
 
 @CommandHandler(command = BotCommands.SEARCH_BY)
 public class SearchByCommandHandler extends BotCommandHandler {
 
-    private final DentalWorkServiceWrapper dentalWorkService;
+    private final DentalWorkService dentalWorkService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
 
 
     @Autowired
     public SearchByCommandHandler(MessageSource messageSource,
-                                  DentalLabRestClientWrapper dentalLabRestClient,
+                                  DentalWorkService dentalWorkService,
                                   ChatSessionService chatSessionService,
                                   KeyboardBuilderKit keyboardBuilderKit) {
         super(messageSource);
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
+        this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
     }
@@ -79,9 +77,9 @@ public class SearchByCommandHandler extends BotCommandHandler {
         String[] values = messageText.split("\n");
         List<DentalWork> dentalWorks;
         if (values.length == 2) {
-            dentalWorks = dentalWorkService.searchDentalWorks(values[1], values[0], session.getUserId());
+            dentalWorks = dentalWorkService.findByClinicAndPatient(values[1], values[0], session.getUserId());
         } else {
-            dentalWorks = dentalWorkService.searchDentalWorks(null, values[0], session.getUserId());
+            dentalWorks = dentalWorkService.findByClinicAndPatient(null, values[0], session.getUserId());
         }
         return dentalWorks.size() == 1 ?
                 returnSingleWorkAsMessage(session, locale, dentalWorks.getFirst()) :

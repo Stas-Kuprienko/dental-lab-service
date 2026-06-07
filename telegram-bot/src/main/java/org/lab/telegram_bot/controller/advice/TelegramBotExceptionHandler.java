@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.controller.advice;
 
+import feign.FeignException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.lab.telegram_bot.exception.IncorrectInputException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -86,6 +88,27 @@ public class TelegramBotExceptionHandler {
         return buildMessage(chatId, locale, INCORRECT_INPUT, e.getMessage());
     }
 
+    public SendMessage feignClientExceptionHandle(FeignException e, Update update) {
+        int status = e.status();
+        Long chatId = ChatBotUtility.getChatId(update);
+        Locale locale = ChatBotUtility.getLocale(update);
+        return switch (status) {
+            case 400 -> {
+                log.warn(e.getMessage());
+                yield buildMessage(chatId, locale, ILLEGAL_ARGUMENT);
+            }
+            case 404 -> {
+                log.info(e.getMessage());
+                yield buildMessage(chatId, locale, NOT_FOUND);
+            }
+            case 401, 403 -> {
+                log.warn(e.getMessage());
+                yield buildMessage(chatId, locale, UNREGISTERED);
+            }
+            default -> defaultHandle(e, update);
+        };
+    }
+
     public SendMessage defaultHandle(Throwable e, Update update) {
         log.error(e.getMessage(), e);
         Long chatId = ChatBotUtility.getChatId(update);
@@ -130,6 +153,7 @@ public class TelegramBotExceptionHandler {
         map.put(HttpClientErrorException.NotFound.class.getSimpleName(), ((exception, update) -> this.notFoundHandle((HttpClientErrorException.NotFound) exception, update)));
         map.put(IllegalArgumentException.class.getSimpleName(), ((exception, update) -> this.illegalArgumentHandle((IllegalArgumentException) exception, update)));
         map.put(IncorrectInputException.class.getSimpleName(), ((exception, update) -> this.incorrectInputHandle((IncorrectInputException) exception, update)));
+        map.put(FeignException.FeignClientException.class.getSimpleName(), ((exception, update) -> this.feignClientExceptionHandle((FeignException) exception, update)));
         map.put(null, (this::defaultHandle));
         return map;
     }

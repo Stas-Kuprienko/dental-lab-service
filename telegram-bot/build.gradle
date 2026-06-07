@@ -12,7 +12,7 @@ dependencies {
     implementation "org.telegram:telegrambots-spring-boot-starter:${telegram_version}"
 
 	implementation project(':common:models')
-	implementation project(':common:dental-client')
+	implementation project(':common:dental-feign')
 
 	// cloud
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'

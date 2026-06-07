@@ -14,15 +14,30 @@ public interface ProductMapService {
     @PostMapping
     ProductType create(@RequestBody NewProductType newProductType);
 
+    @PostMapping
+    ProductType create(@RequestBody NewProductType newProductType, @RequestHeader("X-USER-ID") UUID userId);
+
     @GetMapping("/{id}")
     ProductType findById(@PathVariable("id") UUID id);
+
+    @GetMapping("/{id}")
+    ProductType findById(@PathVariable("id") UUID id, @RequestHeader("X-USER-ID") UUID userId);
 
     @GetMapping
     ProductMap findAll();
 
+    @GetMapping
+    ProductMap findAll(@RequestHeader("X-USER-ID") UUID userId);
+
     @PutMapping("/{id}")
     void update(@PathVariable("id") UUID id, @RequestBody float newPrice);
 
+    @PutMapping("/{id}")
+    void update(@PathVariable("id") UUID id, @RequestBody float newPrice, @RequestHeader("X-USER-ID") UUID userId);
+
     @DeleteMapping("/{id}")
     void delete(@PathVariable("id") UUID id);
+
+    @DeleteMapping("/{id}")
+    void delete(@PathVariable("id") UUID id, @RequestHeader("X-USER-ID") UUID userId);
 }

@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.telegram_bot.datasource.DentalWorkRepository;
@@ -11,8 +12,6 @@ import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,7 +33,7 @@ public class DentalWorksHandler extends BotCommandHandler {
 
     private static final int PAGE_ITEMS = 10;
 
-    private final DentalWorkServiceWrapper dentalWorkService;
+    private final DentalWorkService dentalWorkService;
     private final DentalWorkRepository dentalWorkRepository;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
@@ -42,15 +41,14 @@ public class DentalWorksHandler extends BotCommandHandler {
 
 
     @Autowired
-    public DentalWorksHandler(DentalLabRestClientWrapper dentalLabRestClient,
-                              DentalWorkRepository dentalWorkRepository,
+    public DentalWorksHandler(DentalWorkRepository dentalWorkRepository,
                               KeyboardBuilderKit keyboardBuilderKit,
-                              MessageSource messageSource,
+                              MessageSource messageSource, DentalWorkService dentalWorkService,
                               ChatSessionService chatSessionService) {
         super(messageSource);
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
         this.dentalWorkRepository = dentalWorkRepository;
         this.keyboardBuilderKit = keyboardBuilderKit;
+        this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
     }
 
@@ -98,7 +96,7 @@ public class DentalWorksHandler extends BotCommandHandler {
 
 
     private SendMessage getList(ChatSession session, Locale locale, int messageId) {
-        List<DentalWork> dentalWorks = dentalWorkService.findAll(session.getUserId());
+        List<DentalWork> dentalWorks = dentalWorkService.findAllActualByUserId(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, 1);
         String text = workListToMessage(listPage.dentalWorks, locale);
         List<List<InlineKeyboardButton>> buttonLists = new ArrayList<>();
@@ -130,7 +128,7 @@ public class DentalWorksHandler extends BotCommandHandler {
             return deleteMessage(session.getChatId(), messageId);
         }
         int page = Integer.parseInt(callbackData[2]);
-        List<DentalWork> dentalWorks = dentalWorkService.findAll(session.getUserId());
+        List<DentalWork> dentalWorks = dentalWorkService.findAllActualByUserId(session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, page);
         String text = workListToMessage(listPage.dentalWorks, locale);
         List<InlineKeyboardButton> buttons = new ArrayList<>();

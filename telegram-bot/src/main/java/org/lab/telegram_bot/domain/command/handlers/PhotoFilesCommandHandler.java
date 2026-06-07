@@ -1,6 +1,8 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.WorkPhotoLinkService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.model.WorkPhotoFileData;
@@ -12,9 +14,6 @@ import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
-import org.lab.telegram_bot.service.WorkPhotoLinkServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +26,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,8 +42,8 @@ import java.util.function.Function;
 @CommandHandler(command = BotCommands.PHOTO_FILES)
 public class PhotoFilesCommandHandler extends BotCommandHandler {
 
-    private final WorkPhotoLinkServiceWrapper workPhotoLinkService;
-    private final DentalWorkServiceWrapper dentalWorkService;
+    private final WorkPhotoLinkService workPhotoLinkService;
+    private final DentalWorkService dentalWorkService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final String telegramApiPath;
@@ -54,14 +54,15 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
 
     @Autowired
     public PhotoFilesCommandHandler(MessageSource messageSource,
-                                    DentalLabRestClientWrapper dentalLabRestClientWrapper,
+                                    WorkPhotoLinkService workPhotoLinkService,
+                                    DentalWorkService dentalWorkService,
                                     ChatSessionService chatSessionService,
                                     KeyboardBuilderKit keyboardBuilderKit,
                                     @Value("${telegram.api.path}") String telegramApiPath,
                                     @Value("${project.variables.telegram.bot-token}") String botToken) {
         super(messageSource);
-        this.dentalWorkService = dentalLabRestClientWrapper.DENTAL_WORKS;
-        this.workPhotoLinkService = dentalLabRestClientWrapper.PHOTO_LINKS;
+        this.workPhotoLinkService = workPhotoLinkService;
+        this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.telegramApiPath = telegramApiPath;

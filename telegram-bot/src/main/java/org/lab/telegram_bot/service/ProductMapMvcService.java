@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.service;
 
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.exception.NotFoundCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
@@ -13,12 +14,12 @@ import java.util.UUID;
 @Service
 public class ProductMapMvcService {
 
-    private final ProductMapServiceWrapper productMapService;
+    private final ProductMapService productMapService;
     private final ProductMapRepository productMapRepository;
 
     @Autowired
-    public ProductMapMvcService(DentalLabRestClientWrapper dentalLabRestClient, ProductMapRepository productMapRepository) {
-        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
+    public ProductMapMvcService(ProductMapService productMapService, ProductMapRepository productMapRepository) {
+        this.productMapService = productMapService;
         this.productMapRepository = productMapRepository;
     }
 
@@ -48,7 +49,7 @@ public class ProductMapMvcService {
     }
 
     public ProductMap updatePrice(UUID productTypeId, float newPrice, UUID userId) {
-        productMapService.updatePrice(productTypeId, newPrice, userId);
+        productMapService.update(productTypeId, newPrice, userId);
         ProductMap map = productMapRepository.get(userId).orElse(productMapService.findAll(userId));
         ProductType productType = map.get(productTypeId).orElseThrow(() -> new NotFoundCustomException("ProductType '%s' is not found for user '%s'".formatted(productTypeId, userId)));
         productType.setPrice(newPrice);

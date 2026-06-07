@@ -1,12 +1,14 @@
 package org.lab.telegram_bot.configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import org.dental.restclient.DentalLabRestClient;
 import org.lab.exception.ApplicationCustomException;
 import org.lab.model.ProductMap;
+import org.lab.telegram_bot.configuration.auth.RequestAuthorization;
 import org.lab.telegram_bot.controller.TelegramBotController;
 import org.lab.telegram_bot.datasource.redis.DentalWorkList;
 import org.lab.telegram_bot.domain.session.ChatSession;
@@ -20,7 +22,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.web.client.RestClient;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 
@@ -63,9 +64,8 @@ public class TelegramBotConfig {
     }
 
     @Bean
-    public DentalLabRestClient dentalLabRestClient(@Value("${project.variables.dental-lab-api.url}") String url,
-                                                   RestClient.Builder restClientBuilder) {
-        return new DentalLabRestClient(url, restClientBuilder);
+    public RequestInterceptor myRequestInterceptor(RequestAuthorization requestAuthorization) {
+        return requestAuthorization::intercept;
     }
 
     // MAPPING ************* \/
@@ -75,6 +75,7 @@ public class TelegramBotConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         return mapper;
     }
     // /\ ****************** /\

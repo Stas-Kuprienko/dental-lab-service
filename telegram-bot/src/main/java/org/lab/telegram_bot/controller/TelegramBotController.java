@@ -61,9 +61,8 @@ public class TelegramBotController extends TelegramLongPollingBot {
                 log.info(update.getCallbackQuery().toString());
                 this.execute(commandDispatcher.apply(update.getCallbackQuery()));
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            this.execute(exceptionHandler.apply(e, update));
+        } catch (Throwable thr) {
+            this.execute(exceptionHandler.apply(thr, update));
         }
     }
 

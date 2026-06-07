@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.UserService;
 import org.lab.enums.MailingType;
 import org.lab.model.User;
 import org.lab.telegram_bot.domain.command.BotCommands;
@@ -9,8 +10,6 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.UserServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -26,18 +25,17 @@ import java.util.Locale;
 @CommandHandler(command = BotCommands.NOTIFICATIONS)
 public class NotificationHandler extends BotCommandHandler {
 
-    private final UserServiceWrapper userService;
+    private final UserService userService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
 
 
     @Autowired
-    public NotificationHandler(MessageSource messageSource,
-                               DentalLabRestClientWrapper dentalLabRestClient,
+    public NotificationHandler(MessageSource messageSource, UserService userService,
                                KeyboardBuilderKit keyboardBuilderKit,
                                ChatSessionService chatSessionService) {
         super(messageSource);
-        this.userService = dentalLabRestClient.USERS;
+        this.userService = userService;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -68,7 +66,7 @@ public class NotificationHandler extends BotCommandHandler {
 
 
     private SendMessage status(ChatSession session, Locale locale) {
-        User user = userService.get(session.getUserId());
+        User user = userService.getById(session.getUserId());
         MailingType mailingType = user.getMailingType();
         String notificationStatus = mailingType != null ? mailingType.name()
                 : messageSource.getMessage(ButtonKeys.NO.name(), null, locale);

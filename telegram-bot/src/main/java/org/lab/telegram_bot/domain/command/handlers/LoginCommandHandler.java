@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.TelegramChatService;
 import org.lab.request.NewTelegramOtpLink;
 import org.lab.request.OtpRequest;
 import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
@@ -8,8 +9,6 @@ import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
-import org.lab.telegram_bot.service.TelegramChatServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.lab.telegram_bot.utils.LinkingKeyGenerator;
 import org.lab.telegram_bot.utils.metrics.TGBotMetrics;
@@ -22,6 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class LoginCommandHandler extends BotCommandHandler {
     private static final int KEY_DURATION_IN_MINUTES = 10;
 
     private final LinkingKeyGenerator keyGenerator;
-    private final TelegramChatServiceWrapper telegramChatService;
+    private final TelegramChatService telegramChatService;
     private final ChatSessionService chatSessionService;
     private final TGBotMetrics metrics;
     private final String bindingPage;
@@ -49,14 +49,14 @@ public class LoginCommandHandler extends BotCommandHandler {
 
     @Autowired
     public LoginCommandHandler(LinkingKeyGenerator keyGenerator,
-                               DentalLabRestClientWrapper dentalLabRestClient,
                                MessageSource messageSource,
+                               TelegramChatService telegramChatService,
                                ChatSessionService chatSessionService,
                                TGBotMetrics metrics,
                                @Value("${project.variables.dental-lab-site.url}") String serviceSiteUrl) {
         super(messageSource);
         this.keyGenerator = keyGenerator;
-        this.telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
+        this.telegramChatService = telegramChatService;
         this.chatSessionService = chatSessionService;
         this.metrics = metrics;
         this.bindingPage = serviceSiteUrl + "/telegram-bind/link/";
@@ -111,7 +111,7 @@ public class LoginCommandHandler extends BotCommandHandler {
         if (userLink == null || userLink.isExpired()) {
             text = messageSource.getMessage(LINK_EXPIRED, null, locale);
         } else {
-            UUID userId = telegramChatService.bindTelegram(userLink.key, new OtpRequest(messageText), locale.getLanguage());
+            UUID userId = telegramChatService.bindTelegram(userLink.key, locale.getLanguage(), new OtpRequest(messageText));
             chatSessionService.create(chatId, userId);
             text = messageSource.getMessage(LOGIN_SUCCESS, new Object[]{userName}, locale);
             metrics.getLinkLoginSuccesses().increment();
