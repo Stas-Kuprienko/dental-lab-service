@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/auth")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/auth", name = "authentication-service")
 public interface AuthenticationService {
 
 

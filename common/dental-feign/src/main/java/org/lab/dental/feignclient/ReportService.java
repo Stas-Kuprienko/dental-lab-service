@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/reports")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/reports", name = "report-service")
 public interface ReportService {
 
 

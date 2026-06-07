@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/product_map")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/product_map", name = "product-map-service")
 public interface ProductMapService {
 
 
@@ -21,8 +21,8 @@ public interface ProductMapService {
     ProductMap findAll();
 
     @PutMapping("/{id}")
-    void updateProductType(@PathVariable("id") UUID id, @RequestBody float newPrice);
+    void update(@PathVariable("id") UUID id, @RequestBody float newPrice);
 
     @DeleteMapping("/{id}")
-    void deleteProductType(@PathVariable("id") UUID id);
+    void delete(@PathVariable("id") UUID id);
 }

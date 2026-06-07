@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/dental_works")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/dental_works", name = "product-service")
 public interface ProductService {
 
 

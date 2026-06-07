@@ -1,7 +1,6 @@
 package org.lab.uimvc.service;
 
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.ProductMapService;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.exception.NotFoundCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
@@ -19,8 +18,8 @@ public class ProductMapMvcService {
     private final ProductMapRepository productMapRepository;
 
     @Autowired
-    public ProductMapMvcService(DentalLabRestClient dentalLabRestClient, ProductMapRepository productMapRepository) {
-        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
+    public ProductMapMvcService(ProductMapService productMapService, ProductMapRepository productMapRepository) {
+        this.productMapService = productMapService;
         this.productMapRepository = productMapRepository;
     }
 
@@ -45,7 +44,7 @@ public class ProductMapMvcService {
     }
 
     public ProductMap update(UUID userId, UUID productTypeId, float newPrice) {
-        productMapService.updateProductType(productTypeId, newPrice);
+        productMapService.update(productTypeId, newPrice);
         ProductMap map = productMapRepository.get(userId).orElseThrow(() -> new NotFoundCustomException("ProductMap is not found for user " + userId));
         ProductType productType = map.get(productTypeId).orElseThrow(() -> new NotFoundCustomException("ProductType '%s' is not found for user '%s'".formatted(productTypeId, userId)));
         productType.setPrice(newPrice);

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/dental_works")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/dental_works", name = "work-photo-service")
 public interface WorkPhotoLinkService {
 
 

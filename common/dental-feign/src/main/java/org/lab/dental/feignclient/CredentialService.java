@@ -4,7 +4,7 @@ import org.lab.request.ResetPasswordRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/credentials")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/credentials", name = "credential-service")
 public interface CredentialService {
 
 

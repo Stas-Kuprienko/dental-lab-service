@@ -1,8 +1,7 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.ReportService;
+import org.lab.dental.feignclient.ReportService;
 import org.lab.model.ProfitRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,8 +21,8 @@ public class ReportController {
     private final ReportService reportService;
 
     @Autowired
-    public ReportController(DentalLabRestClient dentalLabRestClient) {
-        this.reportService = dentalLabRestClient.REPORTS;
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
     }
 
 

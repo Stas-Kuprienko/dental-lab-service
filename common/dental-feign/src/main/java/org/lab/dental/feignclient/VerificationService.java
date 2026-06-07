@@ -3,7 +3,7 @@ package org.lab.dental.feignclient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/verification")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/verification", name = "verification-service")
 public interface VerificationService {
 
 

@@ -1,9 +1,8 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.DentalWorkService;
-import org.dental.restclient.ProductService;
+import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductService;
 import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
@@ -29,10 +28,12 @@ public class DentalWorkItemController {
 
 
     @Autowired
-    public DentalWorkItemController(ProductMapMvcService productMapService, DentalLabRestClient dentalLabRestClient) {
+    public DentalWorkItemController(ProductMapMvcService productMapService,
+                                    DentalWorkService dentalWorkService,
+                                    ProductService productService) {
         this.productMapService = productMapService;
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
-        this.productService = dentalLabRestClient.PRODUCTS;
+        this.dentalWorkService = dentalWorkService;
+        this.productService = productService;
     }
 
 
@@ -98,8 +99,7 @@ public class DentalWorkItemController {
                                    HttpSession session, Model model) {
 
         MvcControllerUtil.addProductMapToModel(productMapService, session, model);
-        dentalWork.setId(id);
-        DentalWork updated = dentalWorkService.update(dentalWork);
+        DentalWork updated = dentalWorkService.update(id, dentalWork);
         model.addAttribute(ATTRIBUTE_WORK, updated);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(id);
     }

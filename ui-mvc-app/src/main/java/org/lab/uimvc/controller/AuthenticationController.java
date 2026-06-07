@@ -1,8 +1,7 @@
 package org.lab.uimvc.controller;
 
-import org.dental.restclient.CredentialService;
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.UserService;
+import org.lab.dental.feignclient.CredentialService;
+import org.lab.dental.feignclient.UserService;
 import org.lab.model.ErrorResponse;
 import org.lab.model.User;
 import org.lab.request.NewUser;
@@ -32,9 +31,9 @@ public class AuthenticationController extends MvcControllerUtil {
 
 
     @Autowired
-    public AuthenticationController(DentalLabRestClient dentalLabRestClient, MessageSource messageSource) {
-        this.userService = dentalLabRestClient.USERS;
-        this.credentialService = dentalLabRestClient.CREDENTIALS;
+    public AuthenticationController(UserService userService, CredentialService credentialService, MessageSource messageSource) {
+        this.userService = userService;
+        this.credentialService = credentialService;
         this.messageSource = messageSource;
     }
 

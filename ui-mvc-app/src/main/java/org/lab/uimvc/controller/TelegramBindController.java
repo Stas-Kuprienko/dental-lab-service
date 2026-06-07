@@ -1,7 +1,6 @@
 package org.lab.uimvc.controller;
 
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.TelegramChatService;
+import org.lab.dental.feignclient.TelegramChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,14 +15,14 @@ public class TelegramBindController {
     private final TelegramChatService telegramChatService;
 
     @Autowired
-    public TelegramBindController(DentalLabRestClient dentalLabRestClient) {
-        telegramChatService = dentalLabRestClient.TELEGRAM_CHATS;
+    public TelegramBindController(TelegramChatService telegramChatService) {
+        this.telegramChatService = telegramChatService;
     }
 
 
     @GetMapping("/link/{key}")
     public String telegramBindPage(@PathVariable("key") String key, Model model) {
-        telegramChatService.setUserId(key);
+        telegramChatService.setUserIdToLink(key);
         String otp = telegramChatService.getOtpByKey(key);
         model.addAttribute("otp", otp);
         return "telegram-otp";

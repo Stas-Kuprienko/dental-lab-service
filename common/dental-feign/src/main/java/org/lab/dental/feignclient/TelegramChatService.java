@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/telegram_chat")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/telegram_chat", name = "telegram-chat-service")
 public interface TelegramChatService {
 
 

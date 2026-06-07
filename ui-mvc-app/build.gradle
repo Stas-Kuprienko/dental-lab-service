@@ -12,7 +12,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	implementation project(':common:models')
-	implementation project(':common:dental-client')
+	implementation project(':common:dental-feign')
 
 	// cloud
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
@@ -24,21 +24,10 @@ dependencies {
 	//datasource
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.apache.commons:commons-pool2'
-
-	// observability
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-	// tests
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
     imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }

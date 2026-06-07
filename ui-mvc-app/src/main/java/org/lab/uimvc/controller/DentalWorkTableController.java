@@ -1,8 +1,7 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.DentalWorkService;
+import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
 import org.lab.uimvc.service.ProductMapMvcService;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 
 @Controller
@@ -28,9 +26,9 @@ public class DentalWorkTableController {
 
 
     @Autowired
-    public DentalWorkTableController(ProductMapMvcService productMapService, DentalLabRestClient dentalLabRestClient) {
+    public DentalWorkTableController(ProductMapMvcService productMapService, DentalWorkService dentalWorkService) {
         this.productMapService = productMapService;
-        this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
+        this.dentalWorkService = dentalWorkService;
     }
 
 
@@ -41,7 +39,7 @@ public class DentalWorkTableController {
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
         List<DentalWork> works;
         if (headerMonth.isCurrentMonth()) {
-            works = dentalWorkService.findAll();
+            works = dentalWorkService.findAllActualByUserId();
         } else {
             works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
         }
@@ -54,7 +52,7 @@ public class DentalWorkTableController {
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
         MvcControllerUtil.addProductMapToModel(productMapService, session, model);
-        List<DentalWork> works = dentalWorkService.searchDentalWorks(clinic, patient);
+        List<DentalWork> works = dentalWorkService.findByClinicAndPatient(clinic, patient);
         HeaderMonth headerMonth = new HeaderMonth(null);
         model.addAttribute("headerMonth", headerMonth);
         model.addAttribute("works", works);
@@ -66,7 +64,7 @@ public class DentalWorkTableController {
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
         List<DentalWork> works;
         if (headerMonth.isCurrentMonth()) {
-            works = dentalWorkService.findAll();
+            works = dentalWorkService.findAllActualByUserId();
         } else {
             works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
         }

@@ -1,12 +1,12 @@
 package org.lab.uimvc.configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.dental.restclient.DentalLabRestClient;
+import feign.RequestInterceptor;
 import org.lab.model.ProductMap;
-import org.lab.uimvc.configuration.auth.ClientAuthenticationManager;
-import org.lab.uimvc.configuration.auth.MyRequestInterceptor;
+import org.lab.uimvc.configuration.auth.RequestAuthorization;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +17,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -28,18 +28,9 @@ public class UiMvcConfig {
 
 
     @Bean
-    public DentalLabRestClient dentalLabRestClient(RestClient.Builder restClientBuilder,
-                                                   MyRequestInterceptor interceptor,
-                                                   @Value("${project.variables.dental-lab-api.url}") String url,
-                                                   @Value("${project.variables.keycloak.service-client-id}") String clientId,
-                                                   @Value("${project.variables.keycloak.service-client-secret}") String clientSecret) {
-        DentalLabRestClient dentalLabRestClient = new DentalLabRestClient(url, restClientBuilder, interceptor);
-        ClientAuthenticationManager authenticationManager = new ClientAuthenticationManager(dentalLabRestClient.AUTHENTICATION, clientId, clientSecret);
-        authenticationManager.authenticate();
-        interceptor.setAuthentication(authenticationManager);
-        return dentalLabRestClient;
+    public RequestInterceptor myRequestInterceptor(RequestAuthorization requestAuthorization) {
+        return requestAuthorization::intercept;
     }
-
 
     @Bean
     public LocaleResolver localeResolver() {
@@ -58,6 +49,7 @@ public class UiMvcConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         return mapper;
     }
     // ******************* /\

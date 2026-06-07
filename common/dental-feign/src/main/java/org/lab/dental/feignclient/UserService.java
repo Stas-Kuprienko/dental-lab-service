@@ -7,12 +7,12 @@ import org.lab.request.UpdatePasswordRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/users")
+@FeignClient(url = "${project.variables.dental-lab-api.url}", path = "/users", name = "user-service")
 public interface UserService {
 
 
     @PostMapping
-    User create(@RequestBody NewUser newUser);
+    User signUp(@RequestBody NewUser newUser);
 
     @GetMapping
     User getById();

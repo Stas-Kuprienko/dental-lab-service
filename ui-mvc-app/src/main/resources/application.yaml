@@ -51,19 +51,3 @@ feign:
       default:
         connectTimeout: 5000
         readTimeout: 5000
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,prometheus,metrics,info
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: production
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true

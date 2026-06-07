@@ -1,9 +1,8 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
-import org.dental.restclient.DentalLabRestClient;
-import org.dental.restclient.UserService;
-import org.dental.restclient.VerificationService;
+import org.lab.dental.feignclient.UserService;
+import org.lab.dental.feignclient.VerificationService;
 import org.lab.enums.MailingType;
 import org.lab.exception.ForbiddenCustomException;
 import org.lab.model.ErrorResponse;
@@ -43,11 +42,12 @@ public class UserProfileController extends MvcControllerUtil {
 
 
     @Autowired
-    public UserProfileController(DentalLabRestClient dentalLabRestClient,
+    public UserProfileController(UserService userService,
+                                 VerificationService verificationService,
                                  CredentialsUtility credentialsUtility,
                                  MessageSource messageSource) {
-        userService = dentalLabRestClient.USERS;
-        verificationService = dentalLabRestClient.VERIFICATION;
+        this.userService = userService;
+        this.verificationService = verificationService;
         this.credentialsUtility = credentialsUtility;
         this.messageSource = messageSource;
     }
@@ -55,7 +55,7 @@ public class UserProfileController extends MvcControllerUtil {
 
     @GetMapping
     public String getProfile(Model model) {
-        User user = userService.get();
+        User user = userService.getById();
         model.addAttribute("user", user);
         return USER_PROFILE_PAGE;
     }
@@ -182,10 +182,10 @@ public class UserProfileController extends MvcControllerUtil {
                     .oldPassword(oldPassword)
                     .newPassword(newPassword)
                     .build();
-            boolean result = userService.updatePassword(request);
-            if (result) {
+            try {
+                userService.updatePassword(request);
                 messageKey = PASSWORD_IS_UPDATED;
-            } else {
+            } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
                 messageKey = WRONG_PASSWORD;
             }
         }

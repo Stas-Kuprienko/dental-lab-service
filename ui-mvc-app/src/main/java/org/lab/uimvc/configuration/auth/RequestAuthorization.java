@@ -1,12 +1,8 @@
 package org.lab.uimvc.configuration.auth;
 
-import org.lab.exception.ApplicationCustomException;
+import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,22 +10,23 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
 
 @Component
-public class MyRequestInterceptor implements ClientHttpRequestInterceptor {
+public class RequestAuthorization {
 
     private final OAuth2AuthorizedClientManager authorizedClientManager;
-    private ClientAuthenticationManager authenticationManager;
+    private final ServiceAuthenticationManager authenticationManager;
 
     @Autowired
-    public MyRequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager) {
+    public RequestAuthorization(OAuth2AuthorizedClientManager authorizedClientManager,
+                                ServiceAuthenticationManager authenticationManager) {
         this.authorizedClientManager = authorizedClientManager;
+        this.authenticationManager = authenticationManager;
+        authenticationManager.authenticate();
     }
 
 
-    @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    public void intercept(RequestTemplate request) {
         if (isSecured(request)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("keycloak")
@@ -38,30 +35,24 @@ public class MyRequestInterceptor implements ClientHttpRequestInterceptor {
             OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
             if (authorizedClient != null) {
                 String token = authorizedClient.getAccessToken().getTokenValue();
-                request.getHeaders().setBearerAuth(token);
+                request.header("Authorization", "Bearer " + token);
             } else {
                 throw new AccessDeniedException(
-                        "Unauthorized user trying to make request for secured endpoint: " + request.getURI().getPath());
+                        "Unauthorized user trying to make request for secured endpoint: " + request.path());
             }
         } else {
-            if (authenticationManager == null) {
-                throw new ApplicationCustomException("AuthenticationManager is not set for Request Interceptor!");
-            }
-            request.getHeaders().setBearerAuth(authenticationManager.accessToken());
+            request.header("Authorization", "Bearer " + authenticationManager.accessToken());
         }
-        return execution.execute(request, body);
-    }
-
-    public void setAuthentication(ClientAuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
     }
 
 
-    private boolean isSecured(HttpRequest request) {
-        String path = request.getURI().getPath();
-        HttpMethod method = request.getMethod();
+    private boolean isSecured(RequestTemplate request) {
+        String path = request.path();
+        HttpMethod method = HttpMethod.valueOf(request.method());
         return !(
                 (path.equals("/api/v1/users") && method.equals(HttpMethod.POST))
+                ||
+                (path.startsWith("/api/v1/auth"))
                 ||
                 (path.startsWith("/api/v1/credentials/")));
     }
