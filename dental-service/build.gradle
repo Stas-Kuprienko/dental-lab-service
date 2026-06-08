@@ -45,6 +45,9 @@ dependencies {
     // validation
 	implementation "org.springframework.boot:spring-boot-starter-validation"
 
+	// events
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 	// observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'

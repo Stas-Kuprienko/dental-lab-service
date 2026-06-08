@@ -62,6 +62,14 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
+  rabbitmq:
+    host: ${project.variables.rabbitmq.host}
+    port: ${project.variables.rabbitmq.port}
+    username: ${project.variables.rabbitmq.username}
+    password: ${project.variables.rabbitmq.password}
+    topic: dental-lab-events
+    queue: mailing-events
+    routing-key: works-for-tomorrow
 
 eureka:
   client:
@@ -156,6 +164,11 @@ project:
       duration-minutes: 30
     tempo:
       url: http://localhost:4318/v1/traces
+    rabbitmq:
+      host: localhost
+      port: 5672
+      username: guest
+      password: guest
   mail:
     protocol: smtp
     service:

@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
-@Service
 public class TelegramBotRestService implements EventMessageService {
 
     private static final String url = "/api/v1/notifications";

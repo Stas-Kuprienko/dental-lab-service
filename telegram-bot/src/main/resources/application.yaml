@@ -9,6 +9,14 @@ spring:
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
+  rabbitmq:
+    host: ${project.variables.rabbitmq.host}
+    port: ${project.variables.rabbitmq.port}
+    username: ${project.variables.rabbitmq.username}
+    password: ${project.variables.rabbitmq.password}
+    topic: dental-lab-events
+    queue: mailing-events
+    routing-key: works-for-tomorrow
 feign:
   client:
     config:
@@ -82,6 +90,11 @@ project:
       client-secret: lRPMOwOylXUUhlUXcHYqye92jLLZh11R
     tempo:
       url: http://localhost:4318/v1/traces
+    rabbitmq:
+      host: localhost
+      port: 5672
+      username: guest
+      password: guest
   telegram:
     link-duration-minutes: 10
     otp-length: 7

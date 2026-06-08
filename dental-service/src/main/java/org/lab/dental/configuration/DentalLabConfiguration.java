@@ -1,6 +1,9 @@
 package org.lab.dental.configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -19,6 +22,11 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.lab.dental.repository.redis.DentalWorkList;
 import org.lab.exception.ApplicationCustomException;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -181,6 +189,46 @@ public class DentalLabConfiguration {
                 .components(new Components().addSecuritySchemes(oauth2SchemeVar, oauth2Scheme));
         log.info("OpenAPI for '{}' version={} by URL='{}' is created with '{}' security", title, version, url, oauth2SchemeVar);
         return openAPI;
+    }
+    // /\ **************** /\
+
+    // MAPPING ************* \/
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        return mapper;
+    }
+    // /\ ****************** /\
+
+    // EVENT-DRIVEN ****** \/
+
+    @Bean
+    public TopicExchange topicExchange(@Value("${spring.rabbitmq.topic}") String topicName) {
+        return new TopicExchange(topicName);
+    }
+
+    @Bean
+    public Queue queue(@Value("${spring.rabbitmq.queue}") String queueName) {
+        return new Queue(queueName);
+    }
+
+    @Bean
+    public Binding bindingBuilder(Queue queue,
+                                  TopicExchange exchange,
+                                  @Value("${spring.rabbitmq.routing-key}") String routingKey) {
+        return BindingBuilder
+                .bind(queue)
+                .to(exchange)
+                .with(routingKey);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter(objectMapper());
     }
     // /\ **************** /\
 

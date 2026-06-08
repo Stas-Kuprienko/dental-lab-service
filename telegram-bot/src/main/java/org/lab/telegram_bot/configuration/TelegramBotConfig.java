@@ -12,6 +12,11 @@ import org.lab.telegram_bot.configuration.auth.RequestAuthorization;
 import org.lab.telegram_bot.controller.TelegramBotController;
 import org.lab.telegram_bot.datasource.redis.DentalWorkList;
 import org.lab.telegram_bot.domain.session.ChatSession;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +29,6 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -158,6 +162,34 @@ public class TelegramBotConfig {
         }
     }
     // ******************** /\
+
+    // EVENT-DRIVEN ****** \/
+
+    @Bean
+    public TopicExchange topicExchange(@Value("${spring.rabbitmq.topic}") String topicName) {
+        return new TopicExchange(topicName);
+    }
+
+    @Bean
+    public Queue queue(@Value("${spring.rabbitmq.queue}") String queueName) {
+        return new Queue(queueName);
+    }
+
+    @Bean
+    public Binding bindingBuilder(Queue queue,
+                                  TopicExchange exchange,
+                                  @Value("${spring.rabbitmq.routing-key}") String routingKey) {
+        return BindingBuilder
+                .bind(queue)
+                .to(exchange)
+                .with(routingKey);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter(objectMapper());
+    }
+    // /\ **************** /\
 
     // MESSAGES *********** \/
 
