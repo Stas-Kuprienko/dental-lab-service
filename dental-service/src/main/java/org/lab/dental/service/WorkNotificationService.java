@@ -7,6 +7,7 @@ import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.repository.MailingSubscriptionRepository;
 import org.lab.enums.MailingType;
 import org.lab.event.EventMessage;
+import org.lab.event.EventType;
 import org.lab.model.TelegramChat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -72,6 +73,7 @@ public class WorkNotificationService {
             switch (ms.getType()) {
                 case TELEGRAM -> telegramNotify(ms.getUserId(), concatenateWorks(dwList));
                 case EMAIL -> emailNotify(ms.getUserId(), concatenateWorks(dwList));
+                default -> log.error("Unexpected mailing type: {}", ms.getType());
             }
         }
     }
@@ -103,7 +105,9 @@ public class WorkNotificationService {
         TelegramChat telegramChat = userService.getTelegramChat(userId);
         EventMessage eventMessage = EventMessage.builder()
                 .id(UUID.randomUUID())
+                .userId(userId)
                 .chatId(telegramChat.getChatId())
+                .type(EventType.MAILING)
                 .language(telegramChat.getLanguage())
                 .text(message)
                 .createdAt(LocalDateTime.now())
@@ -112,7 +116,7 @@ public class WorkNotificationService {
     }
 
     private void emailNotify(UUID userId, String message) {
-        String email = userService.getById(userId).getLogin();
-        notificationService.sendEmailWithWorksForTomorrow(userId, email, message);
+        String email = userService.getEmail(userId);
+        notificationService.sendMailingEventToEmail(userId, email, message);
     }
 }

@@ -18,7 +18,7 @@ public class RabbitMqEventMessageService implements EventMessageService {
 
     @Autowired
     public RabbitMqEventMessageService(RabbitTemplate rabbitTemplate,
-                                       @Value("${spring.rabbitmq.topic}") String topicName,
+                                       @Value("${spring.rabbitmq.exchange}") String topicName,
                                        @Value("${spring.rabbitmq.routing-key}") String routingKey) {
         this.rabbitTemplate = rabbitTemplate;
         this.topicName = topicName;

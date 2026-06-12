@@ -22,11 +22,6 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.lab.dental.repository.redis.DentalWorkList;
 import org.lab.exception.ApplicationCustomException;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +36,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -203,34 +199,6 @@ public class DentalLabConfiguration {
         return mapper;
     }
     // /\ ****************** /\
-
-    // EVENT-DRIVEN ****** \/
-
-    @Bean
-    public TopicExchange topicExchange(@Value("${spring.rabbitmq.topic}") String topicName) {
-        return new TopicExchange(topicName);
-    }
-
-    @Bean
-    public Queue queue(@Value("${spring.rabbitmq.queue}") String queueName) {
-        return new Queue(queueName);
-    }
-
-    @Bean
-    public Binding bindingBuilder(Queue queue,
-                                  TopicExchange exchange,
-                                  @Value("${spring.rabbitmq.routing-key}") String routingKey) {
-        return BindingBuilder
-                .bind(queue)
-                .to(exchange)
-                .with(routingKey);
-    }
-
-    @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter(objectMapper());
-    }
-    // /\ **************** /\
 
     // CONTEXT *********** \/
 

@@ -5,7 +5,7 @@ import org.lab.telegram_bot.controller.advice.TelegramBotExceptionHandler;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandDispatcher;
 import org.lab.telegram_bot.domain.command.handlers.*;
-import org.lab.telegram_bot.exception.ApplicationCustomException;
+import org.lab.telegram_bot.exception.TelegramApiExceptionWrapper;
 import org.lab.telegram_bot.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 
@@ -42,6 +43,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
         this.exceptionHandler = exceptionHandler;
         setExecutorsToHandlers(commandDispatcher);
         notificationService.setExecutor(this::execute);
+        log.info("Telegram-bot username: " + username);
     }
 
 
@@ -72,7 +74,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             return super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            throw new ApplicationCustomException(e);
+            throw new TelegramApiExceptionWrapper(e);
         }
     }
 
@@ -82,7 +84,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             return super.executeAsync(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            throw new ApplicationCustomException(e);
+            throw new TelegramApiExceptionWrapper(e);
         }
     }
 
@@ -91,7 +93,7 @@ public class TelegramBotController extends TelegramLongPollingBot {
             super.execute(method);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
-            throw new ApplicationCustomException(e);
+            throw new TelegramApiExceptionWrapper(e);
         }
     }
 

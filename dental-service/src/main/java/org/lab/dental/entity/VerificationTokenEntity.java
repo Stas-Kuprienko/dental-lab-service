@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @Table(name = "email_verification_token", schema = "dental_lab")
-public class EmailVerificationTokenEntity {
+public class VerificationTokenEntity {
 
     @Id
     @Column(name = "user_id")
@@ -35,5 +35,5 @@ public class EmailVerificationTokenEntity {
     private boolean isVerified;
 
 
-    public EmailVerificationTokenEntity() {}
+    public VerificationTokenEntity() {}
 }

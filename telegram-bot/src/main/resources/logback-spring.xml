@@ -7,6 +7,7 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>/app/logs/application-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
         </rollingPolicy>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>

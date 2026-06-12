@@ -7,13 +7,11 @@ import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.exception.UnregisteredUserException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -29,9 +27,7 @@ public class TelegramBotExceptionHandler {
     private final Map<String, BiFunction<Throwable, Update, SendMessage>> functionMap;
 
     @Autowired
-    public TelegramBotExceptionHandler(MessageSource messageSource,
-                                       @Value("${project.variables.telegram.username}") String username) {
-        log.info("Telegram-bot username: " + username);
+    public TelegramBotExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
         functionMap = collectExceptionHandlers();
     }
@@ -50,10 +46,8 @@ public class TelegramBotExceptionHandler {
         Long chatId = e.getChatId();
         String username = ChatBotUtility.getUsername(update);
         Locale locale = ChatBotUtility.getLocale(update);
-
         String message = messageSource
-                .getMessage(UNREGISTERED.name(), new Object[]{username, "Dental Mechanic Service"}, locale);
-        //TODO url link button
+                .getMessage(UNREGISTERED.name(), new Object[]{username, "Dental Lab Service"}, locale);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(message);
@@ -61,14 +55,14 @@ public class TelegramBotExceptionHandler {
     }
 
     public SendMessage notFoundHandle(NotFoundException e, Update update) {
-        log.warn(e.getMessage());
+        log.info(e.getMessage());
         Long chatId = ChatBotUtility.getChatId(update);
         Locale locale = ChatBotUtility.getLocale(update);
         return buildMessage(chatId, locale, NOT_FOUND);
     }
 
     public SendMessage notFoundHandle(HttpClientErrorException.NotFound e, Update update) {
-        log.warn(e.getMessage());
+        log.info(e.getMessage());
         Long chatId = ChatBotUtility.getChatId(update);
         Locale locale = ChatBotUtility.getLocale(update);
         return buildMessage(chatId, locale, NOT_FOUND);

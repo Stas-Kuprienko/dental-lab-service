@@ -2,7 +2,7 @@ package org.lab.dental.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.EmailVerificationTokenEntity;
+import org.lab.dental.entity.VerificationTokenEntity;
 import org.lab.dental.service.UserService;
 import org.lab.dental.service.VerificationService;
 import org.lab.model.TelegramChat;
@@ -68,7 +68,7 @@ public class VerificationController {
     public ResponseEntity<Boolean> isVerified(@RequestHeader("X-USER-ID") UUID userId,
                                               @PathVariable("email") String email) {
         log.info("From user '{}' received request to check email verification {}", userId, email);
-        EmailVerificationTokenEntity verificationToken = verificationService.getByUserId(userId);
+        VerificationTokenEntity verificationToken = verificationService.getByUserId(userId);
         if (verificationToken.getEmail().equals(email)) {
             if (verificationToken.isVerified()) {
                 verificationService.deleteByUserId(userId);

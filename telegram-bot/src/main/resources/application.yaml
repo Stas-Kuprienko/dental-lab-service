@@ -10,13 +10,19 @@ spring:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
   rabbitmq:
+    listener:
+      simple:
+        default-requeue-rejected: false
     host: ${project.variables.rabbitmq.host}
     port: ${project.variables.rabbitmq.port}
     username: ${project.variables.rabbitmq.username}
     password: ${project.variables.rabbitmq.password}
-    topic: dental-lab-events
-    queue: mailing-events
-    routing-key: works-for-tomorrow
+    exchange: dental-lab.exchange
+    dlq-exchange: dlq.exchange
+    queue: events.queue
+    dlq: events.dlq
+    routing-key: events.routing-key
+    dlq-routing-key: dlq.routing-key
 feign:
   client:
     config:

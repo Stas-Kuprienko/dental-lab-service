@@ -11,6 +11,8 @@ public interface UserService {
 
     User getById(UUID id);
 
+    String getEmail(UUID id);
+
     void setStatus(UUID id, UserStatus status);
 
     void updateName(UUID id, String name);

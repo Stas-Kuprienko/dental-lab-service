@@ -11,7 +11,6 @@ import org.lab.event.EventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
@@ -61,7 +60,7 @@ public class MyNotificationService implements NotificationService {
     }
 
     @Override
-    public void sendEmailWithWorksForTomorrow(UUID userId, String email, String data) {
+    public void sendMailingEventToEmail(UUID userId, String email, String data) {
         log.info("The message with works for tomorrow is accepted to send to the email '{}' for userID='{}'", email, userId);
         String message;
         String localDateTomorrow = LocalDate.now().plusDays(1).format(DentalLabConfiguration.DATE_FORMATTER);

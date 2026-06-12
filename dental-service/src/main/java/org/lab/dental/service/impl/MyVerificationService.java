@@ -1,9 +1,9 @@
 package org.lab.dental.service.impl;
 
-import org.lab.dental.entity.EmailVerificationTokenEntity;
+import org.lab.dental.entity.VerificationTokenEntity;
 import org.lab.dental.entity.ResetPasswordTokenEntity;
 import org.lab.dental.exception.NotFoundCustomException;
-import org.lab.dental.repository.EmailVerificationTokenRepository;
+import org.lab.dental.repository.VerificationTokenRepository;
 import org.lab.dental.repository.ResetPasswordTokenRepository;
 import org.lab.dental.service.CredentialService;
 import org.lab.dental.service.NotificationService;
@@ -12,6 +12,7 @@ import org.lab.dental.service.VerificationService;
 import org.lab.dental.util.CodeGenerator;
 import org.lab.enums.UserStatus;
 import org.lab.event.EventMessage;
+import org.lab.event.EventType;
 import org.lab.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class MyVerificationService implements VerificationService {
 
     private final CodeGenerator codeGenerator;
     private final NotificationService notificationService;
-    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
     private final ResetPasswordTokenRepository resetPasswordTokenRepository;
     private final CredentialService credentialService;
     private final UserService userService;
@@ -39,13 +40,13 @@ public class MyVerificationService implements VerificationService {
     @Autowired
     public MyVerificationService(CodeGenerator codeGenerator,
                                  NotificationService notificationService,
-                                 EmailVerificationTokenRepository emailVerificationTokenRepository,
+                                 VerificationTokenRepository verificationTokenRepository,
                                  ResetPasswordTokenRepository resetPasswordTokenRepository,
                                  CredentialService credentialService,
                                  UserService userService) {
         this.codeGenerator = codeGenerator;
         this.notificationService = notificationService;
-        this.emailVerificationTokenRepository = emailVerificationTokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
         this.resetPasswordTokenRepository = resetPasswordTokenRepository;
         this.credentialService = credentialService;
         this.userService = userService;
@@ -56,14 +57,14 @@ public class MyVerificationService implements VerificationService {
     public void createForUserId(UUID userId, String email, boolean toChange) {
         String token = codeGenerator.generateStringCode(TOKEN_LENGTH);
         String tokenHash = codeGenerator.getEncoder().encode(token);
-        EmailVerificationTokenEntity emailVerificationToken = EmailVerificationTokenEntity.builder()
+        VerificationTokenEntity emailVerificationToken = VerificationTokenEntity.builder()
                 .userId(userId)
                 .email(email)
                 .token(tokenHash)
                 .createdAt(LocalDateTime.now())
                 .isVerified(false)
                 .build();
-        emailVerificationTokenRepository.save(emailVerificationToken);
+        verificationTokenRepository.save(emailVerificationToken);
         if (toChange) {
             notificationService.sendEmailChangeLink(userId, email, token);
         } else {
@@ -75,17 +76,19 @@ public class MyVerificationService implements VerificationService {
     public void createTelegramOtpForUserId(UUID userId, String email, long chatId) {
         String otp = codeGenerator.generateNumericCode(6);
         String tokenHash = codeGenerator.getEncoder().encode(otp);
-        EmailVerificationTokenEntity emailVerificationToken = EmailVerificationTokenEntity.builder()
+        VerificationTokenEntity emailVerificationToken = VerificationTokenEntity.builder()
                 .userId(userId)
                 .email(email)
                 .token(tokenHash)
                 .createdAt(LocalDateTime.now())
                 .isVerified(false)
                 .build();
-        emailVerificationTokenRepository.save(emailVerificationToken);
+        verificationTokenRepository.save(emailVerificationToken);
         EventMessage message = EventMessage.builder()
                 .id(UUID.randomUUID())
+                .userId(userId)
                 .chatId(chatId)
+                .type(EventType.OTP)
                 .text(otp)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -94,7 +97,7 @@ public class MyVerificationService implements VerificationService {
 
     @Override
     public boolean verifyUserEmail(UUID userId, String token) {
-        EmailVerificationTokenEntity verificationToken = getByUserId(userId);
+        VerificationTokenEntity verificationToken = getByUserId(userId);
         User user = userService.getById(userId);
         if (!user.getLogin().equals(verificationToken.getEmail())) {
             throw new IllegalArgumentException("the user's email does not match the email of the token");
@@ -104,14 +107,14 @@ public class MyVerificationService implements VerificationService {
         }
         boolean isEqualled = codeGenerator.getEncoder().matches(token, verificationToken.getToken());
         if (isEqualled) {
-            emailVerificationTokenRepository.setIsVerified(userId, true);
+            verificationTokenRepository.setIsVerified(userId, true);
             try {
                 credentialService.verifyEmail(verificationToken.getUserId(), verificationToken.getEmail());
                 userService.setStatus(userId, UserStatus.ENABLED);
-                emailVerificationTokenRepository.deleteById(userId);
+                verificationTokenRepository.deleteById(userId);
                 return true;
             } catch (Exception e) {
-                emailVerificationTokenRepository.setIsVerified(userId, false);
+                verificationTokenRepository.setIsVerified(userId, false);
                 throw e;
             }
         } else {
@@ -121,31 +124,31 @@ public class MyVerificationService implements VerificationService {
 
     @Override
     public boolean verifyForChangeEmail(UUID userId, String token) {
-        EmailVerificationTokenEntity verificationToken = getByUserId(userId);
+        VerificationTokenEntity verificationToken = getByUserId(userId);
         if (verificationToken.isVerified()) {
             throw new IllegalArgumentException("the passed token has already been used");
         } else if (LocalDateTime.now().isAfter(verificationToken.getCreatedAt().plus(EMAIL_TOKEN_EXPIRATION))) {
-            emailVerificationTokenRepository.deleteById(userId);
+            verificationTokenRepository.deleteById(userId);
             throw new IllegalArgumentException("the passed token has already been expired");
         } else {
             boolean isEqualled = codeGenerator.getEncoder().matches(token, verificationToken.getToken());
             if (isEqualled) {
-                emailVerificationTokenRepository.setIsVerified(userId, true);
+                verificationTokenRepository.setIsVerified(userId, true);
             }
             return isEqualled;
         }
     }
 
     @Override
-    public EmailVerificationTokenEntity getByUserId(UUID userId) {
-        return emailVerificationTokenRepository.findById(userId)
+    public VerificationTokenEntity getByUserId(UUID userId) {
+        return verificationTokenRepository.findById(userId)
                 .orElseThrow(() ->
-                        NotFoundCustomException.byId(EmailVerificationTokenEntity.class.getSimpleName(), userId));
+                        NotFoundCustomException.byId(VerificationTokenEntity.class.getSimpleName(), userId));
     }
 
     @Override
     public void deleteByUserId(UUID userId) {
-        emailVerificationTokenRepository.deleteById(userId);
+        verificationTokenRepository.deleteById(userId);
     }
 
     @Override

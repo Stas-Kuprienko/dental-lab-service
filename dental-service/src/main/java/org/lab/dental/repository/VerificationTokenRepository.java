@@ -1,7 +1,7 @@
 package org.lab.dental.repository;
 
 import jakarta.transaction.Transactional;
-import org.lab.dental.entity.EmailVerificationTokenEntity;
+import org.lab.dental.entity.VerificationTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationTokenEntity, UUID> {
+public interface VerificationTokenRepository extends JpaRepository<VerificationTokenEntity, UUID> {
 
 
     @Modifying

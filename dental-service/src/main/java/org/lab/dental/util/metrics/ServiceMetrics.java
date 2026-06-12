@@ -14,14 +14,16 @@ public class ServiceMetrics {
     private final Counter userFailedCreations;
     private final Counter userOkDeletions;
     private final Counter userFailedDeletions;
+    private final Counter otpEventFails;
+    private final Counter telegramMailingFails;
 
     @Autowired
     public ServiceMetrics(MeterRegistry registry) {
-        this.userOkCreations = Counter
+        userOkCreations = Counter
                 .builder("service.users.created")
                 .description("Total created users")
                 .register(registry);
-        this.userFailedCreations = Counter
+        userFailedCreations = Counter
                 .builder("service.users.failed-creation")
                 .description("Total fails of user creation")
                 .register(registry);
@@ -32,6 +34,14 @@ public class ServiceMetrics {
         userFailedDeletions = Counter
                 .builder("service.users.failed-deletion")
                 .description("Total fails of user deletion")
+                .register(registry);
+        otpEventFails = Counter
+                .builder("service.telegram.otp.fails")
+                .description("Fails of OTP sending to Telegram")
+                .register(registry);
+        telegramMailingFails = Counter
+                .builder("service.telegram.mailing.fails")
+                .description("Fails of mailing sending to Telegram")
                 .register(registry);
     }
 }

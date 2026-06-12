@@ -95,6 +95,14 @@ public class MyUserService implements UserService {
     }
 
     @Override
+    public String getEmail(UUID id) {
+        String email = userRepository.findLoginById(id)
+                .orElseThrow(() -> NotFoundCustomException.byId("User", id));
+        log.info("Found user email by ID '{}'", id);
+        return email;
+    }
+
+    @Override
     public void setStatus(UUID id, UserStatus status) {
         userRepository.updateStatus(id, status.name());
         log.info("For user '{}' updated status '{}'", id, status);

@@ -1,6 +1,6 @@
 package org.lab.dental.service;
 
-import org.lab.dental.entity.EmailVerificationTokenEntity;
+import org.lab.dental.entity.VerificationTokenEntity;
 import org.lab.dental.entity.ResetPasswordTokenEntity;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ public interface VerificationService {
 
     boolean verifyForChangeEmail(UUID userId, String token);
 
-    EmailVerificationTokenEntity getByUserId(UUID userId);
+    VerificationTokenEntity getByUserId(UUID userId);
 
     void deleteByUserId(UUID userId);
 
