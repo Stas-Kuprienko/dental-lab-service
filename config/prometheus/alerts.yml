@@ -3,7 +3,7 @@ groups:
 
     rules:
 
-      - alert: ApplicationDown
+      - alert: DentalLabServiceDown
         expr: up{job="dental-lab-service"} == 0
         for: 1m
 
@@ -13,6 +13,17 @@ groups:
         annotations:
           summary: "Dental-Lab-Service is down"
           description: "Dental-Lab-Service has not been reachable for 1 minute"
+
+      - alert: ApiGatewayDown
+        expr: up{job="api-gateway"} == 0
+        for: 1m
+
+        labels:
+          severity: critical
+
+        annotations:
+          summary: "API-Gateway is down"
+          description: "API-Gateway has not been reachable for 1 minute"
 
       - alert: HighErrorRate
         expr: |
