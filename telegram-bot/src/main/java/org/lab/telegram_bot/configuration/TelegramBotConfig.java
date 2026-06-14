@@ -27,6 +27,8 @@ import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Configuration
@@ -64,6 +66,11 @@ public class TelegramBotConfig {
     @Bean
     public RequestInterceptor myRequestInterceptor(RequestAuthorization requestAuthorization) {
         return requestAuthorization::intercept;
+    }
+
+    @Bean(name = "virtualThreadPerTaskExecutor")
+    public ExecutorService virtualThreadPerTaskExecutor() {
+        return Executors.newVirtualThreadPerTaskExecutor();
     }
 
     // MAPPING ************* \/
