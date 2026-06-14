@@ -12,20 +12,55 @@ spring:
     config:
       uri: http://host.docker.internal:8888
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: dental-lab-service
-          uri: lb://dental-lab-service
-          predicates:
-            - Path=/api/v1/**
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: dental-lab-service
+              uri: lb://dental-lab-service
+              predicates:
+                - Path=/api/v1/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: dentalLabService
+                    fallbackUri: forward:/fallback
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 10
+                    redis-rate-limiter.burstCapacity: 20
+                    key-resolver: "#{@userKeyResolver}"
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 10s
+  redis:
+    host: ${project.variables.redis.host}
+    port: ${project.variables.redis.port}
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      dentalLabService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 10s
+        cancelRunningFuture: true
+    instances:
+      dentalLabService:
+        baseConfig: default
 
 eureka:
   client:
@@ -36,8 +71,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics
+        include: gateway,health,info,prometheus,metrics
   endpoint:
+    gateway:
+      access: read-only
     health:
       show-details: always
       probes:

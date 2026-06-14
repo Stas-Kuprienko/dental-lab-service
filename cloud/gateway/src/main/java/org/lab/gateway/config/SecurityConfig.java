@@ -1,9 +1,7 @@
 package org.lab.gateway.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,21 +10,11 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import java.security.Principal;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-
-    private final HttpHeaderManagementFilter httpHeaderManagementFilter;
-    private final String issuerUri;
-
-
-    @Autowired
-    public SecurityConfig(HttpHeaderManagementFilter httpHeaderManagementFilter,
-                          @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
-        this.httpHeaderManagementFilter = httpHeaderManagementFilter;
-        this.issuerUri = issuerUri;
-    }
 
 
     @Bean
@@ -35,7 +23,6 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
-                        .pathMatchers("/api/v1/auth/**").permitAll()
                         .anyExchange().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())
@@ -43,18 +30,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ReactiveJwtDecoder reactiveJwtDecoder() {
+    public ReactiveJwtDecoder reactiveJwtDecoder(@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
         return ReactiveJwtDecoders.fromIssuerLocation(issuerUri);
     }
 
-
     @Bean
-    public RouteLocator routeLocator(RouteLocatorBuilder builder) {
-        return builder.routes()
-                .route("dental-lab-service", r -> r
-                        .path("/api/v1/**")
-                        .filters(f -> f.filter(httpHeaderManagementFilter))
-                        .uri("lb://dental-lab-service"))
-                .build();
+    public KeyResolver userKeyResolver() {
+        return exchange ->
+                exchange.getPrincipal()
+                        .map(Principal::getName);
     }
 }

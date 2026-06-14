@@ -1,19 +1,22 @@
 package org.lab.gateway.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.lab.exception.ForbiddenCustomException;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class HttpHeaderManagementFilter implements GatewayFilter {
+public class HttpHeaderManagementFilter implements GlobalFilter {
 
     private static final String DENTAL_LAB_CLIENT_ID = "dental-lab-client";
     private static final String UI_MVC_CLIENT_ID = "ui-mvc-client";
@@ -39,7 +42,7 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
         return switch (clientId) {
             case TELEGRAM_CLIENT_ID -> telegramBotClient(exchange);
             case UI_MVC_CLIENT_ID -> uiMvcClient(exchange);
-            case null -> throw new ForbiddenCustomException("client ID is null, but must be set");
+            case null -> error(exchange, HttpStatus.FORBIDDEN, "client ID is null, but must be set");
             default -> dentalLabClient(exchange, jwtAuth);
         };
     }
@@ -80,7 +83,7 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
                 log.info("set HTTP header {}:{}", SERVICE_ID_HEADER, TELEGRAM_CLIENT_ID);
                 return exchange.mutate().request(mutatedRequest).build();
             } else {
-                throw new ForbiddenCustomException("Missing X-USER-ID header for telegram client");
+                return error(exchange, HttpStatus.FORBIDDEN, "Missing X-USER-ID header for telegram client");
             }
         }
         return exchange;
@@ -99,5 +102,13 @@ public class HttpHeaderManagementFilter implements GatewayFilter {
             return true;
         }
         return false;
+    }
+
+    private ServerWebExchange error(ServerWebExchange exchange, HttpStatus status, String message) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(status);
+        DataBuffer dataBuffer = response.bufferFactory().wrap(message.getBytes());
+        response.writeWith(Mono.just(dataBuffer));
+        throw new RestClientResponseException(message, status.value(), status.getReasonPhrase(), null, null, null);
     }
 }

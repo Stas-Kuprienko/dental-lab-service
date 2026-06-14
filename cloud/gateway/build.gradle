@@ -16,8 +16,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation project(':common:models')
 
+	// resilience
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+
+	// data
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
 	// observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {
