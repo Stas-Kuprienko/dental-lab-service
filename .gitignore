@@ -48,3 +48,4 @@ bin/
 /ui-mvc-app/src/main/resources/application-local.yaml
 /.env
 /logs/
+/cloud/gateway/src/main/resources/application-local.yaml

@@ -39,9 +39,6 @@ dependencies {
 	// open-api
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${swagger_version}"
 
-    // validation
-	implementation "org.springframework.boot:spring-boot-starter-validation"
-
 	// observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 

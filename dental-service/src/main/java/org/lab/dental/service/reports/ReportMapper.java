@@ -11,12 +11,15 @@ import java.util.stream.Collectors;
 @Component
 public class ReportMapper {
 
+    public static final String PATIENT = "ПАЦИЕНТ";
+    public static final String CLINIC = "КЛИНИКА";
+
 
     public List<List<String>> mapDentalWorkReport(List<DentalWorkEntity> works, List<String> productTitles) {
         List<List<String>> result = new ArrayList<>();
         List<String> headers = new ArrayList<>();
-        headers.add("ПАЦИЕНТ");
-        headers.add("КЛИНИКА");
+        headers.add(PATIENT);
+        headers.add(CLINIC);
         headers.addAll(productTitles.stream().map(String::toUpperCase).toList());
         result.add(headers);
         for (DentalWorkEntity work : works) {
