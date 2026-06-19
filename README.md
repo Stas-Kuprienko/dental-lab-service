@@ -37,7 +37,7 @@
 - оптимизированное потребление памяти и вычислительных ресурсов.
 
 Эта версия приложения развёрнута на VDS и доступна через домен [dental-lab-service](https://dental-lab-service.ru) с SSL-сертификатом и прокси Nginx.
-###### [перейти к версии 👈](...)
+###### [перейти к версии 👈](https://github.com/Stas-Kuprienko/dental-lab-service/tree/simple-release)
 
 ---
 #### 2. `main`
@@ -79,6 +79,7 @@
 **Интеграции**
 
 - Telegram Bot API
+- Email
 
 ---
 **Observability**
