@@ -21,6 +21,10 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -68,6 +72,22 @@ public class TelegramBotConfig {
     @Bean(name = "virtualThreadPerTaskExecutor")
     public ExecutorService virtualThreadPerTaskExecutor() {
         return Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    @Bean
+    public Proxy proxy(@Value("${project.telegram.proxy.enable:false}") Boolean isProxy,
+                       @Value("${project.telegram.proxy.host:127.0.0.1}") String host,
+                       @Value("${project.telegram.proxy.port:10808}") Integer port,
+                       @Value("${project.telegram.proxy.type:HTTP}") String type) {
+        if (isProxy) {
+            Proxy.Type proxyType = Proxy.Type.valueOf(type);
+            SocketAddress address = new InetSocketAddress(host, port);
+            log.info("Configured PROXY for Telegram API, type={}, address={}:{}", type, host, port);
+            return new Proxy(proxyType, address);
+        } else {
+            log.info("Configured with NO_PROXY for Telegram API");
+            return Proxy.NO_PROXY;
+        }
     }
 
     // MAPPING ************* \/

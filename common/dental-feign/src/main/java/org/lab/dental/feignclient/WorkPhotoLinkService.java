@@ -14,14 +14,11 @@ public interface WorkPhotoLinkService {
 
 
     @PostMapping(path = "/{work_id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    String create(@PathVariable("work_id") long workId, @RequestPart("file") byte[] file);
-
-    @PostMapping(path = "/{work_id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     String create(@PathVariable("work_id") long workId, @RequestPart("file") MultipartFile file);
 
     @PostMapping(path = "/{work_id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     String create(@PathVariable("work_id") long workId,
-                  @RequestPart("file") byte[] file,
+                  @RequestPart("file") MultipartFile file,
                   @RequestHeader("X-USER-ID") UUID userId);
 
     @GetMapping("/{work_id}/photo/{filename}")

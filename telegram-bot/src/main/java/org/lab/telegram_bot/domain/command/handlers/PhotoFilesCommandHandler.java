@@ -15,9 +15,11 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.utils.ChatBotUtility;
+import org.lab.telegram_bot.utils.MultipartFileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -30,8 +32,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +47,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
     private final DentalWorkService dentalWorkService;
     private final ChatSessionService chatSessionService;
     private final KeyboardBuilderKit keyboardBuilderKit;
+    private final Proxy proxy;
     private final String telegramApiPath;
     private final String botToken;
     private Function<GetFile, File> executor;
@@ -58,6 +60,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                                     DentalWorkService dentalWorkService,
                                     ChatSessionService chatSessionService,
                                     KeyboardBuilderKit keyboardBuilderKit,
+                                    Proxy proxy,
                                     @Value("${telegram.api.path}") String telegramApiPath,
                                     @Value("${project.variables.telegram.bot-token}") String botToken) {
         super(messageSource);
@@ -65,6 +68,7 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         this.dentalWorkService = dentalWorkService;
         this.chatSessionService = chatSessionService;
         this.keyboardBuilderKit = keyboardBuilderKit;
+        this.proxy = proxy;
         this.telegramApiPath = telegramApiPath;
         this.botToken = botToken;
     }
@@ -132,8 +136,8 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
                 .orElseThrow(() -> new ApplicationCustomException("Photo files does not contents"))
                 .getFileId();
         long workId = Long.parseLong(session.getAttribute(Attributes.DENTAL_WORK_ID.name()));
-        byte[] bytes = pullPhotoFile(photoId);
-        workPhotoLinkService.create(workId, bytes, session.getUserId());
+        MultipartFile multipartFile = pullPhotoFile(photoId);
+        workPhotoLinkService.create(workId, multipartFile, session.getUserId());
         DentalWork dw = dentalWorkService.findById(workId, session.getUserId());
         String patient = dw.getPatient();
         String clinic = dw.getClinic();
@@ -164,15 +168,18 @@ public class PhotoFilesCommandHandler extends BotCommandHandler {
         return List.of(keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, callbackQueryPrefix, locale));
     }
 
-    private byte[] pullPhotoFile(String fileId) {
+    private MultipartFile pullPhotoFile(String fileId) {
         GetFile getFile = new GetFile(fileId);
         File file = executor.apply(getFile);
         String fileUrl = telegramApiPath + botToken + '/' + file.getFilePath();
         URL url;
         try {
             url = URI.create(fileUrl).toURL();
-            try (InputStream in = url.openStream()) {
-                return in.readAllBytes();
+            URLConnection connection = url.openConnection(proxy);
+            connection.setConnectTimeout(10000);
+            try (InputStream in = connection.getInputStream()) {
+                byte[] bytes = in.readAllBytes();
+                return MultipartFileUtil.create(bytes, file, in);
             }
         } catch (IOException e) {
             throw new ApplicationCustomException(e);
