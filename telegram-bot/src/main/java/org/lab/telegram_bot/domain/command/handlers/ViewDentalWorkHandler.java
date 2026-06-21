@@ -1,6 +1,7 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.dental.feignclient.ProductService;
 import org.lab.enums.WorkStatus;
 import org.lab.exception.BadRequestCustomException;
@@ -18,7 +19,6 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.ProductMapMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 @CommandHandler(command = BotCommands.VIEW_DENTAL_WORK)
 public class ViewDentalWorkHandler extends BotCommandHandler {
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final DentalWorkService dentalWorkService;
     private final ProductService productService;
     private final KeyboardBuilderKit keyboardBuilderKit;
@@ -49,7 +49,7 @@ public class ViewDentalWorkHandler extends BotCommandHandler {
 
     @Autowired
     public ViewDentalWorkHandler(MessageSource messageSource,
-                                 ProductMapMvcService productMapService,
+                                 ProductMapService productMapService,
                                  DentalWorkService dentalWorkService,
                                  ProductService productService,
                                  KeyboardBuilderKit keyboardBuilderKit,

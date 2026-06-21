@@ -2,11 +2,11 @@ package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.dental.feignclient.ProductService;
 import org.lab.model.DentalWork;
 import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
-import org.lab.uimvc.service.ProductMapMvcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,13 +22,13 @@ public class DentalWorkItemController {
     private static final String DENTAL_WORKS_BY_ID = MvcControllerUtil.MAIN_PATH + "/dental-works/%d";
     private static final String ATTRIBUTE_WORK = "work";
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final DentalWorkService dentalWorkService;
     private final ProductService productService;
 
 
     @Autowired
-    public DentalWorkItemController(ProductMapMvcService productMapService,
+    public DentalWorkItemController(ProductMapService productMapService,
                                     DentalWorkService dentalWorkService,
                                     ProductService productService) {
         this.productMapService = productMapService;

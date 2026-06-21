@@ -91,7 +91,7 @@ springdoc:
   swagger-ui:
     path: /index.html
   api-docs:
-    path: /v3/api-docs
+    path: /swagger-ui/v3/api-docs
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
   paths-to-match: /api/v1/**

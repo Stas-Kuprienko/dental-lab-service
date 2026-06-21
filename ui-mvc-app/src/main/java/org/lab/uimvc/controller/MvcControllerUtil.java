@@ -1,10 +1,9 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.model.ProductMap;
-import org.lab.uimvc.service.ProductMapMvcService;
 import org.springframework.ui.Model;
-
 import java.util.Locale;
 import java.util.UUID;
 
@@ -28,9 +27,9 @@ public abstract class MvcControllerUtil {
     public static final Locale DEFAULT_LOCALE = Locale.of("RU");
 
 
-    public static void addProductMapToModel(ProductMapMvcService productMapService, HttpSession session, Model model) {
+    public static void addProductMapToModel(ProductMapService productMapService, HttpSession session, Model model) {
         UUID userId = getUserId(session);
-        ProductMap map = productMapService.get(userId);
+        ProductMap map = productMapService.findAll(userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
     }
 

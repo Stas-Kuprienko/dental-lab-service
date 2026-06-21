@@ -2,11 +2,11 @@ package org.lab.dental.service.reports;
 
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.entity.ProductEntity;
-import org.lab.dental.entity.ProductTypeEntity;
 import org.lab.dental.repository.ProductRepository;
 import org.lab.dental.service.DentalWorkService;
 import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.service.ReportService;
+import org.lab.model.ProductType;
 import org.lab.model.ProfitRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,10 +44,10 @@ public class MyReportService implements ReportService {
     @Override
     public ByteArrayInputStream createFile(UUID userId, YearMonth yearMonth) {
         List<DentalWorkEntity> workList = dentalWorkService.getAllForMonthByUserId(userId, yearMonth);
-        List<ProductTypeEntity> typeEntities = productTypeService.getAllByUserId(userId);
+        List<ProductType> typeEntities = productTypeService.getAllByUserId(userId).getEntries();
         List<String> titles = typeEntities
                 .stream()
-                .map(ProductTypeEntity::getTitle)
+                .map(ProductType::getTitle)
                 .toList();
         List<List<String>> data = reportMapper.mapDentalWorkReport(workList, titles);
         return xlsxFileTool.createReport(data);

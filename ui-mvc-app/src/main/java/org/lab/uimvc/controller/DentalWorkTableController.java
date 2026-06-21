@@ -2,9 +2,9 @@ package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
-import org.lab.uimvc.service.ProductMapMvcService;
 import org.lab.uimvc.util.HeaderMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,12 +21,12 @@ public class DentalWorkTableController {
 
     private static final String DENTAL_WORKS = "dental-works";
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final DentalWorkService dentalWorkService;
 
 
     @Autowired
-    public DentalWorkTableController(ProductMapMvcService productMapService, DentalWorkService dentalWorkService) {
+    public DentalWorkTableController(ProductMapService productMapService, DentalWorkService dentalWorkService) {
         this.productMapService = productMapService;
         this.dentalWorkService = dentalWorkService;
     }

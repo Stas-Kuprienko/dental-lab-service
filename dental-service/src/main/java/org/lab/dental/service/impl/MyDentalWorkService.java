@@ -8,18 +8,19 @@ import org.lab.dental.exception.PersistenceCustomException;
 import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.repository.DentalWorkRepository;
 import org.lab.dental.repository.ProductRepository;
+import org.lab.dental.repository.ProductTypeRepository;
 import org.lab.dental.service.DentalWorkService;
-import org.lab.dental.service.ProductTypeService;
 import org.lab.enums.WorkStatus;
+import org.lab.exception.BadRequestCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -28,15 +29,15 @@ public class MyDentalWorkService implements DentalWorkService {
 
     private final DentalWorkRepository dentalWorkRepository;
     private final ProductRepository productRepository;
-    private final ProductTypeService productTypeService;
+    private final ProductTypeRepository productTypeRepository;
 
     @Autowired
     public MyDentalWorkService(DentalWorkRepository dentalWorkRepository,
                                ProductRepository productRepository,
-                               ProductTypeService productTypeService) {
+                               ProductTypeRepository productTypeRepository) {
         this.dentalWorkRepository = dentalWorkRepository;
         this.productRepository = productRepository;
-        this.productTypeService = productTypeService;
+        this.productTypeRepository = productTypeRepository;
     }
 
 
@@ -162,30 +163,35 @@ public class MyDentalWorkService implements DentalWorkService {
             throw PersistenceCustomException.nullParameters("Product", "productTypeId", "quantity");
         }
         DentalWorkEntity dentalWork = getByIdAndUserId(id, userId);
-        ProductTypeEntity productType = productTypeService.getByIdAndUserId(productTypeId, userId);
-        ProductEntity product = ProductEntity.builder()
-                .title(productType.getTitle())
-                .price(productType.getPrice())
-                .quantity(quantity)
-                .dentalWorkId(id)
-                .completeAt(completeAt)
-                .acceptedAt(LocalDate.now())
-                .build();
-        for (ProductEntity p : dentalWork.getProducts()) {
-            if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
-                p.setQuantity(p.getQuantity() + product.getQuantity());
-                p.setCompleteAt(completeAt);
-                ProductEntity updated = productRepository.save(p);
-                log.info("Product '{}' updated for '{}'", updated, dentalWork);
-                setCompleteAtIfIsLater(dentalWork, completeAt);
-                log.info("Product '{}' added to '{}'", product, dentalWork);
-                return dentalWork;
+        Optional<ProductTypeEntity> optional = productTypeRepository.findByIdAndUserId(productTypeId, userId);
+        if (optional.isPresent()) {
+            ProductTypeEntity productType = optional.get();
+            ProductEntity product = ProductEntity.builder()
+                    .title(productType.getTitle())
+                    .price(productType.getPrice())
+                    .quantity(quantity)
+                    .dentalWorkId(id)
+                    .completeAt(completeAt)
+                    .acceptedAt(LocalDate.now())
+                    .build();
+            for (ProductEntity p : dentalWork.getProducts()) {
+                if (p.getTitle().equalsIgnoreCase(product.getTitle()) && p.getPrice().equals(product.getPrice())) {
+                    p.setQuantity(p.getQuantity() + product.getQuantity());
+                    p.setCompleteAt(completeAt);
+                    ProductEntity updated = productRepository.save(p);
+                    log.info("Product '{}' updated for '{}'", updated, dentalWork);
+                    setCompleteAtIfIsLater(dentalWork, completeAt);
+                    log.info("Product '{}' added to '{}'", product, dentalWork);
+                    return dentalWork;
+                }
             }
+            setCompleteAtIfIsLater(dentalWork, completeAt);
+            dentalWork.getProducts().add(productRepository.save(product));
+            log.info("Product '{}' added to '{}'", product, dentalWork);
+            return dentalWork;
+        } else {
+            throw BadRequestCustomException.notFoundPassedEntity(id);
         }
-        setCompleteAtIfIsLater(dentalWork, completeAt);
-        dentalWork.getProducts().add(productRepository.save(product));
-        log.info("Product '{}' added to '{}'", product, dentalWork);
-        return dentalWork;
     }
 
     @Override
@@ -214,24 +220,29 @@ public class MyDentalWorkService implements DentalWorkService {
             log.info("Nothing to add for entity: {}", dentalWork);
             return dentalWork;
         }
-        ProductTypeEntity productType = productTypeService.getByIdAndUserId(productTypeId, dentalWork.getUserId());
-        ProductEntity product = ProductEntity.builder()
-                .dentalWorkId(dentalWork.getId())
-                .title(productType.getTitle())
-                .price(productType.getPrice())
-                .quantity(quantity)
-                .completeAt(completeAt)
-                .acceptedAt(LocalDate.now())
-                .build();
-        product = productRepository.save(product);
-        log.info("Product '{}' added to '{}'", product, dentalWork);
-        setCompleteAtIfIsLater(dentalWork, completeAt);
-        if (dentalWork.getProducts() == null) {
-            dentalWork.setProducts(List.of(product));
+        Optional<ProductTypeEntity> optional = productTypeRepository.findByIdAndUserId(productTypeId, dentalWork.getUserId());
+        if (optional.isPresent()) {
+            ProductTypeEntity productType = optional.get();
+            ProductEntity product = ProductEntity.builder()
+                    .dentalWorkId(dentalWork.getId())
+                    .title(productType.getTitle())
+                    .price(productType.getPrice())
+                    .quantity(quantity)
+                    .completeAt(completeAt)
+                    .acceptedAt(LocalDate.now())
+                    .build();
+            product = productRepository.save(product);
+            log.info("Product '{}' added to '{}'", product, dentalWork);
+            setCompleteAtIfIsLater(dentalWork, completeAt);
+            if (dentalWork.getProducts() == null) {
+                dentalWork.setProducts(List.of(product));
+            } else {
+                dentalWork.getProducts().add(product);
+            }
+            return dentalWork;
         } else {
-            dentalWork.getProducts().add(product);
+            throw BadRequestCustomException.notFoundPassedEntity(productTypeId);
         }
-        return dentalWork;
     }
 
     @Override

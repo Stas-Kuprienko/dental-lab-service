@@ -12,10 +12,10 @@ public interface ProductMapService {
 
 
     @PostMapping
-    ProductType create(@RequestBody NewProductType newProductType);
+    ProductMap create(@RequestBody NewProductType newProductType);
 
     @PostMapping
-    ProductType create(@RequestBody NewProductType newProductType, @RequestHeader("X-USER-ID") UUID userId);
+    ProductMap create(@RequestBody NewProductType newProductType, @RequestHeader("X-USER-ID") UUID userId);
 
     @GetMapping("/{id}")
     ProductType findById(@PathVariable("id") UUID id);

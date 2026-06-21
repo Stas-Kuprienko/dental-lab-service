@@ -17,6 +17,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.lab.dental.repository.redis.DentalWorkList;
 import org.lab.exception.ApplicationCustomException;
+import org.lab.model.ProductMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -140,6 +141,31 @@ public class DentalLabConfiguration {
         template.setValueSerializer(dentalWorkRedisSerializer);
         template.setHashKeySerializer(stringRedisSerializer);
         template.setHashValueSerializer(dentalWorkRedisSerializer);
+        template.afterPropertiesSet();
+        if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
+            log.info("RedisTemplate for DentalWorks has been initialized");
+            return template;
+        } else {
+            throw new ApplicationCustomException("Redis connection is failure");
+        }
+    }
+
+    @Bean("productMapRedisSerializer")
+    public Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer(ObjectMapper objectMapper) {
+        return new Jackson2JsonRedisSerializer<>(objectMapper, ProductMap.class);
+    }
+
+    @Bean("productMapRedisTemplate")
+    public RedisTemplate<String, ProductMap> productMapRedisTemplate(RedisConnectionFactory redisConnectionFactory,
+                                                                     StringRedisSerializer stringRedisSerializer,
+                                                                     Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer) {
+
+        RedisTemplate<String, ProductMap> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(stringRedisSerializer);
+        template.setValueSerializer(productMapRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+        template.setHashValueSerializer(productMapRedisSerializer);
         template.afterPropertiesSet();
         if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
             log.info("RedisTemplate for DentalWorks has been initialized");

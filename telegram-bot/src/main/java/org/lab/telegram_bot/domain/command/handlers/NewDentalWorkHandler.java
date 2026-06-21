@@ -3,6 +3,7 @@ package org.lab.telegram_bot.domain.command.handlers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.lab.dental.feignclient.DentalWorkService;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
 import org.lab.model.ProductMap;
@@ -17,7 +18,6 @@ import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
 import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
-import org.lab.telegram_bot.service.ProductMapMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 public class NewDentalWorkHandler extends BotCommandHandler {
 
     private final DentalWorkService dentalWorkService;
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private final ObjectMapper objectMapper;
@@ -44,7 +44,7 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
 
     @Autowired
-    public NewDentalWorkHandler(ProductMapMvcService productMapService,
+    public NewDentalWorkHandler(ProductMapService productMapService,
                                 KeyboardBuilderKit keyboardBuilderKit,
                                 MessageSource messageSource,
                                 DentalWorkService dentalWorkService,

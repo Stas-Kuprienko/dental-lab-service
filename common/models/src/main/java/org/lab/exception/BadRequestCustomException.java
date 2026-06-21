@@ -2,7 +2,7 @@ package org.lab.exception;
 
 public class BadRequestCustomException extends RuntimeException {
 
-    private static final String ENTITY_TO_SAVE_HAS_ID = "Entity to save must not have ID (%s)";
+    private static final String NOT_FOUND_BY_PASSED_ID = "Entity is not found by passed ID='{%s}'";
 
     public BadRequestCustomException(String message) {
         super(message);
@@ -12,7 +12,7 @@ public class BadRequestCustomException extends RuntimeException {
         super(cause);
     }
 
-    public static BadRequestCustomException savedEntityHasId(Object entity) {
-        return new BadRequestCustomException(ENTITY_TO_SAVE_HAS_ID.formatted(entity.toString()));
+    public static BadRequestCustomException notFoundPassedEntity(Object id) {
+        return new BadRequestCustomException(NOT_FOUND_BY_PASSED_ID.formatted(id.toString()));
     }
 }

@@ -1,5 +1,6 @@
 package org.lab.telegram_bot.domain.command.handlers;
 
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
@@ -11,7 +12,6 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.ProductMapMvcService;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -26,13 +26,13 @@ import java.util.Locale;
 @CommandHandler(command = BotCommands.NEW_PRODUCT_TYPE)
 public class NewProductTypeHandler extends BotCommandHandler {
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
 
 
     @Autowired
-    public NewProductTypeHandler(ProductMapMvcService productMapService,
+    public NewProductTypeHandler(ProductMapService productMapService,
                                  KeyboardBuilderKit keyboardBuilderKit,
                                  MessageSource messageSource,
                                  ChatSessionService chatSessionService) {

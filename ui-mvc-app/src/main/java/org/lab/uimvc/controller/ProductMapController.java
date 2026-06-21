@@ -1,9 +1,9 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.lab.dental.feignclient.ProductMapService;
 import org.lab.model.ProductMap;
 import org.lab.request.NewProductType;
-import org.lab.uimvc.service.ProductMapMvcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,11 +17,11 @@ public class ProductMapController extends MvcControllerUtil {
     private static final String PRODUCT_MAP = "product-map";
     private static final String PRODUCT_MAP_PATH = "/main/product-map";
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
 
 
     @Autowired
-    public ProductMapController(ProductMapMvcService productMapService) {
+    public ProductMapController(ProductMapService productMapService) {
         this.productMapService = productMapService;
     }
 
@@ -29,7 +29,7 @@ public class ProductMapController extends MvcControllerUtil {
     @GetMapping
     public String productMapPage(HttpSession session, Model model) {
         UUID userId = getUserId(session);
-        ProductMap map = productMapService.get(userId);
+        ProductMap map = productMapService.findAll(userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return PRODUCT_MAP;
     }
@@ -39,7 +39,7 @@ public class ProductMapController extends MvcControllerUtil {
                              @RequestParam("price") float price,
                              HttpSession session, Model model) {
         UUID userId = getUserId(session);
-        ProductMap map = productMapService.create(userId, new NewProductType(title, price));
+        ProductMap map = productMapService.create(new NewProductType(title, price), userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }
@@ -49,7 +49,8 @@ public class ProductMapController extends MvcControllerUtil {
                               @RequestParam("price") float price,
                               HttpSession session, Model model) {
         UUID userId = getUserId(session);
-        ProductMap map = productMapService.update(userId, id, price);
+        productMapService.update(id, price, userId);
+        ProductMap map = productMapService.findAll(userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }
@@ -58,7 +59,8 @@ public class ProductMapController extends MvcControllerUtil {
     public String deleteProduct(@PathVariable("id") UUID id,
                                 HttpSession session, Model model) {
         UUID userId = getUserId(session);
-        ProductMap map = productMapService.delete(userId, id);
+        productMapService.delete(userId, id);
+        ProductMap map = productMapService.findAll(userId);
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }
