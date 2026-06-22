@@ -57,7 +57,9 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
-
+logging:
+  charset:
+    console: UTF-8
 springdoc:
   info:
     title: Dental Lab Service

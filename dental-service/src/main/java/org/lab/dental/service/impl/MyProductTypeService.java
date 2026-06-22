@@ -8,7 +8,6 @@ import org.lab.dental.repository.ProductTypeRepository;
 import org.lab.dental.service.ProductTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;

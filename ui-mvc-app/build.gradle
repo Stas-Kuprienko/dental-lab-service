@@ -15,17 +15,6 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 	//datasource
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.apache.commons:commons-pool2'
-
-	// observability
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-	// tests
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.apache.commons:commons-pool2'
 }

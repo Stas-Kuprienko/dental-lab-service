@@ -56,6 +56,14 @@ public class MyDentalWorkService implements DentalWorkService {
     }
 
     @Override
+    public List<DentalWorkEntity> createAll(List<DentalWorkEntity> dentalWorks) {
+        log.info("{} entities received to save", dentalWorks.size());
+        List<DentalWorkEntity> savedList = dentalWorkRepository.saveAll(dentalWorks);
+        log.info("{} entities saved successfully", savedList.size());
+        return savedList;
+    }
+
+    @Override
     public DentalWorkEntity getByIdAndUserId(Long id, UUID userId) {
         DentalWorkEntity dentalWork = dentalWorkRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> NotFoundCustomException

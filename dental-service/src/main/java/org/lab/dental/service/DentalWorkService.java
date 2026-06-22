@@ -13,6 +13,8 @@ public interface DentalWorkService {
 
     DentalWorkEntity create(DentalWorkEntity dentalWork);
 
+    List<DentalWorkEntity> createAll(List<DentalWorkEntity> dentalWorks);
+
     DentalWorkEntity getByIdAndUserId(Long id, UUID userId);
 
     DentalWorkEntity getById(Long id);

@@ -1,8 +1,14 @@
 package org.dental.restclient;
 
+import org.lab.enums.WorkStatus;
 import org.lab.model.ProfitRecord;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import java.time.YearMonth;
 import java.util.function.Consumer;
 
 public class ReportService {
@@ -42,6 +48,33 @@ public class ReportService {
                 .body(byte[].class);
     }
 
+    public void updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status) {
+        restClient
+                .post()
+                .uri(uri -> uri.path(RESOURCE + "/works")
+                        .queryParam("complete-at", completeAt)
+                        .queryParam("status", status)
+                        .build())
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(resourceToRequest(fileBytes))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status, Consumer<HttpHeaders> headersConsumer) {
+        restClient
+                .post()
+                .uri(uri -> uri.path(RESOURCE + "/works")
+                        .queryParam("complete-at", completeAt)
+                        .queryParam("status", status)
+                        .build())
+                .headers(headersConsumer)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(resourceToRequest(fileBytes))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
     public ProfitRecord countProfitForMonth(int year, int month) {
         return restClient
                 .get()
@@ -65,5 +98,20 @@ public class ReportService {
                 .headers(headersConsumer)
                 .retrieve()
                 .body(ProfitRecord.class);
+    }
+
+
+    public MultiValueMap<String, Object> resourceToRequest(byte[] fileBytes) {
+        String filename = System.currentTimeMillis() + ".xlsx";
+        ByteArrayResource resource = new ByteArrayResource(fileBytes) {
+            @Override
+            public String getFilename() {
+                return filename;
+            }
+        };
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", resource);
+        body.add("description", "This is a test file upload.");
+        return body;
     }
 }

@@ -1,16 +1,21 @@
 package org.lab.dental.service.reports;
 
-import org.lab.dental.entity.DentalWorkEntity;
 import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.entity.ProductTypeEntity;
+import org.lab.dental.mapping.ProductTypeConverter;
 import org.lab.dental.repository.ProductRepository;
-import org.lab.dental.service.DentalWorkService;
 import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.service.ReportService;
+import org.lab.enums.WorkStatus;
+import org.lab.model.DentalWork;
+import org.lab.model.ProductMap;
 import org.lab.model.ProfitRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -20,21 +25,21 @@ import java.util.UUID;
 @Service
 public class MyReportService implements ReportService {
 
-    private final DentalWorkService dentalWorkService;
     private final ProductTypeService productTypeService;
+    private final ProductTypeConverter productTypeConverter;
     private final ReportMapper reportMapper;
     private final XLSXFileTool xlsxFileTool;
     private final ProductRepository productRepository;
 
 
     @Autowired
-    public MyReportService(DentalWorkService dentalWorkService,
-                           ProductTypeService productTypeService,
+    public MyReportService(ProductTypeService productTypeService,
+                           ProductTypeConverter productTypeConverter,
                            ReportMapper reportMapper,
                            XLSXFileTool xlsxFileTool,
                            ProductRepository productRepository) {
-        this.dentalWorkService = dentalWorkService;
         this.productTypeService = productTypeService;
+        this.productTypeConverter = productTypeConverter;
         this.reportMapper = reportMapper;
         this.xlsxFileTool = xlsxFileTool;
         this.productRepository = productRepository;
@@ -42,8 +47,7 @@ public class MyReportService implements ReportService {
 
 
     @Override
-    public ByteArrayInputStream createFile(UUID userId, YearMonth yearMonth) {
-        List<DentalWorkEntity> workList = dentalWorkService.getAllForMonthByUserId(userId, yearMonth);
+    public ByteArrayInputStream createFile(List<DentalWork> workList, UUID userId, YearMonth yearMonth) {
         List<ProductTypeEntity> typeEntities = productTypeService.getAllByUserId(userId);
         List<String> titles = typeEntities
                 .stream()
@@ -51,6 +55,20 @@ public class MyReportService implements ReportService {
                 .toList();
         List<List<String>> data = reportMapper.mapDentalWorkReport(workList, titles);
         return xlsxFileTool.createReport(data);
+    }
+
+    @Override
+    public List<DentalWork> readReport(MultipartFile file, UUID userId, LocalDate completeAt, WorkStatus status) {
+        List<ProductTypeEntity> productTypes = productTypeService.getAllByUserId(userId);
+        ProductMap productMap = productTypeConverter.toProductMap(userId, productTypes);
+        List<String> titles = productTypes.stream().map(ProductTypeEntity::getTitle).toList();
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
+            List<List<String>> data = xlsxFileTool.parseReport(inputStream, titles);
+            return reportMapper.parseReportToDentalWorks(data, productMap, completeAt, status);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

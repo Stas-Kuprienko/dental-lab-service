@@ -118,6 +118,11 @@
             <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
         </form>
     </a>
+    <a>
+        <form method="get" th:action="@{/main/reports/works/upload}">
+            <input class="low-button" type="submit" value="загрузить">
+        </form>
+    </a>
 </div>
 
 <!-- ⚙️ Скрипты -->

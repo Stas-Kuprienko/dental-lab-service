@@ -10,6 +10,7 @@ import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -51,6 +52,17 @@ public class DentalWorkManager {
             cacheRepository.save(dentalWork);
         }
         return dentalWork;
+    }
+
+    @Transactional
+    public List<DentalWork> createAll(List<DentalWork> dentalWorks) {
+        List<DentalWorkEntity> entities = dentalWorks.stream()
+                .map(converter::toEntity)
+                .toList();
+        entities = dentalWorkService.createAll(entities);
+        return entities.stream()
+                .map(converter::toDto)
+                .toList();
     }
 
     public DentalWork getByIdAndUserId(long id, UUID userId) {
