@@ -1,34 +1,36 @@
 ```mermaid
 flowchart TD
-    
-    USER((User)) --> |request| UI[UI-MVC-App]
-    USER --> |request| TG[TG-Bot-App]
-    
-    UI --> API[API Gateway]
 
     subgraph DENTAL-LAB-SERVICE
-        API -.-> |authentication| KC{{Keycloak}}
-        API --> |routing| DLS[Dental-Lab-Service]
-        DLS --> |messaging| RMQ([RabbitMQ])
-        RMQ --> |dlq| DLS
+        API[API Gateway] ==> |routing| DLS[Dental-Lab-Service]
         DLS --> |datasource| PG[(PostgreSQL)]
         DLS --> |cache| RDS[(Redis)]
         DLS --> |object storage| S3[(MinIO S3)]
+        DLS <--> |events| RMQ([RabbitMQ])
     end
-    
-    DLS --> |notify| EMAIL[E-mail]
 
     subgraph TELEGRAM-BOT
-        TG --> API
-        TG --> |chat sessions| RDS2((Redis))
+        TG[Telegram-Bot] ==> API
+        TG <--> |events| RMQ
+        TG --> |chat sessions| RDS2[(Redis)]
     end
 
-    RMQ --> |messaging| TELEGRAM-BOT
-    TG-API[Telegram-bots API] <--> TELEGRAM-BOT
+    USER((User)) --> |request| UI{{UI-MVC-App}}
+    USER --> |request| TG
+
+    UI ==> API
+
+    API -.-> |jwt validation| KC{Keycloak}
+    UI -.-> |oauth2| KC
+    TG -.-> |oauth2| KC
+ 
+    DLS --> |notify| EMAIL[E-mail]
 
     DLS -.-> |monitoring| Observability
     API -.-> |monitoring| Observability
     TG -.-> |monitoring| Observability
+    
+    TG <--> TG-API[Telegram-bots API]
 
     subgraph Observability
         PROM[Prometheus] --> GR[Grafana]

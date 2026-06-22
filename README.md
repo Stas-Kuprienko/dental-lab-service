@@ -108,10 +108,157 @@
 - Gradle
 
 ---
-> ## Архитектура ##
+> ## Архитектура
+
+Система состоит из нескольких независимых компонентов:
+пользовательского `веб-интерфейса`, `Telegram-бота`, `backend-сервиса` и `инфраструктурных сервисов`.
+Бизнес-логика сосредоточена в `Dental-Lab-Service`, а взаимодействие между компонентами осуществляется через `API Gateway` и `RabbitMQ`.
+Аутентификация и авторизация осуществляется через сервис `Keycloak`.
 
 <img src="./docs/diagram.png">
 
 ---
 
 [Файл диаграммы](docs/diagram.md)
+
+---
+> ## Технические решения
+
+### RabbitMQ вместо Apache Kafka
+
+Для асинхронного взаимодействия между сервисами выбран RabbitMQ.
+
+Причины выбора:
+
+- небольшой объём сообщений;
+- отсутствие необходимости в event streaming;
+- простота эксплуатации и меньшие требования к ресурсам;
+- поддержка маршрутизации сообщений и Dead Letter Queue.
+
+Для данного проекта использование Apache Kafka являлось бы избыточным решением.
+
+---
+### Keycloak вместо собственной реализации авторизации
+
+Для аутентификации и авторизации используется Keycloak.
+
+Причины выбора:
+
+- поддержка OAuth2 и OpenID Connect;
+- централизованное управление пользователями;
+- поддержка ролей и политик доступа;
+- готовая интеграция со Spring Security.
+
+Это позволяет сосредоточиться на бизнес-логике приложения, не реализуя собственный Identity Provider.
+
+---
+### Dead Letter Queue
+
+Для обработки ошибок доставки сообщений используется отдельная DLQ очередь.
+
+Сценарий:
+
+1. Dental Lab Service отправляет сообщение.
+2. Telegram Bot обрабатывает сообщение.
+3. При ошибке сообщение попадает в DLQ.
+4. Dental Lab Service анализирует причину ошибки и выполняет альтернативные действия.
+
+Например:
+
+- отправка Email уведомления;
+- запись метрики;
+- логирование инцидента.
+
+---
+### Stateful Telegram Bot
+
+Для поддержки многошаговых сценариев взаимодействия реализован механизм ChatSession.
+```
+public class ChatSession {
+
+    private Long chatId;
+    private UUID userId;
+    private Context context;
+
+    public static class Context {
+
+        private BotCommands command;
+        private Map<String, String> attributes;
+        private int step;
+    }
+}
+```
+При каждом запросе CommandHandler сохраняет в сессию текущую команду, шаг (у каждого CommandHandler свои шаги) и по необходимости атрибуты.
+
+```
+    private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
+        NewDentalWork newDentalWork = ... // парсинг сообщения в данные для объекта нового заказа
+        ... // создание ответа со списком видов работ... 
+        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.SELECT_PRODUCT_TYPE.ordinal());
+        session.addAttribute(Attributes.NEW_DENTAL_WORK.name(), newDentalWorkAsString(newDentalWork));
+        session.setCommand(BotCommands.NEW_DENTAL_WORK);
+        session.setStep(Steps.SELECT_PRODUCT_TYPE.ordinal());
+        chatSessionService.save(session);
+        ... // удаление предыдущего сообщения 
+        return createSendMessage(session.getChatId(), text, keyboardMarkup);
+    }
+```
+При новом запросе будет работать следующий шаг с использованием сохранённых в сессии данных.
+
+---
+### Использование Redis
+
+Redis применяется в нескольких сервисах:
+
+- кэширование часто запрашиваемых данных в dental-lab-service;
+- хранение ChatSession Telegram пользователей;
+- реализация Rate Limiting в API Gateway.
+
+По факту Redis используется не только как кэш, но и как быстрое in-memory хранилище.
+
+---
+> ## Observability
+
+В проекте реализован полный цикл наблюдаемости приложения.
+
+### Метрики
+
+**Prometheus + Micrometer**
+
+Собираются:
+
+- HTTP latency
+- количество запросов
+- ошибки
+- Resilience4J
+- бизнес-метрики
+
+### Логи
+
+**Loki + Promtail**
+
+Централизованно собираются структурированные JSON логи.
+
+### Трассировка
+
+**OpenTelemetry + Tempo**
+
+Поддерживается сквозная трассировка запросов между сервисами по Trace ID.
+
+### Визуализация
+
+**Grafana Dashboard**
+
+---
+> ## Скриншоты
+
+
+---
+> ## Запуск проекта
+
+**Требования**
+
+**Локальный запуск**
+
+---
+> ## Автор
