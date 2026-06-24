@@ -32,7 +32,7 @@ public class ProductMapController {
 
 
     @PostMapping
-    public ResponseEntity<ProductMap> create(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<ProductMap> create(@RequestAttribute("X-USER-ID") UUID userId,
                                              @RequestBody @Valid NewProductType newProductType) {
         log.info("From user '{}' received request to create new product type: {}", userId, newProductType);
         ProductMap productMap = productTypeService.create(newProductType, userId);
@@ -41,7 +41,7 @@ public class ProductMapController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductType> findById(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<ProductType> findById(@RequestAttribute("X-USER-ID") UUID userId,
                                                 @PathVariable("id") UUID id) {
         log.info("From user '{}' received request to find product type by id={}", userId, id);
         ProductType productType = productTypeService.getByIdAndUserId(id, userId);
@@ -49,14 +49,14 @@ public class ProductMapController {
     }
 
     @GetMapping
-    public ResponseEntity<ProductMap> findAll(@RequestHeader("X-USER-ID") UUID userId) {
+    public ResponseEntity<ProductMap> findAll(@RequestAttribute("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get product map", userId);
         ProductMap productMap = productTypeService.getAllByUserId(userId);
         return ResponseEntity.ok(productMap);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateProductType(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateProductType(@RequestAttribute("X-USER-ID") UUID userId,
                                                   @PathVariable("id") UUID id,
                                                   @RequestBody Float newPrice) {
         log.info("From user '{}' received request to update productType ID={}", userId, id);
@@ -65,7 +65,7 @@ public class ProductMapController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProductType(@RequestHeader("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> deleteProductType(@RequestAttribute("X-USER-ID") UUID userId,
                                                   @PathVariable("id") UUID id) {
         log.info("From user '{}' received request to delete by ID={}", userId, id);
         productTypeService.delete(id, userId);
