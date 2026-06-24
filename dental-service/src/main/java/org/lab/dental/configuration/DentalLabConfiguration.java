@@ -1,6 +1,9 @@
 package org.lab.dental.configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -19,6 +22,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.lab.dental.repository.redis.DentalWorkList;
 import org.lab.exception.ApplicationCustomException;
+import org.lab.model.ProductMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +37,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -150,6 +153,31 @@ public class DentalLabConfiguration {
             throw new ApplicationCustomException("Redis connection is failure");
         }
     }
+
+    @Bean("productMapRedisSerializer")
+    public Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer(ObjectMapper objectMapper) {
+        return new Jackson2JsonRedisSerializer<>(objectMapper, ProductMap.class);
+    }
+
+    @Bean("productMapRedisTemplate")
+    public RedisTemplate<String, ProductMap> productMapRedisTemplate(RedisConnectionFactory redisConnectionFactory,
+                                                                     StringRedisSerializer stringRedisSerializer,
+                                                                     Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer) {
+
+        RedisTemplate<String, ProductMap> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(stringRedisSerializer);
+        template.setValueSerializer(productMapRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+        template.setHashValueSerializer(productMapRedisSerializer);
+        template.afterPropertiesSet();
+        if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
+            log.info("RedisTemplate for DentalWorks has been initialized");
+            return template;
+        } else {
+            throw new ApplicationCustomException("Redis connection is failure");
+        }
+    }
     // ******************* /\
 
     // OPEN-API ********** \/
@@ -184,6 +212,18 @@ public class DentalLabConfiguration {
         return openAPI;
     }
     // /\ **************** /\
+
+    // MAPPING ************* \/
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        return mapper;
+    }
+    // /\ ****************** /\
 
     // CONTEXT *********** \/
 

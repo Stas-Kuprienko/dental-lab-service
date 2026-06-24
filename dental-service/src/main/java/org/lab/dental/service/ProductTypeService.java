@@ -1,16 +1,17 @@
 package org.lab.dental.service;
 
-import org.lab.dental.entity.ProductTypeEntity;
-import java.util.List;
+import org.lab.model.ProductMap;
+import org.lab.model.ProductType;
+import org.lab.request.NewProductType;
 import java.util.UUID;
 
 public interface ProductTypeService {
 
-    ProductTypeEntity create(ProductTypeEntity productType);
+    ProductMap create(NewProductType newProductType, UUID userId);
 
-    ProductTypeEntity getByIdAndUserId(UUID id, UUID userId);
+    ProductType getByIdAndUserId(UUID id, UUID userId);
 
-    List<ProductTypeEntity> getAllByUserId(UUID userId);
+    ProductMap getAllByUserId(UUID userId);
 
     void update(UUID id, UUID userId, float newPrice);
 

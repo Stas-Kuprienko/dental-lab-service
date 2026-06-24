@@ -11,7 +11,8 @@ import org.lab.telegram_bot.domain.element.ButtonKeys;
 import org.lab.telegram_bot.domain.element.KeyboardBuilderKit;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.lab.telegram_bot.domain.session.ChatSessionService;
-import org.lab.telegram_bot.service.ProductMapMvcService;
+import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
+import org.lab.telegram_bot.service.ProductMapServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -26,18 +27,18 @@ import java.util.Locale;
 @CommandHandler(command = BotCommands.NEW_PRODUCT_TYPE)
 public class NewProductTypeHandler extends BotCommandHandler {
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapServiceWrapper productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
 
 
     @Autowired
-    public NewProductTypeHandler(ProductMapMvcService productMapService,
+    public NewProductTypeHandler(DentalLabRestClientWrapper dentalLabRestClient,
                                  KeyboardBuilderKit keyboardBuilderKit,
                                  MessageSource messageSource,
                                  ChatSessionService chatSessionService) {
         super(messageSource);
-        this.productMapService = productMapService;
+        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -84,7 +85,8 @@ public class NewProductTypeHandler extends BotCommandHandler {
                 .title(values[0])
                 .price(price)
                 .build();
-        ProductMap productMap = productMapService.create(newProductType, session.getUserId());
+        productMapService.create(newProductType, session.getUserId());
+        ProductMap productMap = productMapService.findAll(session.getUserId());
         String text = buildProductMapMessageText(productMap);
         String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, 0);
         InlineKeyboardButton update = keyboardBuilderKit.callbackButton(ButtonKeys.UPDATE, callbackQueryPrefix,locale);

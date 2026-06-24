@@ -3,8 +3,6 @@ package org.lab.dental.controller.v1;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.lab.dental.entity.ProductTypeEntity;
-import org.lab.dental.mapping.ProductTypeConverter;
 import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.util.RequestMappingReader;
 import org.lab.model.ProductMap;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,48 +20,43 @@ import java.util.UUID;
 @RequestMapping("/api/v1/product_map")
 public class ProductMapController {
 
-    private final String URL;
-
     private final ProductTypeService productTypeService;
-    private final ProductTypeConverter converter;
+    private final String URL;
 
 
     @Autowired
-    public ProductMapController(ProductTypeService productTypeService, ProductTypeConverter converter) {
+    public ProductMapController(ProductTypeService productTypeService) {
         this.productTypeService = productTypeService;
-        this.converter = converter;
         URL = RequestMappingReader.read(this.getClass());
     }
 
 
     @PostMapping
-    public ResponseEntity<ProductType> create(@RequestAttribute("X-USER-ID") UUID userId,
-                                              @RequestBody @Valid NewProductType newProductType) {
+    public ResponseEntity<ProductMap> create(@RequestHeader("X-USER-ID") UUID userId,
+                                             @RequestBody @Valid NewProductType newProductType) {
         log.info("From user '{}' received request to create new product type: {}", userId, newProductType);
-        ProductTypeEntity entity = converter.fromRequest(newProductType, userId);
-        entity = productTypeService.create(entity);
+        ProductMap productMap = productTypeService.create(newProductType, userId);
         return ResponseEntity
-                .created(URI.create(URL + '/' + entity.getId())).body(converter.toDto(entity));
+                .created(URI.create(URL)).body(productMap);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductType> findById(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<ProductType> findById(@RequestHeader("X-USER-ID") UUID userId,
                                                 @PathVariable("id") UUID id) {
         log.info("From user '{}' received request to find product type by id={}", userId, id);
-        ProductTypeEntity entity = productTypeService.getByIdAndUserId(id, userId);
-        return ResponseEntity.ok(converter.toDto(entity));
+        ProductType productType = productTypeService.getByIdAndUserId(id, userId);
+        return ResponseEntity.ok(productType);
     }
 
     @GetMapping
-    public ResponseEntity<ProductMap> findAll(@RequestAttribute("X-USER-ID") UUID userId) {
+    public ResponseEntity<ProductMap> findAll(@RequestHeader("X-USER-ID") UUID userId) {
         log.info("From user '{}' received request to get product map", userId);
-        List<ProductTypeEntity> entities = productTypeService.getAllByUserId(userId);
-        ProductMap productMap = converter.toProductMap(userId, entities);
+        ProductMap productMap = productTypeService.getAllByUserId(userId);
         return ResponseEntity.ok(productMap);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateProductType(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> updateProductType(@RequestHeader("X-USER-ID") UUID userId,
                                                   @PathVariable("id") UUID id,
                                                   @RequestBody Float newPrice) {
         log.info("From user '{}' received request to update productType ID={}", userId, id);
@@ -73,7 +65,7 @@ public class ProductMapController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProductType(@RequestAttribute("X-USER-ID") UUID userId,
+    public ResponseEntity<Void> deleteProductType(@RequestHeader("X-USER-ID") UUID userId,
                                                   @PathVariable("id") UUID id) {
         log.info("From user '{}' received request to delete by ID={}", userId, id);
         productTypeService.delete(id, userId);

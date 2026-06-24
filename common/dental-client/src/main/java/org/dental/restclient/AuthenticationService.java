@@ -7,7 +7,7 @@ import org.lab.request.LoginRequest;
 import org.lab.request.RefreshTokenRequest;
 import org.springframework.web.client.RestClient;
 
-public class AuthenticationService extends ClientExceptionDispatcher {
+public class AuthenticationService {
 
     private static final String RESOURCE = "/auth";
 

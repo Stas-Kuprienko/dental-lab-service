@@ -3,9 +3,9 @@ package org.lab.uimvc.controller;
 import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.DentalWorkService;
+import org.dental.restclient.ProductMapService;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
-import org.lab.uimvc.service.ProductMapMvcService;
 import org.lab.uimvc.util.HeaderMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,13 +23,13 @@ public class DentalWorkTableController {
     public static final String IMPORTED_SESSION_KEY = "IMPORTED_LIST";
     private static final String DENTAL_WORKS = "dental-works";
 
-    private final ProductMapMvcService productMapService;
+    private final ProductMapService productMapService;
     private final DentalWorkService dentalWorkService;
 
 
     @Autowired
-    public DentalWorkTableController(ProductMapMvcService productMapService, DentalLabRestClient dentalLabRestClient) {
-        this.productMapService = productMapService;
+    public DentalWorkTableController(DentalLabRestClient dentalLabRestClient) {
+        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
     }
 
@@ -38,7 +38,7 @@ public class DentalWorkTableController {
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
                               @RequestParam(value = "imported", required = false) boolean imported,
                               HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
         @SuppressWarnings("unchecked")
         List<DentalWork> works = (List<DentalWork>) session.getAttribute(IMPORTED_SESSION_KEY);
@@ -59,7 +59,7 @@ public class DentalWorkTableController {
     @PostMapping("/search")
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         List<DentalWork> works = dentalWorkService.searchDentalWorks(clinic, patient);
         HeaderMonth headerMonth = new HeaderMonth(null);
         model.addAttribute("headerMonth", headerMonth);

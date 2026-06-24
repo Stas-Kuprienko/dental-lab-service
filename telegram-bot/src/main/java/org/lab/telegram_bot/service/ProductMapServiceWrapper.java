@@ -28,6 +28,10 @@ public class ProductMapServiceWrapper {
         return productMapService.findAll(httpHeaderConsumerFunction.apply(userId));
     }
 
+    public ProductType findById(UUID id, UUID userId) {
+        return productMapService.findById(id, httpHeaderConsumerFunction.apply(userId));
+    }
+
     public void updatePrice(UUID id, float newPrice, UUID userId) {
         productMapService.updateProductType(id, newPrice, httpHeaderConsumerFunction.apply(userId));
     }

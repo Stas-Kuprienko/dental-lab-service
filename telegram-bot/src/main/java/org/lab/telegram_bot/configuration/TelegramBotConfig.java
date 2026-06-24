@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.dental.restclient.DentalLabRestClient;
-import org.lab.exception.ApplicationCustomException;
-import org.lab.model.ProductMap;
 import org.lab.telegram_bot.controller.TelegramBotController;
-import org.lab.telegram_bot.datasource.redis.DentalWorkList;
 import org.lab.telegram_bot.domain.session.ChatSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -23,7 +20,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestClient;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -110,51 +106,6 @@ public class TelegramBotConfig {
         template.setHashValueSerializer(chatSessionRedisSerializer);
         template.afterPropertiesSet();
         return template;
-    }
-
-    @Bean("productMapRedisSerializer")
-    public Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer(ObjectMapper objectMapper) {
-        return new Jackson2JsonRedisSerializer<>(objectMapper, ProductMap.class);
-    }
-
-    @Bean("productMapRedisTemplate")
-    public RedisTemplate<String, ProductMap> productMapRedisTemplate(RedisConnectionFactory redisConnectionFactory,
-                                                                     StringRedisSerializer stringRedisSerializer,
-                                                                     Jackson2JsonRedisSerializer<ProductMap> productMapRedisSerializer) {
-
-        RedisTemplate<String, ProductMap> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(productMapRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setHashValueSerializer(productMapRedisSerializer);
-        template.afterPropertiesSet();
-        return template;
-    }
-
-    @Bean("dentalWorkRedisSerializer")
-    public Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer(ObjectMapper objectMapper) {
-        return new Jackson2JsonRedisSerializer<>(objectMapper, DentalWorkList.class);
-    }
-
-    @Bean("dentalWorkRedisTemplate")
-    public RedisTemplate<String, DentalWorkList> dentalWorkRedisTemplate(RedisConnectionFactory redisConnectionFactory,
-                                                                         StringRedisSerializer stringRedisSerializer,
-                                                                         Jackson2JsonRedisSerializer<DentalWorkList> dentalWorkRedisSerializer) {
-
-        RedisTemplate<String, DentalWorkList> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(dentalWorkRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setHashValueSerializer(dentalWorkRedisSerializer);
-        template.afterPropertiesSet();
-        if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
-            log.info("RedisTemplate has been initialized");
-            return template;
-        } else {
-            throw new ApplicationCustomException("Redis connection is failure");
-        }
     }
     // ******************** /\
 

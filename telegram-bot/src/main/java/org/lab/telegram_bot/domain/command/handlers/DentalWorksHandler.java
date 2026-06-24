@@ -2,7 +2,6 @@ package org.lab.telegram_bot.domain.command.handlers;
 
 import org.lab.exception.BadRequestCustomException;
 import org.lab.model.DentalWork;
-import org.lab.telegram_bot.datasource.DentalWorkRepository;
 import org.lab.telegram_bot.domain.command.BotCommands;
 import org.lab.telegram_bot.domain.command.CommandHandler;
 import org.lab.telegram_bot.domain.command.TextKeys;
@@ -35,7 +34,6 @@ public class DentalWorksHandler extends BotCommandHandler {
     private static final int PAGE_ITEMS = 10;
 
     private final DentalWorkServiceWrapper dentalWorkService;
-    private final DentalWorkRepository dentalWorkRepository;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private Consumer<BotApiMethod<?>> executor;
@@ -43,13 +41,11 @@ public class DentalWorksHandler extends BotCommandHandler {
 
     @Autowired
     public DentalWorksHandler(DentalLabRestClientWrapper dentalLabRestClient,
-                              DentalWorkRepository dentalWorkRepository,
                               KeyboardBuilderKit keyboardBuilderKit,
                               MessageSource messageSource,
                               ChatSessionService chatSessionService) {
         super(messageSource);
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
-        this.dentalWorkRepository = dentalWorkRepository;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
     }
@@ -240,7 +236,6 @@ public class DentalWorksHandler extends BotCommandHandler {
         buttonLists.add(List.of(buildAnotherMonthButton(locale, messageId)));
         buttonLists.add(List.of(buildCancelButton(locale, messageId)));
         InlineKeyboardMarkup keyboardMarkup = keyboardBuilderKit.inlineKeyboard(buttonLists);
-        dentalWorkRepository.save(dentalWorks, yearMonth, session.getUserId());
         session.addAttribute(Attributes.YEAR_MONTH.name(), yearMonth.toString());
         session.setCommand(BotCommands.DENTAL_WORKS);
         session.setStep(Steps.LIST_PAGING_FOR_ANOTHER_MONTH.ordinal());
@@ -262,10 +257,7 @@ public class DentalWorksHandler extends BotCommandHandler {
         }
         YearMonth yearMonth = YearMonth.parse(session.getAttribute(Attributes.YEAR_MONTH.name()));
         int page = Integer.parseInt(callbackData[2]);
-        List<DentalWork> dentalWorks = dentalWorkRepository.getAll(session.getUserId(), yearMonth);
-        if (dentalWorks.isEmpty()) {
-            dentalWorks = dentalWorkService.findAllByMonth(yearMonth.getYear(), yearMonth.getMonthValue(), session.getUserId());
-        }
+        List<DentalWork> dentalWorks = dentalWorkService.findAllByMonth(yearMonth.getYear(), yearMonth.getMonthValue(), session.getUserId());
         ListPage listPage = getSubListForPage(dentalWorks, page);
         String text = workListToMessage(listPage.dentalWorks, locale);
         String listMonth = yearMonth.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, locale) + '-' + yearMonth.getYear();

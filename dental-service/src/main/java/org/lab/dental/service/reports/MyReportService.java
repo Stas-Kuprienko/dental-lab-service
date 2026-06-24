@@ -1,19 +1,17 @@
 package org.lab.dental.service.reports;
 
 import org.lab.dental.entity.ProductEntity;
-import org.lab.dental.entity.ProductTypeEntity;
-import org.lab.dental.mapping.ProductTypeConverter;
 import org.lab.dental.repository.ProductRepository;
 import org.lab.dental.service.ProductTypeService;
 import org.lab.dental.service.ReportService;
 import org.lab.enums.WorkStatus;
 import org.lab.model.DentalWork;
 import org.lab.model.ProductMap;
+import org.lab.model.ProductType;
 import org.lab.model.ProfitRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -26,7 +24,6 @@ import java.util.UUID;
 public class MyReportService implements ReportService {
 
     private final ProductTypeService productTypeService;
-    private final ProductTypeConverter productTypeConverter;
     private final ReportMapper reportMapper;
     private final XLSXFileTool xlsxFileTool;
     private final ProductRepository productRepository;
@@ -34,12 +31,10 @@ public class MyReportService implements ReportService {
 
     @Autowired
     public MyReportService(ProductTypeService productTypeService,
-                           ProductTypeConverter productTypeConverter,
                            ReportMapper reportMapper,
                            XLSXFileTool xlsxFileTool,
                            ProductRepository productRepository) {
         this.productTypeService = productTypeService;
-        this.productTypeConverter = productTypeConverter;
         this.reportMapper = reportMapper;
         this.xlsxFileTool = xlsxFileTool;
         this.productRepository = productRepository;
@@ -48,10 +43,11 @@ public class MyReportService implements ReportService {
 
     @Override
     public ByteArrayInputStream createFile(List<DentalWork> workList, UUID userId, YearMonth yearMonth) {
-        List<ProductTypeEntity> typeEntities = productTypeService.getAllByUserId(userId);
-        List<String> titles = typeEntities
+        ProductMap productMap = productTypeService.getAllByUserId(userId);
+        List<String> titles = productMap
+                .getEntries()
                 .stream()
-                .map(ProductTypeEntity::getTitle)
+                .map(ProductType::getTitle)
                 .toList();
         List<List<String>> data = reportMapper.mapDentalWorkReport(workList, titles);
         return xlsxFileTool.createReport(data);
@@ -59,9 +55,8 @@ public class MyReportService implements ReportService {
 
     @Override
     public List<DentalWork> readReport(MultipartFile file, UUID userId, LocalDate completeAt, WorkStatus status) {
-        List<ProductTypeEntity> productTypes = productTypeService.getAllByUserId(userId);
-        ProductMap productMap = productTypeConverter.toProductMap(userId, productTypes);
-        List<String> titles = productTypes.stream().map(ProductTypeEntity::getTitle).toList();
+        ProductMap productMap = productTypeService.getAllByUserId(userId);
+        List<String> titles = productMap.getEntries().stream().map(ProductType::getTitle).toList();
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
             List<List<String>> data = xlsxFileTool.parseReport(inputStream, titles);

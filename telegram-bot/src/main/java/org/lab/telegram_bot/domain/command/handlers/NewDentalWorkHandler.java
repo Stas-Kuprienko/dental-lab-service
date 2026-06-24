@@ -18,7 +18,7 @@ import org.lab.telegram_bot.exception.ApplicationCustomException;
 import org.lab.telegram_bot.exception.IncorrectInputException;
 import org.lab.telegram_bot.service.DentalLabRestClientWrapper;
 import org.lab.telegram_bot.service.DentalWorkServiceWrapper;
-import org.lab.telegram_bot.service.ProductMapMvcService;
+import org.lab.telegram_bot.service.ProductMapServiceWrapper;
 import org.lab.telegram_bot.utils.ChatBotUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 public class NewDentalWorkHandler extends BotCommandHandler {
 
     private final DentalWorkServiceWrapper dentalWorkService;
-    private final ProductMapMvcService productMapService;
+    private final ProductMapServiceWrapper productMapService;
     private final KeyboardBuilderKit keyboardBuilderKit;
     private final ChatSessionService chatSessionService;
     private final ObjectMapper objectMapper;
@@ -46,14 +46,13 @@ public class NewDentalWorkHandler extends BotCommandHandler {
 
     @Autowired
     public NewDentalWorkHandler(DentalLabRestClientWrapper dentalLabRestClient,
-                                ProductMapMvcService productMapService,
                                 KeyboardBuilderKit keyboardBuilderKit,
                                 MessageSource messageSource,
                                 ChatSessionService chatSessionService,
                                 ObjectMapper objectMapper) {
         super(messageSource);
         this.dentalWorkService = dentalLabRestClient.DENTAL_WORKS;
-        this.productMapService = productMapService;
+        this.productMapService = dentalLabRestClient.PRODUCT_MAP;
         this.keyboardBuilderKit = keyboardBuilderKit;
         this.chatSessionService = chatSessionService;
         this.objectMapper = objectMapper;
