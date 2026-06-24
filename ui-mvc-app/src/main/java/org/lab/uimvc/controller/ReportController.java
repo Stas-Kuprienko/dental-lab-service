@@ -1,9 +1,12 @@
 package org.lab.uimvc.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.ReportService;
 import org.lab.enums.WorkStatus;
+import org.lab.exception.ApplicationCustomException;
+import org.lab.model.DentalWork;
 import org.lab.model.ProfitRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Month;
@@ -64,12 +66,14 @@ public class ReportController {
     @PostMapping("/works/upload")
     public String uploadReportPage(@RequestParam("file") MultipartFile file,
                                    @RequestParam("completeAt") YearMonth completeAt,
-                                   @RequestParam("status") WorkStatus status) {
+                                   @RequestParam("status") WorkStatus status,
+                                   HttpSession session) {
         try {
-            reportService.updateReport(file.getBytes(), completeAt, status);
+            List<DentalWork> dentalWorks = reportService.updateReport(file.getBytes(), completeAt, status);
+            session.setAttribute(DentalWorkTableController.IMPORTED_SESSION_KEY, dentalWorks);
+            return MvcControllerUtil.REDIRECT + "/main/dental-works";
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ApplicationCustomException(e);
         }
-        return MvcControllerUtil.REDIRECT + MvcControllerUtil.MAIN_FULL_PATH;
     }
 }

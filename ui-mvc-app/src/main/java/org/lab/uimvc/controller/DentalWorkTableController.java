@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 
 @Controller
 @RequestMapping("/main/dental-works")
 public class DentalWorkTableController {
 
+    public static final String IMPORTED_SESSION_KEY = "IMPORTED_LIST";
     private static final String DENTAL_WORKS = "dental-works";
 
     private final ProductMapMvcService productMapService;
@@ -36,14 +36,20 @@ public class DentalWorkTableController {
 
     @GetMapping
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
+                              @RequestParam(value = "imported", required = false) boolean imported,
                               HttpSession session, Model model) {
         MvcControllerUtil.addProductMapToModel(productMapService, session, model);
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
-        List<DentalWork> works;
-        if (headerMonth.isCurrentMonth()) {
-            works = dentalWorkService.findAll();
+        @SuppressWarnings("unchecked")
+        List<DentalWork> works = (List<DentalWork>) session.getAttribute(IMPORTED_SESSION_KEY);
+        if (!imported || works == null) {
+            if (headerMonth.isCurrentMonth()) {
+                works = dentalWorkService.findAll();
+            } else {
+                works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
+            }
         } else {
-            works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
+            session.removeAttribute(IMPORTED_SESSION_KEY);
         }
         model.addAttribute("headerMonth", headerMonth);
         model.addAttribute("works", works);

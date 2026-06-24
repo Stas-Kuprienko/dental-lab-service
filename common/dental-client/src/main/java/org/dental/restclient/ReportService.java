@@ -1,7 +1,9 @@
 package org.dental.restclient;
 
 import org.lab.enums.WorkStatus;
+import org.lab.model.DentalWork;
 import org.lab.model.ProfitRecord;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -9,6 +11,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ReportService {
@@ -48,8 +51,8 @@ public class ReportService {
                 .body(byte[].class);
     }
 
-    public void updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status) {
-        restClient
+    public List<DentalWork> updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status) {
+        return restClient
                 .post()
                 .uri(uri -> uri.path(RESOURCE + "/works")
                         .queryParam("complete-at", completeAt)
@@ -58,11 +61,11 @@ public class ReportService {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(resourceToRequest(fileBytes))
                 .retrieve()
-                .toBodilessEntity();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
-    public void updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status, Consumer<HttpHeaders> headersConsumer) {
-        restClient
+    public List<DentalWork> updateReport(byte[] fileBytes, YearMonth completeAt, WorkStatus status, Consumer<HttpHeaders> headersConsumer) {
+        return restClient
                 .post()
                 .uri(uri -> uri.path(RESOURCE + "/works")
                         .queryParam("complete-at", completeAt)
@@ -72,7 +75,7 @@ public class ReportService {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(resourceToRequest(fileBytes))
                 .retrieve()
-                .toBodilessEntity();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     public ProfitRecord countProfitForMonth(int year, int month) {

@@ -14,7 +14,6 @@ import org.lab.enums.WorkStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -240,6 +239,14 @@ public class MyDentalWorkService implements DentalWorkService {
             dentalWork.getProducts().add(product);
         }
         return dentalWork;
+    }
+
+    @Override
+    public List<ProductEntity> saveAllProducts(List<ProductEntity> products) {
+        log.info("{} ProductEntities received to save", products.size());
+        products = productRepository.saveAll(products);
+        log.info("{} ProductEntities saved successfully", products.size());
+        return products;
     }
 
     @Override

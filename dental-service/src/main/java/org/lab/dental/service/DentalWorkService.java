@@ -41,6 +41,8 @@ public interface DentalWorkService {
 
     DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt);
 
+    List<ProductEntity> saveAllProducts(List<ProductEntity> products);
+
     DentalWorkEntity updateProductCompletion(Long id, UUID userId, UUID productId, LocalDate completeAt);
 
     DentalWorkEntity deleteProduct(Long id, UUID userId, UUID productId);

@@ -2,6 +2,7 @@ package org.lab.dental.service;
 
 import jakarta.transaction.Transactional;
 import org.lab.dental.entity.DentalWorkEntity;
+import org.lab.dental.entity.ProductEntity;
 import org.lab.dental.mapping.DentalWorkConverter;
 import org.lab.dental.repository.DentalWorkCacheRepository;
 import org.lab.enums.WorkStatus;
@@ -10,12 +11,13 @@ import org.lab.request.NewDentalWork;
 import org.lab.request.NewProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class DentalWorkManager {
@@ -58,8 +60,26 @@ public class DentalWorkManager {
     public List<DentalWork> createAll(List<DentalWork> dentalWorks) {
         List<DentalWorkEntity> entities = dentalWorks.stream()
                 .map(converter::toEntity)
-                .toList();
-        entities = dentalWorkService.createAll(entities);
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<List<ProductEntity>> arrayOfProductList = new ArrayList<>();
+        for (DentalWorkEntity dw : entities) {
+            arrayOfProductList.add(dw.getProducts());
+            dw.setProducts(null);
+        }
+        dentalWorkService.createAll(entities);
+        List<ProductEntity> products = new ArrayList<>();
+        for (int i = 0; i < entities.size(); i++) {
+            List<ProductEntity> productList = arrayOfProductList.get(i);
+            if (productList != null && !productList.isEmpty()) {
+                DentalWorkEntity dw = entities.get(i);
+                for (ProductEntity p : arrayOfProductList.get(i)) {
+                    p.setDentalWorkId(dw.getId());
+                    products.add(p);
+                }
+                dw.setProducts(productList);
+            }
+        }
+        dentalWorkService.saveAllProducts(products);
         return entities.stream()
                 .map(converter::toDto)
                 .toList();
@@ -67,15 +87,16 @@ public class DentalWorkManager {
 
     public DentalWork getByIdAndUserId(long id, UUID userId) {
         Optional<DentalWork> optionalDentalWork = cacheRepository.getByIdAndUserId(id, userId);
+        DentalWork dentalWork;
         if (optionalDentalWork.isPresent()) {
-            return optionalDentalWork.get();
+            dentalWork = optionalDentalWork.get();
         } else {
             DentalWorkEntity entity = dentalWorkService.getByIdAndUserId(id, userId);
-            DentalWork dentalWork = converter.toDto(entity);
-            List<String> photoFiles = workPhotoFileService.getAllFilenamesByWorkId(id);
-            dentalWork.setPhotoFiles(photoFiles);
-            return dentalWork;
+            dentalWork = converter.toDto(entity);
         }
+        List<String> photoFiles = workPhotoFileService.getAllFilenamesByWorkId(id);
+        dentalWork.setPhotoFiles(photoFiles);
+        return dentalWork;
     }
 
     public List<DentalWork> getAllForMonthByUserId(UUID userId, YearMonth yearMonth) {
@@ -97,11 +118,7 @@ public class DentalWorkManager {
         if (dentalWorks.isEmpty()) {
             List<DentalWorkEntity> entities = dentalWorkService.getAllActualByUserId(userId);
             dentalWorks = entities.stream()
-                    .map(e -> {
-                        DentalWork dw = converter.toDto(e);
-                        dw.setPhotoFiles(workPhotoFileService.getAllFilenamesByWorkId(dw.getId()));
-                        return dw;
-                    })
+                    .map(converter::toDto)
                     .toList();
             cacheRepository.save(dentalWorks, userId);
         }
