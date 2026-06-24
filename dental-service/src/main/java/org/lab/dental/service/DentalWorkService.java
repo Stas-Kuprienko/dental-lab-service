@@ -13,6 +13,8 @@ public interface DentalWorkService {
 
     DentalWorkEntity create(DentalWorkEntity dentalWork);
 
+    List<DentalWorkEntity> createAll(List<DentalWorkEntity> dentalWorks);
+
     DentalWorkEntity getByIdAndUserId(Long id, UUID userId);
 
     DentalWorkEntity getById(Long id);
@@ -38,6 +40,8 @@ public interface DentalWorkService {
     void addProduct(Long id, UUID userId, ProductEntity product);
 
     DentalWorkEntity addProduct(DentalWorkEntity dentalWork, UUID productTypeId, Integer quantity, LocalDate completeAt);
+
+    List<ProductEntity> saveAllProducts(List<ProductEntity> products);
 
     DentalWorkEntity updateProductCompletion(Long id, UUID userId, UUID productId, LocalDate completeAt);
 

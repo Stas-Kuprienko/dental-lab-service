@@ -11,20 +11,16 @@
 
 <body>
 
-<!-- 🔝 Меню -->
 <div th:replace="fragments/nav :: nav"></div>
 
 <section>
-    <!-- 📅 Заголовок месяца -->
     <h3><strong th:text="${headerMonth.value()}">Июль - 2025</strong></h3>
 
-    <!-- 🟦 Легенда -->
     <h4 style="float: left;">
         <label style="background-color: #002d73; border: 5px solid #002d73">ВЫПОЛНЕНО</label> &emsp;
         <label style="background-color: #075700; border: 5px solid #075700">ОПЛАЧЕНО</label>
     </h4>
 
-    <!-- 🧾 Таблица -->
     <div class="table-wrapper">
         <div class="table">
             <div class="thead" style="font-size: 65%;">
@@ -45,7 +41,6 @@
                     <div class="td" th:text="${work.patient}">Пациент</div>
                     <div class="td" th:text="${work.clinic}">Клиника</div>
 
-                    <!-- Продукты -->
                     <div class="td"
                          th:each="item : ${map}"
                          th:text="${work.quantityFor(item.title) ?: ' '}">
@@ -60,10 +55,8 @@
     </div>
 </section>
 
-<!-- ⏬ Нижнее меню -->
 <div class="low-menu">
     <div class="low-burger">☰</div>
-    <!-- PROFIT -->
     <a id="profit-label"><button>посчитать доход</button></a>
     <div id="profit-form" style="display:none;">
         <form method="get" th:action="@{/main/reports/profit}">
@@ -76,7 +69,6 @@
         </form>
     </div>
 
-    <!-- SEARCH -->
     <a id="search-label"><button>поиск записи</button></a>
     <div id="search-form" style="display:none;">
         <form method="post" th:action="@{/main/dental-works/search}">
@@ -86,7 +78,6 @@
         </form>
     </div>
 
-    <!-- SELECT MONTH -->
     <a id="monthly-label"><button>другой месяц</button></a>
     <div id="monthly-form" style="display:none;">
         <form method="get" th:action="@{/main/dental-works}">
@@ -95,7 +86,6 @@
         </form>
     </div>
 
-    <!-- SORT -->
     <a id="sort-label"><button>сортировать</button></a>
     <div id="sort-form" style="display:none;">
         <form method="post" th:action="@{/main/dental-works/sorting?is_previous_month=false}">
@@ -110,7 +100,6 @@
         </form>
     </div>
 
-    <!-- DOWNLOAD -->
     <a>
         <form method="get" th:action="@{/main/reports/works/download}">
             <input class="low-button" type="submit" value="скачать">
@@ -118,11 +107,14 @@
             <input type="hidden" name="month" th:value="${headerMonth.monthValue}">
         </form>
     </a>
+    <a>
+        <form method="get" th:action="@{/main/reports/works/upload}">
+            <input class="low-button" type="submit" value="загрузить">
+        </form>
+    </a>
 </div>
 
-<!-- ⚙️ Скрипты -->
 <script>
-    // Табличные ряды — клик по строке
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.row-clickable').forEach(row => {
             row.addEventListener('click', () => {
@@ -131,7 +123,6 @@
             });
         });
 
-        // Переключалки в нижнем меню
         $('#search-label').click(() => $('#search-form').toggle("show"));
         $('#profit-label').click(() => $('#profit-form').toggle("show"));
         $('#sort-label').click(() => $('#sort-form').toggle("show"));

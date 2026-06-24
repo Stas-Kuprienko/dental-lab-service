@@ -11,23 +11,18 @@
 </head>
 
 <body>
-<!-- 🔝 Меню -->
 <div th:replace="fragments/nav :: main-menu"></div>
 
-<!-- 📝 Форма -->
 <section>
   <h2>Запись новой работы:</h2>
 
   <form th:action="@{/main/dental-works}" method="post" class="work">
-    <!-- Пациент -->
     <label for="patient">пациент:</label><br>
     <input type="text" id="patient" name="patient" required><br>
 
-    <!-- Клиника -->
     <label for="clinic">клиника:</label><br>
     <input type="text" id="clinic" name="clinic" required><br>
 
-    <!-- Вид работы -->
     <label for="product">вид работы:</label><br>
     <select id="product" name="productId"
             style="width: 230px; height: 30px; font-size: 22px;" required>
@@ -38,23 +33,24 @@
       </option>
     </select><br>
 
-    <!-- Кол-во -->
     <label for="quantity">количество:</label><br>
     <input type="number" id="quantity" name="quantity" min="0" max="32"><br>
 
-    <!-- Дата -->
     <label for="complete">дата назначения:</label><br>
     <input type="date" id="complete" name="completeAt"><br>
 
-    <!-- 💬 Комментарий -->
     <label for="comment">комментарий:</label><br>
     <textarea id="comment" name="comment" rows="3" cols="25"
               placeholder="Введите комментарий (необязательно)..."
               style="font-size: 18px;"></textarea><br>
 
-    <!-- Кнопка -->
     <br>
     <button type="submit" class="medium-button">СОХРАНИТЬ</button>
+  </form>
+</section>
+<section>
+  <form method="get" th:action="@{/main/reports/works/upload}" class="work" style="width: 256px">
+    <input class="low-button" type="submit" value="загрузить EXCEL отчёт">
   </form>
 </section>
 </body>

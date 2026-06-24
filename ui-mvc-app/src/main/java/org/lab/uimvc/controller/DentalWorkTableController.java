@@ -19,6 +19,7 @@ import java.util.List;
 @RequestMapping("/main/dental-works")
 public class DentalWorkTableController {
 
+    public static final String IMPORTED_SESSION_KEY = "IMPORTED_LIST";
     private static final String DENTAL_WORKS = "dental-works";
 
     private final ProductMapService productMapService;
@@ -34,14 +35,20 @@ public class DentalWorkTableController {
 
     @GetMapping
     public String dentalWorks(@RequestParam(value = "year-month", required = false) String yearMonth,
+                              @RequestParam(value = "imported", required = false) boolean imported,
                               HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         HeaderMonth headerMonth = new HeaderMonth(yearMonth);
-        List<DentalWork> works;
-        if (headerMonth.isCurrentMonth()) {
-            works = dentalWorkService.findAllActualByUserId();
+        @SuppressWarnings("unchecked")
+        List<DentalWork> works = (List<DentalWork>) session.getAttribute(IMPORTED_SESSION_KEY);
+        if (!imported || works == null) {
+            if (headerMonth.isCurrentMonth()) {
+                works = dentalWorkService.findAllActualByUserId();
+            } else {
+                works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
+            }
         } else {
-            works = dentalWorkService.findAllByMonth(headerMonth.getYear(), headerMonth.getMonthValue());
+            session.removeAttribute(IMPORTED_SESSION_KEY);
         }
         model.addAttribute("headerMonth", headerMonth);
         model.addAttribute("works", works);
@@ -51,7 +58,7 @@ public class DentalWorkTableController {
     @PostMapping("/search")
     public String searchDentalWorks(@RequestParam("clinic") String clinic, @RequestParam("patient") String patient,
                                     HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         List<DentalWork> works = dentalWorkService.findByClinicAndPatient(clinic, patient);
         HeaderMonth headerMonth = new HeaderMonth(null);
         model.addAttribute("headerMonth", headerMonth);

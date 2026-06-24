@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DENTAL LAB SERVICE</title>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="fragments/nav :: main-menu"></div>
+
+<section>
+    <h2>Загрузка EXCEL отчёта</h2>
+    <h3> Шаблон Excel таблицы для импорта</h3>
+    <div class="photo-gallery">
+        <div class="photo-box">
+            <img th:src="@{/img/excel-template.jpg}">
+            <label>*первые две колонки должны быть "Пациент | Клиника",<br>
+                а дальше колонки с видами работ, которые есть у вас в
+                <a th:href="@{/main/product-map}" style="color: white"> карте</a>
+            </label>
+        </div>
+    </div>
+    <div class="work">
+        <label>Добавить xlsx файл</label>
+        <form method="post"
+              enctype="multipart/form-data"
+              th:action="@{/main/reports/works/upload}" name="Выбрать файл">
+            <input type="file" name="file"
+                   accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .xls"
+                   required/><br><br>
+            <label for="complete-at">Месяц закрытия работ:</label>
+            <input type="month" id="complete-at" name="completeAt"><br><br>
+            <label style="font-size:80%;">Статус работ:</label>
+            <select name="status">
+                <option value="MAKING">ДЕЛАЕТСЯ</option>
+                <option value="COMPLETED">ВЫПОЛНЕНО</option>
+                <option value="PAID">ОПЛАЧЕНО</option>
+            </select><br><br>
+            <button style="width: 128px;" type="submit">ЗАГРУЗИТЬ</button>
+        </form>
+    </div>
+</section>
+</body>
+</html>

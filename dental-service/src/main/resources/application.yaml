@@ -138,7 +138,8 @@ logging:
     org.hibernate.SQL: DEBUG
   file:
     name: logs/application.log
-
+  charset:
+    console: UTF-8
 
 project:
   variables:

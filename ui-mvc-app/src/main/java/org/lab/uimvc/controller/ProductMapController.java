@@ -1,6 +1,5 @@
 package org.lab.uimvc.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.lab.dental.feignclient.ProductMapService;
 import org.lab.model.ProductMap;
 import org.lab.request.NewProductType;
@@ -27,9 +26,8 @@ public class ProductMapController extends MvcControllerUtil {
 
 
     @GetMapping
-    public String productMapPage(HttpSession session, Model model) {
-        UUID userId = getUserId(session);
-        ProductMap map = productMapService.findAll(userId);
+    public String productMapPage(Model model) {
+        ProductMap map = productMapService.findAll();
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return PRODUCT_MAP;
     }
@@ -37,9 +35,8 @@ public class ProductMapController extends MvcControllerUtil {
     @PostMapping
     public String addProduct(@RequestParam("title") String title,
                              @RequestParam("price") float price,
-                             HttpSession session, Model model) {
-        UUID userId = getUserId(session);
-        ProductMap map = productMapService.create(new NewProductType(title, price), userId);
+                             Model model) {
+        ProductMap map = productMapService.create(new NewProductType(title, price));
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }
@@ -47,20 +44,18 @@ public class ProductMapController extends MvcControllerUtil {
     @PostMapping("/{id}/edit")
     public String editProduct(@PathVariable("id") UUID id,
                               @RequestParam("price") float price,
-                              HttpSession session, Model model) {
-        UUID userId = getUserId(session);
-        productMapService.update(id, price, userId);
-        ProductMap map = productMapService.findAll(userId);
+                              Model model) {
+        productMapService.update(id, price);
+        ProductMap map = productMapService.findAll();
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }
 
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable("id") UUID id,
-                                HttpSession session, Model model) {
-        UUID userId = getUserId(session);
-        productMapService.delete(userId, id);
-        ProductMap map = productMapService.findAll(userId);
+                                Model model) {
+        productMapService.delete(id);
+        ProductMap map = productMapService.findAll();
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
         return REDIRECT + PRODUCT_MAP_PATH;
     }

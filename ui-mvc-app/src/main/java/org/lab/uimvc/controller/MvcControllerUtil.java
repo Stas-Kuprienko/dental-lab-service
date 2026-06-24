@@ -5,7 +5,6 @@ import org.lab.dental.feignclient.ProductMapService;
 import org.lab.model.ProductMap;
 import org.springframework.ui.Model;
 import java.util.Locale;
-import java.util.UUID;
 
 public abstract class MvcControllerUtil {
 
@@ -27,14 +26,9 @@ public abstract class MvcControllerUtil {
     public static final Locale DEFAULT_LOCALE = Locale.of("RU");
 
 
-    public static void addProductMapToModel(ProductMapService productMapService, HttpSession session, Model model) {
-        UUID userId = getUserId(session);
-        ProductMap map = productMapService.findAll(userId);
+    public static void addProductMapToModel(ProductMapService productMapService, Model model) {
+        ProductMap map = productMapService.findAll();
         model.addAttribute(ATTRIBUTE_KEY_MAP, map.getEntries());
-    }
-
-    public static UUID getUserId(HttpSession session) {
-        return (UUID) session.getAttribute(ATTRIBUTE_KEY_USER_ID);
     }
 
     public static String getEmail(HttpSession session) {

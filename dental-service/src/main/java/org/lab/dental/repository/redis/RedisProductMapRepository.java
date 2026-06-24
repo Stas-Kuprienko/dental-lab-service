@@ -67,14 +67,19 @@ public class RedisProductMapRepository implements ProductMapCacheRepository {
     }
 
     @Override
-    public Optional<ProductMap> updateIfContains(ProductType productType, UUID userId) {
+    public Optional<ProductMap> updateIfContains(UUID id, float newPrice, UUID userId) {
         log.info("ProductType for user '{}' accepted to update if contains", userId);
         Optional<ProductMap> optional = getProductMap(userId);
         if (optional.isPresent()) {
             ProductMap productMap = optional.get();
-            productMap.getEntries().add(productType);
+            for (ProductType pt : productMap.getEntries()) {
+                if (pt.getId().equals(id)) {
+                    pt.setPrice(newPrice);
+                    break;
+                }
+            }
             put(productMap);
-            log.info("ProductMap for user '{}' is updated, added entry ID='{}'", userId, productType.getId());
+            log.info("ProductMap for user '{}' is updated, added entry ID='{}'", userId, id);
             return Optional.of(productMap);
         } else {
             log.info("ProductMap for user '{}' is not found.", userId);

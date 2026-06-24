@@ -13,7 +13,7 @@ public interface ProductMapCacheRepository {
 
     Optional<ProductMap> get(UUID userId);
 
-    Optional<ProductMap> updateIfContains(ProductType productType, UUID userId);
+    Optional<ProductMap> updateIfContains(UUID id, float newPrice, UUID userId);
 
     void delete(UUID id, UUID userId);
 }

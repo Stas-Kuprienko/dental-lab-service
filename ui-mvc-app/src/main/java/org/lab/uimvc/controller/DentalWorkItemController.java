@@ -1,6 +1,5 @@
 package org.lab.uimvc.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.lab.dental.feignclient.DentalWorkService;
 import org.lab.dental.feignclient.ProductMapService;
 import org.lab.dental.feignclient.ProductService;
@@ -38,22 +37,22 @@ public class DentalWorkItemController {
 
 
     @GetMapping("/new")
-    public String newWorkForm(HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+    public String newWorkForm(Model model) {
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return "new-dental-work";
     }
 
     @PostMapping
-    public String createDentalWork(@ModelAttribute NewDentalWork newDentalWork, Model model, HttpSession session) {
+    public String createDentalWork(@ModelAttribute NewDentalWork newDentalWork, Model model) {
         DentalWork work = dentalWorkService.create(newDentalWork);
         model.addAttribute(ATTRIBUTE_WORK, work);
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(work.getId());
     }
 
     @GetMapping("/{id}")
-    public String viewDentalWork(@PathVariable("id") Long id, HttpSession session, Model model) {
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+    public String viewDentalWork(@PathVariable("id") Long id, Model model) {
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         DentalWork work = dentalWorkService.findById(id);
         model.addAttribute(ATTRIBUTE_WORK, work);
         return "view-dental-work";
@@ -62,11 +61,11 @@ public class DentalWorkItemController {
     @PostMapping("/{id}/products/new")
     public String addProduct(@PathVariable("id") Long id,
                              @ModelAttribute NewProduct newProduct,
-                             HttpSession session, Model model) {
+                             Model model) {
 
         DentalWork work = productService.addProduct(id, newProduct);
         model.addAttribute(ATTRIBUTE_WORK, work);
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(work.getId());
     }
 
@@ -74,40 +73,40 @@ public class DentalWorkItemController {
     public String updateCompletion(@PathVariable("id") Long id,
                                    @RequestParam("product") UUID productId,
                                    @RequestParam("completeAt") LocalDate completeAt,
-                                   HttpSession session, Model model) {
+                                   Model model) {
 
         DentalWork work = productService.updateCompletion(id, productId, completeAt);
         model.addAttribute(ATTRIBUTE_WORK, work);
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(work.getId());
     }
 
     @PostMapping("/{id}/products/delete")
     public String deleteProduct(@PathVariable("id") Long id,
                                 @RequestParam("product") UUID productId,
-                                HttpSession session, Model model) {
+                                Model model) {
 
         DentalWork work = productService.deleteProduct(id, productId);
         model.addAttribute(ATTRIBUTE_WORK, work);
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(work.getId());
     }
 
     @PostMapping("/{id}/edit")
     public String updateDentalWork(@PathVariable("id") Long id,
                                    @ModelAttribute DentalWork dentalWork,
-                                   HttpSession session, Model model) {
+                                   Model model) {
 
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         DentalWork updated = dentalWorkService.update(id, dentalWork);
         model.addAttribute(ATTRIBUTE_WORK, updated);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS_BY_ID.formatted(id);
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteDentalWork(@PathVariable("id") Long id, HttpSession session, Model model) {
+    public String deleteDentalWork(@PathVariable("id") Long id, Model model) {
         dentalWorkService.delete(id);
-        MvcControllerUtil.addProductMapToModel(productMapService, session, model);
+        MvcControllerUtil.addProductMapToModel(productMapService, model);
         return MvcControllerUtil.REDIRECT + DENTAL_WORKS;
     }
 }

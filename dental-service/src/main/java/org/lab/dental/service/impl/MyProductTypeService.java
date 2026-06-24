@@ -8,7 +8,6 @@ import org.lab.dental.mapping.ProductTypeConverter;
 import org.lab.dental.repository.ProductTypeRepository;
 import org.lab.dental.repository.redis.RedisProductMapRepository;
 import org.lab.dental.service.ProductTypeService;
-import org.lab.exception.ApplicationCustomException;
 import org.lab.model.ProductMap;
 import org.lab.model.ProductType;
 import org.lab.request.NewProductType;
@@ -96,14 +95,8 @@ public class MyProductTypeService implements ProductTypeService {
     @Override
     public void update(UUID id, UUID userId, float newPrice) {
         repository.updatePrice(id, userId, BigDecimal.valueOf(newPrice));
-        Optional<ProductTypeEntity> optional = repository.findByIdAndUserId(id, userId);
-        if (optional.isPresent()) {
-            ProductType type = converter.toDto(optional.get());
-            log.info("ProductType with ID={} and userID='{}' is updated", id, userId);
-            redisRepository.updateIfContains(type, userId);
-        } else {
-            throw new ApplicationCustomException("Updatable entity (ID='%s') is not found by findByIdAndUserId(id, userId) method".formatted(id));
-        }
+        redisRepository.updateIfContains(id, newPrice, userId);
+        log.info("ProductType with ID={} and userID='{}' is updated", id, userId);
     }
 
     @Override
