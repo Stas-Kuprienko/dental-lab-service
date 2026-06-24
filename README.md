@@ -192,29 +192,40 @@ public class ChatSession {
 
 ```
     private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
+    
         NewDentalWork newDentalWork = ... // парсинг сообщения в данные для объекта нового заказа
-        ... // создание ответа со списком видов работ... 
-        String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.NEW_DENTAL_WORK, Steps.SELECT_PRODUCT_TYPE.ordinal());
+        InlineKeyboardMarkup keyboardMarkup = ... // создание ответа со списком видов работ
+        
+        //сохраняем в сессию введённые пользователем данные в формате JSON
         session.addAttribute(Attributes.NEW_DENTAL_WORK.name(), newDentalWorkAsString(newDentalWork));
+        
+        //устанавливаем текущую команду
         session.setCommand(BotCommands.NEW_DENTAL_WORK);
+        
+        //устанавливаем в сессию следующий шаг
         session.setStep(Steps.SELECT_PRODUCT_TYPE.ordinal());
+        
+        //сохраняем в Redis
         chatSessionService.save(session);
-        ... // удаление предыдущего сообщения 
+        
         return createSendMessage(session.getChatId(), text, keyboardMarkup);
     }
 ```
 При новом запросе будет работать следующий шаг с использованием сохранённых в сессии данных.
 
 ---
-### Использование Redis
+### Динамические таблицы работ
 
-Redis применяется в нескольких сервисах:
+Каждый пользователь формирует собственный каталог изделий (ProductMap), содержащий индивидуальный набор типов работ и их стоимость.
+На основе этого каталога динамически формируются:
 
-- кэширование часто запрашиваемых данных в dental-lab-service;
-- хранение ChatSession Telegram пользователей;
-- реализация Rate Limiting в API Gateway.
+* таблицы работ в Web UI (Thymeleaf);
+* Excel-отчёты (XLSX Export);
+* импорт данных из Excel (XLSX Import).
 
-По факту Redis используется не только как кэш, но и как быстрое in-memory хранилище.
+Благодаря этому разные пользователи могут работать с различающимися наборами изделий без изменения структуры базы данных и программного кода.
+
+Импорт поддерживает загрузку Excel-файлов (по определённому шаблону), валидирует колонки и автоматически сопоставляет данные.
 
 ---
 > ## Observability
