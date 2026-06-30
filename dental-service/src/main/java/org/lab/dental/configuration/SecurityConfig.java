@@ -29,7 +29,7 @@ public class SecurityConfig {
 
     public enum RequestPatternsPermitAll {
         ACTUATOR("/actuator/**"),
-        OPEN_API("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"),
+        OPEN_API("/docs/**", "/docs"),
         AUTHENTICATION("/api/v1/auth/**");
 
         public final String[] args;

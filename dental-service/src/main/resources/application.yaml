@@ -67,9 +67,9 @@ springdoc:
     version: 1.0.0
     url:
   swagger-ui:
-    path: /index.html
+    path: /docs/index.html
   api-docs:
-    path: /v3/api-docs
+    path: /docs/v3/api-docs
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
   paths-to-match: /api/v1/**

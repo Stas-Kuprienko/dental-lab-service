@@ -197,7 +197,7 @@ public class DentalLabConfiguration {
                 .type(SecurityScheme.Type.OAUTH2)
                 .openIdConnectUrl(authServerUrl + "/realms/" + realm + "/.well-known/openid-configuration")
                 .flows(new OAuthFlows()
-                        .implicit(new OAuthFlow()
+                        .authorizationCode(new OAuthFlow()
                                 .authorizationUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/auth")
                                 .tokenUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token")
                         ));

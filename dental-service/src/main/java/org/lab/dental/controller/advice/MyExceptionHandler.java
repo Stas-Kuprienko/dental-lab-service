@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -61,6 +62,15 @@ public class MyExceptionHandler {
 
     @ExceptionHandler(NotFoundCustomException.class)
     public ResponseEntity<ErrorResponse> notFoundHandle(NotFoundCustomException e) {
+        log.info(e.getMessage());
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        return ResponseEntity
+                .status(httpStatus.value())
+                .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> noResourceFoundHandle(NoResourceFoundException e) {
         log.info(e.getMessage());
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         return ResponseEntity
