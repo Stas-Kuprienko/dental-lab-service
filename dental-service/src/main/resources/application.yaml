@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: framework
   port: 8082
 
 spring:
@@ -68,6 +69,9 @@ springdoc:
     url:
   swagger-ui:
     path: /docs/index.html
+    oauth:
+      client-id: swagger-ui-client
+      use-pkce-with-authorization-code-grant: true
   api-docs:
     path: /docs/v3/api-docs
   default-produces-media-type: application/json
@@ -79,7 +83,7 @@ project:
   variables:
     service-label: Dental-Lab-Service
     service-url: http://localhost:8081/dental-lab
-    service-api-url: http://localhost:8082
+    service-api-url: https://dental-lab-service.ru
     telegram-bot:
       url: http://localhost:8083
     keycloak:

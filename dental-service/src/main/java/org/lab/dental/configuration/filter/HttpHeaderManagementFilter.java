@@ -24,6 +24,7 @@ import java.util.Arrays;
 public class HttpHeaderManagementFilter extends OncePerRequestFilter {
 
     private static final String DENTAL_LAB_CLIENT_ID = "dental-lab-client";
+    private static final String SWAGGER_UI_CLIENT_ID = "swagger-ui-client";
     private static final String UI_MVC_CLIENT_ID = "ui-mvc-client";
     private static final String TELEGRAM_CLIENT_ID = "telegram-bot-client";
     private static final String USER_ID_HEADER = "X-USER-ID";
@@ -61,6 +62,7 @@ public class HttpHeaderManagementFilter extends OncePerRequestFilter {
                 case TELEGRAM_CLIENT_ID -> handleTelegramClient(request);
                 case UI_MVC_CLIENT_ID -> handleUiMvcClient(request);
                 case DENTAL_LAB_CLIENT_ID -> handleDentalLabClient(jwt, request);
+                case SWAGGER_UI_CLIENT_ID -> handleSwaggerUiClient(jwt, request);
                 default -> throw new ForbiddenCustomException("Client ID is unexpected: " + clientId);
             }
         }
@@ -84,6 +86,14 @@ public class HttpHeaderManagementFilter extends OncePerRequestFilter {
         String userId = jwt.getSubject();
         request.setAttribute(USER_ID_HEADER, userId);
         request.setAttribute(SERVICE_ID_HEADER, DENTAL_LAB_CLIENT_ID);
+        log.debug("Set attribute {}={}", USER_ID_HEADER, userId);
+    }
+
+    private void handleSwaggerUiClient(Jwt jwt, HttpServletRequest request) {
+        log.info("Request from {}", SWAGGER_UI_CLIENT_ID);
+        String userId = jwt.getSubject();
+        request.setAttribute(USER_ID_HEADER, userId);
+        request.setAttribute(SERVICE_ID_HEADER, SWAGGER_UI_CLIENT_ID);
         log.debug("Set attribute {}={}", USER_ID_HEADER, userId);
     }
 

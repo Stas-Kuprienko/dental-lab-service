@@ -194,14 +194,13 @@ public class DentalLabConfiguration {
                 .description(description)
                 .version(version);
         SecurityScheme oauth2Scheme = new SecurityScheme()
+                .name("Keycloak")
                 .type(SecurityScheme.Type.OAUTH2)
-                .openIdConnectUrl(authServerUrl + "/realms/" + realm + "/.well-known/openid-configuration")
                 .flows(new OAuthFlows()
                         .authorizationCode(new OAuthFlow()
                                 .authorizationUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/auth")
-                                .tokenUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token")
-                        ));
-        String oauth2SchemeVar = SecurityScheme.Type.OAUTH2.toString();
+                                .tokenUrl(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token")));
+        String oauth2SchemeVar = oauth2Scheme.getName();
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(oauth2SchemeVar);
         OpenAPI openAPI = new OpenAPI()
                 .info(info)
