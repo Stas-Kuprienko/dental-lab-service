@@ -20,7 +20,7 @@ public class ProductMapServiceWrapper {
     }
 
 
-    public ProductType create(NewProductType newProductType, UUID userId) {
+    public ProductMap create(NewProductType newProductType, UUID userId) {
         return productMapService.create(newProductType, httpHeaderConsumerFunction.apply(userId));
     }
 

@@ -197,12 +197,20 @@ public class KeycloakCredentialService implements CredentialService {
     }
 
     @Override
-    public void deleteUser(UUID userId) {
-        realmResource
+    public boolean deleteUser(UUID userId) {
+        Response response = realmResource
                 .users()
-                .get(userId.toString())
-                .remove();
-        log.info("User '{}' is deleted", userId);
+                .delete(userId.toString());
+        try (response) {
+            int status = response.getStatus();
+            if (status >= 200 && status < 299) {
+                log.info("User '{}' is deleted", userId);
+                return true;
+            } else {
+                log.warn("Delete user status = " + status);
+                return false;
+            }
+        }
     }
 
 

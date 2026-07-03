@@ -21,23 +21,23 @@ public class ProductMapService {
     }
 
 
-    public ProductType create(NewProductType newProductType) {
-        return restClient
+    public void create(NewProductType newProductType) {
+        restClient
                 .post()
                 .uri(RESOURCE)
                 .body(newProductType)
                 .retrieve()
-                .body(ProductType.class);
+                .toBodilessEntity();
     }
 
-    public ProductType create(NewProductType newProductType, Consumer<HttpHeaders> headersConsumer) {
+    public ProductMap create(NewProductType newProductType, Consumer<HttpHeaders> headersConsumer) {
         return restClient
                 .post()
                 .uri(RESOURCE)
                 .headers(headersConsumer)
                 .body(newProductType)
                 .retrieve()
-                .body(ProductType.class);
+                .body(ProductMap.class);
     }
 
     public ProductType findById(UUID id) {

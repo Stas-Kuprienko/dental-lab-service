@@ -60,8 +60,8 @@ public class MyExceptionHandler {
                 .body(new ErrorResponse(httpStatus.name(), e.getMessage()));
     }
 
-    @ExceptionHandler(NotFoundCustomException.class)
-    public ResponseEntity<ErrorResponse> notFoundHandle(NotFoundCustomException e) {
+    @ExceptionHandler({NotFoundCustomException.class, org.lab.exception.NotFoundCustomException.class})
+    public ResponseEntity<ErrorResponse> notFoundHandle(RuntimeException e) {
         log.info(e.getMessage());
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         return ResponseEntity

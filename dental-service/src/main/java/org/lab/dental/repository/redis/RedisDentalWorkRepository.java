@@ -7,6 +7,7 @@ import org.lab.model.DentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -30,9 +31,10 @@ public class RedisDentalWorkRepository implements DentalWorkCacheRepository {
 
     @PostConstruct
     public void init() {
-        Duration duration = Duration.of(15, ChronoUnit.MINUTES);
-        redisTemplate.expire(KEY, duration);
-        log.info("Cache duration for {} key is set to {}", KEY, duration);
+        Duration duration = Duration.of(30, ChronoUnit.MINUTES);
+        if (redisTemplate.expire(KEY, duration)) {
+            log.info("Cache duration for {} key is set to {}", KEY, duration);
+        }
     }
 
 

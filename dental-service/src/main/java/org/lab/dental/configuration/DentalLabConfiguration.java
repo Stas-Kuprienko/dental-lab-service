@@ -172,7 +172,7 @@ public class DentalLabConfiguration {
         template.setHashValueSerializer(productMapRedisSerializer);
         template.afterPropertiesSet();
         if (template.getConnectionFactory().getConnection().ping().equals("PONG")) {
-            log.info("RedisTemplate for DentalWorks has been initialized");
+            log.info("RedisTemplate for ProductMap has been initialized");
             return template;
         } else {
             throw new ApplicationCustomException("Redis connection is failure");

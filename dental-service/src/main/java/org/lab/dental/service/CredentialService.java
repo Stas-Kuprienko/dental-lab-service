@@ -25,5 +25,5 @@ public interface CredentialService {
 
     void logout(UUID userId);
 
-    void deleteUser(UUID userId);
+    boolean deleteUser(UUID userId);
 }

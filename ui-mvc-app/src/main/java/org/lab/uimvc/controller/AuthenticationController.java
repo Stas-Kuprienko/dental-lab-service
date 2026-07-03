@@ -1,5 +1,6 @@
 package org.lab.uimvc.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.dental.restclient.CredentialService;
 import org.dental.restclient.DentalLabRestClient;
 import org.dental.restclient.UserService;
@@ -57,9 +58,10 @@ public class AuthenticationController extends MvcControllerUtil {
     }
 
     @GetMapping("/log-out")
-    public String logout() {
+    public String logout(HttpSession session) {
         userService.logout();
-        return FORWARD + LOGOUT;
+        session.invalidate();
+        return REDIRECT + LOGIN_PATH;
     }
 
     @GetMapping("/auth/reset-password")

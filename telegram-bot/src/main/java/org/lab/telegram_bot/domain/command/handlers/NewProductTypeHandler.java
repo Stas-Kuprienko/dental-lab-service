@@ -85,13 +85,13 @@ public class NewProductTypeHandler extends BotCommandHandler {
                 .title(values[0])
                 .price(price)
                 .build();
-        productMapService.create(newProductType, session.getUserId());
-        ProductMap productMap = productMapService.findAll(session.getUserId());
+        ProductMap productMap = productMapService.create(newProductType, session.getUserId());
         String text = buildProductMapMessageText(productMap);
         String callbackQueryPrefix = ChatBotUtility.callBackQueryPrefix(BotCommands.PRODUCT_MAP, 0);
         InlineKeyboardButton update = keyboardBuilderKit.callbackButton(ButtonKeys.UPDATE, callbackQueryPrefix,locale);
         InlineKeyboardButton delete = keyboardBuilderKit.callbackButton(ButtonKeys.DELETE, callbackQueryPrefix,locale);
-        var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete));
+        InlineKeyboardButton close = keyboardBuilderKit.callbackButton(ButtonKeys.CANCEL, ChatBotUtility.callBackQueryPrefix(BotCommands.CANCEL, 0), locale);
+        var keyboard = keyboardBuilderKit.inlineKeyboard(List.of(update, delete, close));
         session.setStep(0);
         session.setCommand(BotCommands.PRODUCT_MAP);
         chatSessionService.save(session);

@@ -76,9 +76,10 @@ public class UserProfileController extends MvcControllerUtil {
     }
 
     @PostMapping("/delete")
-    public String deleteProfile() {
+    public String deleteProfile(HttpSession session) {
         userService.delete();
-        return REDIRECT + LOGOUT;
+        session.invalidate();
+        return REDIRECT + LOGIN_PATH;
     }
 
     @PostMapping("/change-email")

@@ -92,6 +92,7 @@ public class UserController {
     public ResponseEntity<Void> delete(@RequestAttribute("X-USER-ID") UUID userId) {
         log.info("Received request to delete user '{}'", userId);
         userService.delete(userId);
+        userService.logoutById(userId);
         return ResponseEntity.noContent().build();
     }
 
