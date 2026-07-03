@@ -16,6 +16,7 @@ import org.lab.dental.service.WorkPhotoFileService;
 import org.lab.dental.util.metrics.ServiceMetrics;
 import org.lab.enums.UserStatus;
 import org.lab.exception.ApplicationCustomException;
+import org.lab.exception.BadRequestCustomException;
 import org.lab.model.TelegramChat;
 import org.lab.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,9 @@ public class MyUserService implements UserService {
             return converter.toDto(user);
         } catch (PersistenceException | DataAccessException e) {
             credentialService.deleteUser(id);
+            log.error("Failed user signing up", e);
             metrics.getUserFailedCreations().increment();
-            throw new ApplicationCustomException(e);
+            throw new BadRequestCustomException(e);
         }
     }
 

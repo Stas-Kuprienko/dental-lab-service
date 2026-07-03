@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,9 +11,12 @@
 </head>
 
 <body>
-
-<!-- Меню -->
-<div th:replace="fragments/nav :: main-menu"></div>
+<div sec:authorize="isAuthenticated()">
+    <div th:replace="fragments/nav :: main-menu"></div>
+</div>
+<div sec:authorize="isAnonymous()">
+    <div th:replace="fragments/nav-unauth :: main-menu"></div>
+</div>
 
 <section>
     <div th:if="${error?.code}" class="work">

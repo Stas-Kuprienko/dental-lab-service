@@ -1,0 +1,17 @@
+<!-- fragments/nav.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="menu" th:fragment="main-menu">
+    <header><strong>🦷 DENTAL LAB SERVICE 🦷</strong></header>
+    <div class="burger" onclick="document.body.classList.toggle('menu-open')">
+        ☰
+    </div>
+    <a th:href="@{/guide}">ИНСТРУКЦИЯ</a>
+    <a href="https://t.me/dental_mechanic_service_bot"> ТЕЛЕГРАМ-БОТ <img th:src="@{/img/telegram-bot.svg}" style="width: 16px;"></a>
+    <form style="float:right;" th:action="@{/login}">
+        <button>выйти</button>
+    </form>
+</nav>
+</body>
+</html>

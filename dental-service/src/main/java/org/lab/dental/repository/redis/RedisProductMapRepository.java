@@ -31,9 +31,10 @@ public class RedisProductMapRepository implements ProductMapCacheRepository {
 
     @PostConstruct
     public void init() {
-        Duration duration = Duration.of(15, ChronoUnit.MINUTES);
-        redisTemplate.expire(KEY, duration);
-        log.info("Cache duration for {} key is set to {}", KEY, duration);
+        Duration duration = Duration.of(30, ChronoUnit.MINUTES);
+        if (redisTemplate.expire(KEY, duration)) {
+            log.info("Cache duration for {} key is set to {}", KEY, duration);
+        }
     }
 
 

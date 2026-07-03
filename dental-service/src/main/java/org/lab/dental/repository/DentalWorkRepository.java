@@ -55,8 +55,8 @@ public interface DentalWorkRepository extends JpaRepository<DentalWorkEntity, Lo
             FROM DentalWorkEntity dw
             LEFT JOIN FETCH dw.products p
             WHERE dw.userId = :userId AND
-            dw.completeAt >= :from OR
-            dw.status <> 'PAID'
+            (dw.completeAt >= :from OR
+            dw.status <> 'PAID')
             """)
     List<DentalWorkEntity> findAllFromMonthOrNotPaidByUserId(@Param("userId") UUID userId,
                                                               @Param("from") LocalDate from);

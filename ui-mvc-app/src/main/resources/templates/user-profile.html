@@ -7,21 +7,15 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦷</text></svg>">
     <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
-
 <body>
-<!-- 🔝 Навигация -->
 <div th:replace="fragments/nav :: nav"></div>
 
 <section style="margin:auto;">
-
     <h2 style="text-align:center;">Профиль пользователя</h2>
     <br>
-
     <div th:if="${message}" class="alert" th:text="${message}"></div>
-
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
 
-    <!-- Имя -->
     <div class="work">
         <label style="font-size:80%;">имя:</label><br>
         <label style="font-size: 120%;" id="name-label" th:text="${user.name}">Имя</label>
@@ -32,22 +26,16 @@
             <button type="button" onclick="hideForm('name-label', 'name-form')">❌</button>
         </form>
     </div>
-
-    <!-- Email -->
     <div class="work">
         <label style="font-size:80%;">email:</label><br>
         <label id="email-label" style="font-size: 110%;" th:text="${user.login}">user@mail.com</label>
-
         <div id="email-actions" style="display:none; margin-top:6px;">
             <button id="change-email-btn" type="button" class="small-button">Сменить email</button>
             <button id="no-access-btn" type="button" class="small-button">Нет доступа к email?</button>
         </div>
     </div>
-
-    <!-- Смена пароля -->
     <div class="work">
         <button id="change-password-btn" type="button" class="small-button">Сменить пароль</button>
-
         <form id="password-form" th:action="@{'/main/user/change-password'}" method="post" style="display:none; margin-top:8px;">
             <label>Старый пароль:</label><br>
             <input type="password" name="old-password" required /><br>
@@ -60,13 +48,10 @@
             <button type="button" id="cancel-password-btn" class="small-button">Отмена</button>
         </form>
     </div>
-
-    <!-- Зарегистрирован -->
     <div class="work">
         <label style="font-size:80%;">зарегистрирован:</label><br>
         <span th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy')}">01-01-2024</span>
     </div>
-
     <div th:if="${user.mailingType != null}" class="work">
         <label >Уведомления о работах на завтра:</label>
         <label th:text="${user.mailingType.name}">TELEGRAM</label><br>
@@ -74,7 +59,6 @@
             <button type="submit" class="small-button">Отключить</button>
         </form>
     </div>
-
     <div th:if="${user.mailingType == null}" class="work">
         <label >Уведомления о работах на завтра не включены</label>
         <form th:action="@{/main/user/notification/subscribe}" method="post">
@@ -85,19 +69,16 @@
             <button type="submit" class="small-button">ВКЛЮЧИТЬ</button>
         </form>
     </div>
-
-    <!-- Удалить аккаунт -->
-    <div class="work">
+    <br><br>
+    <div class="work" style="width: 256px">
         <form th:action="@{/main/user/delete}" method="post" onsubmit="return confirm('Удалить аккаунт?')">
-            <button type="submit" class="medium-button">УДАЛИТЬ АККАУНТ</button>
+            <button type="submit" class="small-button">УДАЛИТЬ АККАУНТ</button>
         </form>
     </div>
 </section>
 
-<!-- ⚙️ JS -->
 <script th:inline="javascript">
     const BASE_URL = [[@{/}]];
-    // Универсальные функции показа / скрытия формы
     function setupToggle(labelId, formId) {
         const label = document.getElementById(labelId);
         const form = document.getElementById(formId);
@@ -119,17 +100,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Имя редактирование
         setupToggle('name-label', 'name-form');
-
-        // Email — показать кнопки при клике
         const emailLabel = document.getElementById('email-label');
         const emailActions = document.getElementById('email-actions');
         emailLabel.addEventListener('click', () => {
             emailActions.style.display = 'block';
         });
-
-        // Таймер на 60 секунд
         function startTimer(buttons) {
             buttons.forEach(btn => btn.disabled = true);
             let remaining = 60;
@@ -146,11 +122,8 @@
                 }
             }, 1000);
         }
-
-        // Смена email
         const changeEmailBtn = document.getElementById('change-email-btn');
         const noAccessBtn = document.getElementById('no-access-btn');
-
         changeEmailBtn.addEventListener('click', () => {
             if (confirm('Вы действительно хотите сменить email? Вам придёт письмо со ссылкой для подтверждения.')) {
                 fetch(BASE_URL + 'main/user/change-email', { method: 'POST' });
@@ -158,8 +131,6 @@
                 startTimer([changeEmailBtn, noAccessBtn]);
             }
         });
-
-        // Нет доступа к email
         noAccessBtn.addEventListener('click', () => {
             if (confirm('Нет доступа к почте? На ваш Telegram будет отправлен код.')) {
                 fetch(BASE_URL + 'main/user/change-email-otp', { method: 'POST' })
@@ -173,8 +144,6 @@
                     .catch(() => alert('Ошибка соединения с сервером.'));
             }
         });
-
-        // Смена пароля — показать форму
         const passwordBtn = document.getElementById('change-password-btn');
         const passwordForm = document.getElementById('password-form');
         const cancelBtn = document.getElementById('cancel-password-btn');
@@ -190,6 +159,5 @@
         });
     });
 </script>
-
 </body>
 </html>

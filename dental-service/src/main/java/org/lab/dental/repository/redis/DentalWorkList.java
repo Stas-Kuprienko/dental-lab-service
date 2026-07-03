@@ -3,7 +3,6 @@ package org.lab.dental.repository.redis;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.lab.model.DentalWork;
-import org.springframework.data.redis.core.RedisHash;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -12,13 +11,10 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@RedisHash("dentalWorkList")
 public class DentalWorkList implements Serializable {
 
     private HashMap<Long, DentalWork> dentalWorks;
-
     private UUID userId;
-
 
     public DentalWorkList() {
         this.dentalWorks = new HashMap<>();
