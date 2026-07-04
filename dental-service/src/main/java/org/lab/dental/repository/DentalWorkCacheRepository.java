@@ -18,4 +18,6 @@ public interface DentalWorkCacheRepository {
     void updateIfContains(DentalWork dentalWork);
 
     void delete(long workId, UUID userId);
+
+    void deleteAll(UUID userId);
 }

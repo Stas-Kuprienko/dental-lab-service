@@ -7,6 +7,7 @@ import org.lab.exception.ApplicationCustomException;
 import org.lab.exception.NotFoundCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,12 +39,27 @@ public class MyExceptionHandler {
             case HttpStatus.FORBIDDEN -> log.warn(exception.getMessage());
             case HttpStatus.CONFLICT -> {
                 log.info(exception.getMessage());
-                return conflictError(exception.getMessage());
+                return conflictHttpError(exception.getMessage());
             }
             default -> log.info(exception.getMessage());
         }
         HttpStatus httpStatus = HttpStatus.resolve(exception.getStatusCode().value());
         return errorPage(httpStatus);
+    }
+
+    @ExceptionHandler(feign.FeignException.class)
+    public ModelAndView feignClientError(feign.FeignException exception) {
+        HttpStatus status = HttpStatus.resolve(exception.status());
+        switch (status) {
+            case HttpStatus.INTERNAL_SERVER_ERROR -> log.error(exception.getMessage(), exception);
+            case HttpStatus.SERVICE_UNAVAILABLE, HttpStatus.FORBIDDEN -> log.warn(exception.getMessage());
+            case HttpStatus.CONFLICT -> {
+                log.info(exception.getMessage());
+                return conflictFeignError(exception.getMessage());
+            }
+            default -> log.info(exception.getMessage());
+        }
+        return errorPage(status);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -96,7 +112,13 @@ public class MyExceptionHandler {
 
 
     private ModelAndView errorPage(HttpStatus httpStatus) {
-        String message =  messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
+        String message;
+        try {
+            message = messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
+        } catch (NoSuchMessageException e) {
+            log.info(e.getMessage());
+            message = messageSource.getMessage(HttpStatus.INTERNAL_SERVER_ERROR.name(), null, DEFAULT_LOCALE);
+        }
         ErrorResponse error = ErrorResponse.builder()
                 .code(String.valueOf(httpStatus.value()))
                 .message(message)
@@ -119,9 +141,24 @@ public class MyExceptionHandler {
         return modelAndView;
     }
 
-    private ModelAndView conflictError(String exceptionMessage) {
+    private ModelAndView conflictHttpError(String exceptionMessage) {
         HttpStatus httpStatus = HttpStatus.CONFLICT;
         String email = exceptionMessage.split("\"")[1];
+        String message = messageSource.getMessage(httpStatus.name(), new Object[]{email}, DEFAULT_LOCALE);
+        ErrorResponse error = ErrorResponse.builder()
+                .code(String.valueOf(httpStatus))
+                .message(message)
+                .build();
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("error", error);
+        modelAndView.setViewName(ERROR_PAGE);
+        return modelAndView;
+    }
+
+    private ModelAndView conflictFeignError(String exceptionMessage) {
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        String[] arr = exceptionMessage.split(":");
+        String email = arr[arr.length - 1];
         String message = messageSource.getMessage(httpStatus.name(), new Object[]{email}, DEFAULT_LOCALE);
         ErrorResponse error = ErrorResponse.builder()
                 .code(String.valueOf(httpStatus))

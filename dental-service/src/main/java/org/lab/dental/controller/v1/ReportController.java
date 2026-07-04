@@ -55,7 +55,7 @@ public class ReportController {
                                                          @RequestParam("complete-at") YearMonth completeAt,
                                                          @RequestParam("status") WorkStatus status) {
         List<DentalWork> dentalWorks = reportService.readReport(file, userId, completeAt.atDay(1), status);
-        dentalWorks = dentalWorkManager.createAll(dentalWorks);
+        dentalWorks = dentalWorkManager.createAll(dentalWorks, userId);
         return ResponseEntity.ok(dentalWorks);
     }
 

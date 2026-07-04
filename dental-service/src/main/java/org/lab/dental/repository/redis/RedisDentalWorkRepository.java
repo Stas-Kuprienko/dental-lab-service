@@ -105,6 +105,11 @@ public class RedisDentalWorkRepository implements DentalWorkCacheRepository {
         });
     }
 
+    @Override
+    public void deleteAll(UUID userId) {
+        redisTemplate.opsForHash().delete(KEY, userId.toString());
+    }
+
 
     private void put(DentalWorkList dentalWorks) {
         redisTemplate.opsForHash().put(KEY, dentalWorks.getUserId().toString(), dentalWorks);

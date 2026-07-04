@@ -57,7 +57,7 @@ public class DentalWorkManager {
     }
 
     @Transactional
-    public List<DentalWork> createAll(List<DentalWork> dentalWorks) {
+    public List<DentalWork> createAll(List<DentalWork> dentalWorks, UUID userId) {
         List<DentalWorkEntity> entities = dentalWorks.stream()
                 .map(converter::toEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -80,6 +80,7 @@ public class DentalWorkManager {
             }
         }
         dentalWorkService.saveAllProducts(products);
+        cacheRepository.deleteAll(userId);
         return entities.stream()
                 .map(converter::toDto)
                 .toList();

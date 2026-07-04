@@ -68,6 +68,6 @@ public class ReportController {
                                    HttpSession session) {
         List<DentalWork> dentalWorks = reportService.uploadReport(file, completeAt, status);
         session.setAttribute(DentalWorkTableController.IMPORTED_SESSION_KEY, dentalWorks);
-        return MvcControllerUtil.REDIRECT + "/main/dental-works";
+        return MvcControllerUtil.REDIRECT + "/main/dental-works?imported=true";
     }
 }

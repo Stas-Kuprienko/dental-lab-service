@@ -2,6 +2,7 @@ package org.lab.uimvc.configuration.auth;
 
 import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -16,12 +17,15 @@ public class RequestAuthorization {
 
     private final OAuth2AuthorizedClientManager authorizedClientManager;
     private final ServiceAuthenticationManager authenticationManager;
+    private final String apiUrl;
 
     @Autowired
     public RequestAuthorization(OAuth2AuthorizedClientManager authorizedClientManager,
-                                ServiceAuthenticationManager authenticationManager) {
+                                ServiceAuthenticationManager authenticationManager,
+                                @Value("${project.variables.dental-lab-api.url}") String apiUrl) {
         this.authorizedClientManager = authorizedClientManager;
         this.authenticationManager = authenticationManager;
+        this.apiUrl = apiUrl;
         authenticationManager.authenticate();
     }
 
@@ -47,13 +51,14 @@ public class RequestAuthorization {
 
 
     private boolean isSecured(RequestTemplate request) {
-        String path = request.path();
+        String path = request.feignTarget().url();
+        path = path.substring(apiUrl.length());
         HttpMethod method = HttpMethod.valueOf(request.method());
         return !(
-                (path.equals("/api/v1/users") && method.equals(HttpMethod.POST))
+                (path.equals("/users") && method.equals(HttpMethod.POST))
                 ||
-                (path.startsWith("/api/v1/auth"))
+                (path.startsWith("/auth"))
                 ||
-                (path.startsWith("/api/v1/credentials/")));
+                (path.startsWith("/credentials/")));
     }
 }
