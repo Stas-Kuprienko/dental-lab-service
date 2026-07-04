@@ -7,13 +7,13 @@ import org.lab.exception.ForbiddenCustomException;
 import org.lab.exception.NotFoundCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import java.util.Locale;
 
 @Slf4j
@@ -34,17 +34,17 @@ public class MyExceptionHandler {
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ModelAndView httpClientError(HttpClientErrorException exception) {
-        switch (exception.getStatusCode()) {
-            case HttpStatus.INTERNAL_SERVER_ERROR -> log.error(exception.getMessage(), exception);
-            case HttpStatus.FORBIDDEN -> log.warn(exception.getMessage());
-            case HttpStatus.CONFLICT -> {
+        HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
+        switch (status) {
+            case INTERNAL_SERVER_ERROR -> log.error(exception.getMessage(), exception);
+            case FORBIDDEN -> log.warn(exception.getMessage());
+            case CONFLICT -> {
                 log.info(exception.getMessage());
                 return conflictError(exception.getMessage());
             }
             default -> log.info(exception.getMessage());
         }
-        HttpStatus httpStatus = HttpStatus.resolve(exception.getStatusCode().value());
-        return errorPage(httpStatus);
+        return errorPage(status);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -97,7 +97,13 @@ public class MyExceptionHandler {
 
 
     private ModelAndView errorPage(HttpStatus httpStatus) {
-        String message =  messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
+        String message;
+        try {
+            message = messageSource.getMessage(httpStatus.name(), null, DEFAULT_LOCALE);
+        } catch (NoSuchMessageException e) {
+            log.info(e.getMessage());
+            message = messageSource.getMessage(HttpStatus.INTERNAL_SERVER_ERROR.name(), null, DEFAULT_LOCALE);
+        }
         ErrorResponse error = ErrorResponse.builder()
                 .code(String.valueOf(httpStatus.value()))
                 .message(message)

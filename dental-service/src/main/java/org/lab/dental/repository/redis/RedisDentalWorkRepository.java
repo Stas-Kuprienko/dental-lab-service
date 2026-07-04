@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.lab.dental.repository.DentalWorkCacheRepository;
 import org.lab.model.DentalWork;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -24,7 +24,7 @@ public class RedisDentalWorkRepository implements DentalWorkCacheRepository {
 
 
     @Autowired
-    public RedisDentalWorkRepository(RedisTemplate<String, DentalWorkList> redisTemplate) {
+    public RedisDentalWorkRepository(@Qualifier("dentalWorkRedisTemplate") RedisTemplate<String, DentalWorkList> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -103,6 +103,11 @@ public class RedisDentalWorkRepository implements DentalWorkCacheRepository {
             dentalWorkList.remove(workId);
             put(dentalWorkList);
         });
+    }
+
+    @Override
+    public void deleteAll(UUID userId) {
+        redisTemplate.opsForHash().delete(KEY, userId.toString());
     }
 
 

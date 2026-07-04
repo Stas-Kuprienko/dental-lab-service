@@ -71,7 +71,7 @@ public class ReportController {
         try {
             List<DentalWork> dentalWorks = reportService.updateReport(file.getBytes(), completeAt, status);
             session.setAttribute(DentalWorkTableController.IMPORTED_SESSION_KEY, dentalWorks);
-            return MvcControllerUtil.REDIRECT + "/main/dental-works";
+            return MvcControllerUtil.REDIRECT + "/main/dental-works?imported=true";
         } catch (IOException e) {
             throw new ApplicationCustomException(e);
         }
