@@ -768,8 +768,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "http://localhost:8081/login/oauth2/code/keycloak",
-        "/*"
+        "http://localhost:8081/login/oauth2/code/keycloak"
       ],
       "webOrigins": [
         "/*"
@@ -1191,7 +1190,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "http://host.docker.internal:8081/dental-lab/login/oauth2/code/keycloak"
+        "/*"
       ],
       "webOrigins": [
         "/*"

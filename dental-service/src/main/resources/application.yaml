@@ -5,8 +5,6 @@ server:
 spring:
   application:
     name: dental-lab-service
-  profiles:
-    active: local
   security:
     oauth2:
       resourceserver:
@@ -44,11 +42,11 @@ spring:
         max-idle: 8
         min-idle: 0
   mail:
-    host: ${project.variables.mail.smtp.host}
-    port: ${project.variables.mail.port}
-    username: ${project.variables.mail.service.user}
-    password: ${project.variables.mail.service.password}
-    protocol: ${project.variables.mail.protocol}
+    host: ${project.mail.smtp.host}
+    port: ${project.mail.port}
+    username: ${project.mail.service.user}
+    password: ${project.mail.service.password}
+    protocol: ${project.mail.protocol}
     properties:
       mail:
         smtp:
@@ -82,8 +80,8 @@ springdoc:
 project:
   variables:
     service-label: Dental-Lab-Service
-    service-url: http://localhost:8081/dental-lab
-    service-api-url: https://dental-lab-service.ru
+    service-url: http://localhost:8081
+    service-api-url: http://localhost:8082
     telegram-bot:
       url: http://localhost:8083
     keycloak:
@@ -92,7 +90,7 @@ project:
       password: admin
       realm: dental-lab
       client-id: dental-lab-client
-      client-secret: 9S95xSQgkdxbt1VxNPdHoULyTyaLZIWG
+      client-secret: 9S95xSQgkdxbt9VxNPdHoULyTyaLZIWG
     datasource:
       database: dental_lab
       url: localhost:5432
@@ -109,17 +107,19 @@ project:
       duration-minutes: 30
     tempo:
       url: http://localhost:4318/v1/traces
-    mail:
-      protocol: smtp
-      service:
-        user: example@email.com
-        password: password
-      smtp:
-        host: smtp.example.com
-      port: 999
+  mail:
+    protocol: smtp
+    service:
+      user: example@email.com
+      password: password
+    smtp:
+      host: smtp.example.com
+    port: 999
   encryption:
-    secret-key: 2f254abc113f76adf4461fd558074a40967f522bd8fd71a4366703a9ee224868
+    secret-key: d7f2708a25ed18b410b954a06590e6868e508d679ae946487246b8ee4732a22f
   mailing:
     schedule:
       cron: "0 30 9 * * *" #pattern: S M H (24)
       zone: "Asia/Omsk"
+
+

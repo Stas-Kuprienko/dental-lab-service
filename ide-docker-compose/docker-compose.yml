@@ -1,0 +1,93 @@
+version: '3.9'
+
+networks:
+  public:
+    driver: bridge
+
+
+services:
+
+  postgres:
+    container_name: dental_db
+    image: postgres:15.3-alpine
+    networks:
+      - public
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./volumes/postgresql/data:/var/lib/postgresql/data
+      - ./config/postgesql/create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    container_name: dental_keycloak
+    image: quay.io/keycloak/keycloak:25.0
+    command: start --import-realm
+    networks:
+      - public
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HEALTH_ENABLED=true
+      - KC_CACHE=local
+      - KC_CACHE_STACK=simple
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres/keycloakdb
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./config/keycloak/realms:/opt/keycloak/data/import
+      - ./config/keycloak/themes:/opt/keycloak/themes
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    networks:
+      - public
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_REGION_NAME=us-east-1
+      - MINIO_REGION=us-east-1
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server --console-address ":9001" /data
+    volumes:
+      - ./volumes/minio_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  redis:
+    container_name: dental_redis
+    image: redis:latest
+    networks:
+      - public
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - ./volumes/redis/data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro

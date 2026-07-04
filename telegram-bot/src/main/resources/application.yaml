@@ -4,8 +4,6 @@ server:
 spring:
   application:
     name: telegram-bot
-  profiles:
-    active: local
   redis:
     host: ${project.variables.redis.host}
     port: ${project.variables.redis.port}
@@ -31,13 +29,11 @@ project:
       host: localhost
       port: 6379
     telegram:
-      username: dental_lab_service_bot
-      bot-token: ???????????????????
+      username: {bot-name}
+      bot-token: {bot-token}
     keycloak:
       client-id: telegram-bot-client
-      client-secret: lRPMOwOylXUUh1UXcHYqye92jLLZh11R
-    tempo:
-      url: http://localhost:4318/v1/traces
+      client-secret: lRPMOwOylXUUhlUXcHYqye92jLLZh11R
   telegram:
     link-duration-minutes: 10
     otp-length: 7

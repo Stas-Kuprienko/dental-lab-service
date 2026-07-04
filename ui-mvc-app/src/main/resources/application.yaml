@@ -12,8 +12,6 @@ server:
 spring:
   application:
     name: ui-application
-  profiles:
-    active: local
   servlet:
     multipart:
       max-file-size: 30MB
@@ -36,16 +34,6 @@ spring:
         provider:
           keycloak:
             issuer-uri: ${project.variables.keycloak.url}/realms/${project.variables.keycloak.realm}
-  redis:
-    host: ${project.variables.redis.host}
-    port: ${project.variables.redis.port}
-    timeout: 6000
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-
 
 project:
   variables:
@@ -57,9 +45,9 @@ project:
       password: admin
       realm: dental-lab
       client-id: dental-lab-client
-      client-secret: 9S95xSQgkdxbt1VxNPdHoULyTyaLZIWG
+      client-secret: 9S95xSQgkdxbt9VxNPdHoULyTyaLZIWG
       service-client-id: ui-mvc-client
-      service-client-secret: k2tMAw4AV1zZbcW8MuUFiQUjDHx4ZMDz
+      service-client-secret: k2tMAw4AVOzZbcW8MuUFiQUjDHx4ZMDz
     redis:
       host: localhost
       port: 6379
