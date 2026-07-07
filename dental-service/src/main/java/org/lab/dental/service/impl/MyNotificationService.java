@@ -11,7 +11,6 @@ import org.lab.event.EventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
@@ -34,9 +33,16 @@ public class MyNotificationService implements NotificationService {
     public MyNotificationService(EmailNotificationService emailNotificationService,
                                  EventMessageService eventMessageService,
                                  LetterTemplateUtility letterTemplateUtility,
-                                 @Value("${project.variables.service-url}") String serviceUrl) {
-        this.emailNotificationService = emailNotificationService;
-        this.eventMessageService = eventMessageService;
+                                 @Value("${project.variables.service-url}") String serviceUrl,
+                                 @Value("${project.mailing.is-mock:false}") Boolean isMock) {
+        if (isMock) {
+            this.emailNotificationService = new MockMailSender();
+            this.eventMessageService = new MockTelegramSender();
+            log.info("NotificationService is configured with mock mailing");
+        } else {
+            this.emailNotificationService = emailNotificationService;
+            this.eventMessageService = eventMessageService;
+        }
         this.letterTemplateUtility = letterTemplateUtility;
         this.serviceUrl = serviceUrl;
     }

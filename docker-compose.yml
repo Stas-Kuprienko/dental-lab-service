@@ -12,23 +12,25 @@ services:
 
   dental-lab-service:
     build:
-      context: ./dental-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./dental-service/Dockerfile
     container_name: dental-lab-service
     networks:
       - public
       - internal
     ports:
       - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       keycloak:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
       interval: 15s
@@ -40,25 +42,23 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
 
-  ui-application:
+  ui-mvc-app:
     build:
-      context: ./ui-mvc-app
-      dockerfile: Dockerfile
-    container_name: ui-application
+      context: .
+      dockerfile: ./ui-mvc-app/Dockerfile
+    container_name: ui-mvc-app
     networks:
       - public
       - internal
     ports:
       - "8081:8081"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       dental-lab-service:
         condition: service_healthy
       keycloak:
-        condition: service_started
-      redis:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -66,21 +66,23 @@ services:
 
   telegram-bot:
     build:
-      context: ./telegram-bot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./telegram-bot/Dockerfile
     container_name: telegram-bot
     networks:
       - public
       - internal
     expose:
       - "8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     extra_hosts:
       - "host-gateway:host-gateway"
     depends_on:
       dental-lab-service:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -92,8 +94,8 @@ services:
     networks:
       - internal
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - PGDATA=/var/lib/postgresql/data
     expose:
       - '5432'
@@ -117,22 +119,21 @@ services:
       - public
       - internal
     environment:
-      - KC_HOSTNAME=localhost
-#      - KC_HOSTNAME=https://auth.domain.com
-#      - KC_HOSTNAME_ADMIN_URL=https://auth.domain.com
-#      - KC_PROXY=edge
+      - KC_HOSTNAME=${DOMAIN_KEYCLOAK_PATH}
+      - KC_HOSTNAME_ADMIN_URL=${DOMAIN_KEYCLOAK_PATH}
+      - KC_PROXY=edge
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT=true
       - KC_HOSTNAME_STRICT_HTTPS=false
       - KC_HEALTH_ENABLED=true
       - KC_CACHE=local
       - KC_CACHE_STACK=simple
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USERNAME}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://postgres/keycloakdb
-      - KC_DB_USERNAME=postgres
-      - KC_DB_PASSWORD=postgres
+      - KC_DB_USERNAME=${POSTGRES_USERNAME}
+      - KC_DB_PASSWORD={POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
@@ -143,6 +144,12 @@ services:
       - ./config/keycloak/themes:/opt/keycloak/themes
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 
   minio:
@@ -156,17 +163,20 @@ services:
     ports:
       - "9001:9001"
     environment:
-      #      - MINIO_BROWSER_REDIRECT_URL=https://s3-photo.domain.com/minio-console
-      #      - MINIO_SERVER_URL=https://s3-photo.domain.com
       - MINIO_REGION_NAME=us-east-1
       - MINIO_REGION=us-east-1
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_ROOT_USER=${MINIO_ROOT_USERNAME}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server --console-address ":9001" /data
     volumes:
       - ./volumes/minio_data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
   redis:
@@ -181,6 +191,12 @@ services:
       - ./volumes/redis/data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 
   nginx:
@@ -194,8 +210,6 @@ services:
       - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./ssl:/etc/nginx/ssl:ro
       - ./ssl:/etc/ssl:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
     networks:
       - public
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"

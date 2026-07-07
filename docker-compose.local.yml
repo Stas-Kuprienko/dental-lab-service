@@ -29,6 +29,7 @@ services:
       timeout: 5s
       retries: 5
 
+
   keycloak:
     container_name: dental_keycloak
     image: quay.io/keycloak/keycloak:25.0
@@ -59,6 +60,13 @@ services:
       - ./config/keycloak/themes:/opt/keycloak/themes
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
 
   minio:
     image: minio/minio:latest
@@ -78,6 +86,12 @@ services:
       - ./volumes/minio_data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 
   redis:
     container_name: dental_redis
@@ -91,3 +105,9 @@ services:
       - ./volumes/redis/data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

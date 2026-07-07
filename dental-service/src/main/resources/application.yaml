@@ -105,8 +105,6 @@ project:
       secret-key: minioadmin
       bucket: dental-photos
       duration-minutes: 30
-    tempo:
-      url: http://localhost:4318/v1/traces
   mail:
     protocol: smtp
     service:
@@ -121,5 +119,5 @@ project:
     schedule:
       cron: "0 30 9 * * *" #pattern: S M H (24)
       zone: "Asia/Omsk"
-
+    is-mock: true
 
