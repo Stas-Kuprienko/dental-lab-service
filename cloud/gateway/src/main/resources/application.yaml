@@ -10,7 +10,7 @@ spring:
     import: "optional:configserver:"
   cloud:
     config:
-      uri: http://host.docker.internal:8888
+      uri: http://localhost:8888
     gateway:
       server:
         webflux:
@@ -33,6 +33,15 @@ spring:
                     redis-rate-limiter.replenishRate: 10
                     redis-rate-limiter.burstCapacity: 20
                     key-resolver: "#{@userKeyResolver}"
+            - id: dental-lab-swagger
+              uri: lb://dental-lab-service
+              predicates:
+                - Path=/docs/**,/actuator/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: dentalLabService
+                    fallbackUri: forward:/fallback
           httpclient:
             connect-timeout: 5000
             response-timeout: 10s

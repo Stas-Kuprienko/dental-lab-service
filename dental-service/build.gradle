@@ -72,3 +72,7 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+springBoot {
+	mainClass = 'org.lab.dental.DentalLabServiceApplication'
+}

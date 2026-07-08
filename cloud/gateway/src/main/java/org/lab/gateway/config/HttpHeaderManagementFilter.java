@@ -28,7 +28,8 @@ public class HttpHeaderManagementFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        return exchange.getPrincipal()
+        return exchange
+                .getPrincipal()
                 .filter(principal -> principal instanceof JwtAuthenticationToken)
                 .map(principal -> (JwtAuthenticationToken) principal)
                 .map(jwtAuth -> manageHttpHeader(exchange, jwtAuth))
@@ -38,6 +39,10 @@ public class HttpHeaderManagementFilter implements GlobalFilter {
 
 
     private ServerWebExchange manageHttpHeader(ServerWebExchange exchange, JwtAuthenticationToken jwtAuth) {
+        String path = exchange.getRequest().getURI().getPath();
+        if (isPermitAll(path)) {
+            return exchange;
+        }
         String clientId = jwtAuth.getToken().getClaimAsString(CLIENT_ID_CLAIM);
         return switch (clientId) {
             case TELEGRAM_CLIENT_ID -> telegramBotClient(exchange);
@@ -110,5 +115,18 @@ public class HttpHeaderManagementFilter implements GlobalFilter {
         DataBuffer dataBuffer = response.bufferFactory().wrap(message.getBytes());
         response.writeWith(Mono.just(dataBuffer));
         throw new RestClientResponseException(message, status.value(), status.getReasonPhrase(), null, null, null);
+    }
+
+    private boolean isPermitAll(String path) {
+        for (String p : SecurityConfig.PERMIT_ALL) {
+            if (p.endsWith("**")) {
+                if (path.startsWith(p.replace("**", ""))) {
+                    return true;
+                }
+            } else if (p.equals(path)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

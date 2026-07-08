@@ -16,13 +16,15 @@ import java.security.Principal;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+    public static final String[] PERMIT_ALL = {"/actuator/**", "/docs/**"};
+
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+                        .pathMatchers(PERMIT_ALL).permitAll()
                         .anyExchange().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())

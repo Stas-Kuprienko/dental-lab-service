@@ -3,19 +3,50 @@ version: '3.9'
 networks:
   public:
     driver: bridge
+  internal:
+    driver: bridge
+    internal: true
 
 
 services:
 
-  eureka-server:
+  config-server:
     build:
-      context: ./cloud/eureka-server
-      dockerfile: Dockerfile
-    container_name: eureka-server
+      context: .
+      dockerfile: /cloud/config-server/Dockerfile
+    container_name: config-server
     networks:
       - public
-    ports:
-      - "8761:8761"
+      - internal
+    expose:
+      - "8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: /cloud/eureka-server/Dockerfile
+    container_name: eureka-server
+    networks:
+      - internal
+    expose:
+      - "8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
       interval: 15s
@@ -26,13 +57,28 @@ services:
 
   api-gateway:
     build:
-      context: ./cloud/gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cloud/gateway/Dockerfile
     container_name: api-gateway
     networks:
       - public
+      - internal
     ports:
       - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      dental-lab-service:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
       interval: 15s
@@ -43,54 +89,31 @@ services:
 
   dental-lab-service:
     build:
-      context: ./dental-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./dental-service/Dockerfile
     container_name: dental-lab-service
     networks:
       - public
-    ports:
-      - "8079:8000"
+      - internal
+    expose:
+      - "8079"
     environment:
-      - PROJECT_VARIABLES_KEYCLOAK_URL=http://localhost:8080
-      - PROJECT_VARIABLES_KEYCLOAK_REALM=dental-lab
-      - PROJECT_VARIABLES_KEYCLOAK_CLIENT-ID=${KEYCLOAK_CLIENT_ID}
-      - PROJECT_VARIABLES_KEYCLOAK_CLIENT-SECRET=${KEYCLOAK_CLIENT_SECRET}
-      - PROJECT_VARIABLES_KEYCLOAK_USERNAME=${KEYCLOAK_ADMIN_USERNAME}
-      - PROJECT_VARIABLES_KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - PROJECT_VARIABLES_DATASOURCE_URL=postgres:5432
-      - PROJECT_VARIABLES_DATASOURCE_DATABASE=dental_lab
-      - PROJECT_VARIABLES_DATASOURCE_USERNAME=${POSTGRES_USERNAME}
-      - PROJECT_VARIABLES_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - PROJECT_VARIABLES_REDIS_HOST=redis
-      - PROJECT_VARIABLES_REDIS_PORT=6379
-      - PROJECT_VARIABLES_MAIL_SMTP_HOST=smtp.yandex.ru
-      - PROJECT_VARIABLES_MAIL_PORT=587
-      - PROJECT_VARIABLES_MAIL_SERVICE_USER=${MAIL_SERVICE_USER}
-      - PROJECT_VARIABLES_MAIL_SERVICE_PASSWORD=${MAIL_SERVICE_PASSWORD}
-      - PROJECT_VARIABLES_MAIL_PROTOCOL=smtp
-      - PROJECT_VARIABLES_MAIL_MAILRU=${VARIABLE_MAIL_MAILRU}
-      - PROJECT_VARIABLES_MINIO_URL=http://minio:9000
-      - PROJECT_VARIABLES_MINIO_ACCESS-KEY=${MINIO_ROOT_USERNAME}
-      - PROJECT_VARIABLES_MINIO_SECRET-KEY=${MINIO_ROOT_PASSWORD}
-      - PROJECT_VARIABLES_MINIO_BUCKET=dental-lab
-      - PROJECT_VARIABLES_MINIO_DURATION-MINUTES=30
-      - PROJECT_ENCRYPTION_SECRET-KEY=${ENCRYPTION_SECRET}
-      - PROJECT_VARIABLES_SERVICE-API-URL=http://localhost:8082
-      - PROJECT_VARIABLES_SERVICE-LABEL=Dental-Lab-Service
-      - PROJECT_VARIABLES_SERVICE-URL=http://localhost:8081/dental-lab
-      - PROJECT_VARIABLES_TELEGRAM-BOT_URL=http://telegram-bot:8083
-      - PROJECT_VARIABLES_TEMPO_URL=http://tempo:4318/v1/traces
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       keycloak:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       minio:
+        condition: service_healthy
+      rabbitmq:
         condition: service_started
     volumes:
       - ./logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
       interval: 15s
@@ -99,66 +122,69 @@ services:
       start_period: 20s
 
 
-  ui-application:
+  ui-mvc-app:
     build:
-      context: ./ui-mvc-app
-      dockerfile: Dockerfile
-    container_name: ui-application
+      context: .
+      dockerfile: ./ui-mvc-app/Dockerfile
+    container_name: ui-mvc-app
     networks:
       - public
     ports:
       - "8081:8081"
     environment:
-      - PROJECT_VARIABLES_KEYCLOAK_URL=http://keycloak:8080
-      - PROJECT_VARIABLES_KEYCLOAK_REALM=dental-lab
-      - PROJECT_VARIABLES_KEYCLOAK_CLIENT-ID=${KEYCLOAK_CLIENT-ID}
-      - PROJECT_VARIABLES_KEYCLOAK_CLIENT-SECRET=${KEYCLOAK_CLIENT-SECRET}
-      - PROJECT_VARIABLES_KEYCLOAK_USERNAME=${KEYCLOAK_ADMIN_USERNAME}
-      - PROJECT_VARIABLES_KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - PROJECT_VARIABLES_KEYCLOAK_SERVICE-CLIENT-ID=${KEYCLOAK_UI_MVC_SERVICE_CLIENT_ID}
-      - PROJECT_VARIABLES_KEYCLOAK_SERVICE-CLIENT-SECRET=${KEYCLOAK_UI_MVC_SERVICE_CLIENT_SECRET}
-      - PROJECT_VARIABLES_REDIS_HOST=redis
-      - PROJECT_VARIABLES_REDIS_PORT=6379
-      - PROJECT_VARIABLES_DENTAL-LAB-API_URL=http://dental-lab-service:8082/api/v1
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
-      dental-lab-service:
+      api-gateway:
         condition: service_healthy
       keycloak:
-        condition: service_started
-      redis:
-        condition: service_started
+        condition: service_healthy
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   telegram-bot:
     build:
-      context: ./telegram-bot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./telegram-bot/Dockerfile
     container_name: telegram-bot
     networks:
       - public
+      - internal
     expose:
       - "8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    extra_hosts:
+      - "host-gateway:host-gateway"
     depends_on:
-      dental-lab-service:
+      api-gateway:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_started
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   postgres:
     container_name: dental_db
     image: postgres:15.3-alpine
     networks:
-      - public
+      - internal
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - PGDATA=/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    expose:
+      - '5432'
     volumes:
       - ./volumes/postgresql/data:/var/lib/postgresql/data
       - ./config/postgesql/create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -169,13 +195,14 @@ services:
   keycloak:
     container_name: dental_keycloak
     image: quay.io/keycloak/keycloak:25.0
-    command: start
+    command: start --import-realm
     networks:
       - public
+      - internal
     environment:
-      - KC_HOSTNAME=localhost
-      #      - KC_HOSTNAME_ADMIN_URL=https://dental-lab-service.ru/kc
-      #      - KC_PROXY=edge
+      - KC_HOSTNAME=${DOMAIN_KEYCLOAK_PATH}
+      - KC_HOSTNAME_ADMIN_URL=${DOMAIN_KEYCLOAK_PATH}
+      - KC_PROXY=edge
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT=true
       - KC_HOSTNAME_STRICT_HTTPS=false
@@ -196,6 +223,14 @@ services:
     volumes:
       - ./config/keycloak/realms:/opt/keycloak/data/import
       - ./config/keycloak/themes:/opt/keycloak/themes
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 
   minio:
@@ -203,43 +238,64 @@ services:
     container_name: minio
     networks:
       - public
+      - internal
+    expose:
+      - "9000"
     ports:
       - "9001:9001"
-      - "9000:9000"
     environment:
-      #      - MINIO_BROWSER_REDIRECT_URL=https://s3-photo.dental-lab-service.ru/minio-console
-      #      - MINIO_SERVER_URL=https://s3-photo.dental-lab-service.ru
       - MINIO_REGION_NAME=us-east-1
       - MINIO_REGION=us-east-1
-      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_USER=${MINIO_ROOT_USERNAME}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server --console-address ":9001" /data
     volumes:
       - ./volumes/minio_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
   redis:
     container_name: dental_redis
     image: redis:latest
     networks:
-      - public
-    ports:
-      - "6379:6379"
+      - internal
+    expose:
+      - '6379'
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - ./volumes/redis/data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
 
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:3-management
     networks:
       - public
+      - internal
+    expose:
+      - "5672"
     ports:
-      - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 
   grafana:
@@ -247,60 +303,78 @@ services:
     image: grafana/grafana:11.2.0
     networks:
       - public
+      - internal
     ports:
       - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-    volumes:
-      - ./config/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
       - loki
+      - promtail
       - tempo
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
 
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.54.1
     networks:
-      - public
-    ports:
-      - "9090:9090"
+      - internal
+    expose:
+      - "9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
 
   loki:
     container_name: loki
     image: grafana/loki:3.1.1
     networks:
-      - public
-    ports:
-      - "3100:3100"
+      - internal
+    expose:
+      - "3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./config/loki/local-config.yaml:/etc/loki/local-config.yaml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
 
   tempo:
     container_name: tempo
     image: grafana/tempo:2.6.1
     networks:
-      - public
-    ports:
-      - "3200:3200"
-      - "4318:4318"
+      - internal
+    expose:
+      - "3200"
+      - "4318"
     command: [ "-config.file=/etc/tempo.yml" ]
     volumes:
       - ./config/tempo/tempo.yml:/etc/tempo.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
 
   promtail:
     container_name: promtail
     image: grafana/promtail:3.1.1
-    volumes:
-      - ./logs:/logs
-      - ./config/promtail/config.yml:/etc/promtail/config.yml
+    networks:
+      - internal
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
+    volumes:
+      - ./logs:/logs
+      - ./config/promtail/config.yml:/etc/promtail/config.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro

@@ -1,0 +1,25 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: local
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${project.variables.git.uri}
+          username: ${project.variables.git.username}
+          password: ${project.variables.git.password}
+          clone-on-start: true
+          default-label: master
+          search-paths:
+            - '{application}/{profile}'
+
+project:
+  variables:
+    git:
+      uri: ${CONFIG_SERVER_GIT_URL}
+      username: ${CONFIG_SERVER_GIT_USERNAME}
+      password: ${CONFIG_SERVER_GIT_TOKEN}
