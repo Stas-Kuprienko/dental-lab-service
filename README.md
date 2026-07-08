@@ -266,9 +266,24 @@ public class ChatSession {
 
 | **Привязка Телеграмм к профилю сервиса**                     | +++++ | **Создание вида работы в каталог**                             |
 |:-------------------------------------------------------------|-------|:---------------------------------------------------------------|
-| <img src="./docs/screen/telegram_binding.gif" height="720">  |       | <img src="./docs/screen/create_product_type.gif" height="720"> |
+| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720">  |       | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
 ---
 
+**Динамическая таблица и карта работ**
+
+<img src="./docs/screen/video_2026-07-08_19-42-39.gif" weight="480">
+
+---
+
+**Импорт excel файлов**
+
+<img src="./docs/screen/video_2026-07-08_19-42-42 (1).gif" weight="480">
+
+---
+
+**Отображение статусов в таблице***
+
+<img src="./docs/screen/video_2026-07-08_19-42-35.gif" weight="480">
 
 
 ---
@@ -301,4 +316,4 @@ public class ChatSession {
 
 ### Станислав Куприенко
 
-[Мой Телеграмм](@Stas_Kuprienko) 
+[Мой Телеграмм](@Stas_Kuprienko)
