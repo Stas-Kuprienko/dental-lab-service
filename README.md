@@ -40,6 +40,11 @@
 ###### [перейти к версии 👈](https://github.com/Stas-Kuprienko/dental-lab-service/tree/simple-release)
 
 ---
+### [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
+
+_*client-secret не требуется_
+
+---
 #### 2. `main`
 
 Основная версия проекта, с расширением архитектурных и инфраструктурных решений.
@@ -156,7 +161,7 @@
 ### Stateful Telegram Bot
 
 Для поддержки многошаговых сценариев взаимодействия реализован механизм ChatSession.
-```
+```java
 public class ChatSession {
 
     private Long chatId;
@@ -173,7 +178,7 @@ public class ChatSession {
 ```
 При каждом запросе CommandHandler сохраняет в сессию текущую команду, шаг (у каждого CommandHandler свои шаги) и по необходимости атрибуты.
 
-```
+```java
     private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
     
         NewDentalWork newDentalWork = ... // парсинг сообщения в данные для объекта нового заказа
@@ -291,14 +296,15 @@ public class ChatSession {
 
 **Требования**
 
-- RAM - 8 GB (рекомендуется 12+ Gb)
-- CPU - 4 cores
-- Disk - 15 GB
+- RAM - 12+ GB
+- CPU - 4+ cores 
+- Disk - 15+ GB
 - Docker engine - version 26+
 - Docker compose - V2+
 - Java 21 (для запуска проекта через IDE)
 
 Для запуска приложения Telegram-bot нужно создать бота в Telegram с помощью BotFather, затем указать botname и токен в переменных!
+Также для запуска Telegram-bot может понадобится настройка параметров прокси для доступа через VPN. 
 
 **Локальный запуск**
 
@@ -316,4 +322,4 @@ public class ChatSession {
 
 ### Станислав Куприенко
 
-[Мой Телеграмм](@Stas_Kuprienko)
+[Мой Телеграмм](@Stas_Kuprienko) 
