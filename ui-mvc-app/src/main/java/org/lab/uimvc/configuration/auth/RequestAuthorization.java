@@ -51,11 +51,11 @@ public class RequestAuthorization {
 
 
     private boolean isSecured(RequestTemplate request) {
-        String path = request.feignTarget().url();
+        String path = request.feignTarget().url() + request.url();
         path = path.substring(apiUrl.length());
         HttpMethod method = HttpMethod.valueOf(request.method());
         return !(
-                (path.equals("/users") && method.equals(HttpMethod.POST))
+                (path.equals("/users/") && method.equals(HttpMethod.POST))
                 ||
                 (path.startsWith("/auth"))
                 ||

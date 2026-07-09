@@ -232,15 +232,15 @@
                 "manage-realm",
                 "query-groups",
                 "query-users",
-                "view-clients",
+                "impersonation",
                 "manage-users",
                 "query-realms",
-                "impersonation",
+                "view-clients",
                 "view-authorization",
                 "query-clients",
                 "manage-authorization",
-                "view-identity-providers",
                 "manage-events",
+                "view-identity-providers",
                 "view-users",
                 "view-realm"
               ]
@@ -768,7 +768,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "9S95xSQgkdxbt9VxNPdHoULyTyaLZIWG",
       "redirectUris": [
-        "/*"
+        "http://localhost:8081/login/oauth2/code/keycloak"
       ],
       "webOrigins": [
         "/*"

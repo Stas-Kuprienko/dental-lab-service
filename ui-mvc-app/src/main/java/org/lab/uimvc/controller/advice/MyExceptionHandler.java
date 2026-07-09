@@ -34,16 +34,16 @@ public class MyExceptionHandler {
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ModelAndView httpClientError(HttpClientErrorException exception) {
-        switch (exception.getStatusCode()) {
-            case HttpStatus.INTERNAL_SERVER_ERROR -> log.error(exception.getMessage(), exception);
-            case HttpStatus.FORBIDDEN -> log.warn(exception.getMessage());
-            case HttpStatus.CONFLICT -> {
+        HttpStatus httpStatus = HttpStatus.resolve(exception.getStatusCode().value());
+        switch (httpStatus) {
+            case INTERNAL_SERVER_ERROR -> log.error(exception.getMessage(), exception);
+            case FORBIDDEN, SERVICE_UNAVAILABLE -> log.warn(exception.getMessage());
+            case CONFLICT -> {
                 log.info(exception.getMessage());
                 return conflictHttpError(exception.getMessage());
             }
             default -> log.info(exception.getMessage());
         }
-        HttpStatus httpStatus = HttpStatus.resolve(exception.getStatusCode().value());
         return errorPage(httpStatus);
     }
 
