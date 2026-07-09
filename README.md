@@ -20,6 +20,11 @@
 - Аутентификация и авторизация пользователей через Keycloak.
 
 ---
+## [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
+
+_*client-secret не требуется_
+
+---
 > ## Версии проекта
 
 Репозиторий содержит две ветки:
@@ -38,11 +43,6 @@
 
 Эта версия приложения развёрнута на VDS и доступна через домен [dental-lab-service](https://dental-lab-service.ru) с SSL-сертификатом и прокси Nginx.
 ###### [перейти к версии 👈](https://github.com/Stas-Kuprienko/dental-lab-service/tree/simple-release)
-
----
-### [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
-
-_*client-secret не требуется_
 
 ---
 #### 2. `main`
@@ -242,25 +242,38 @@ public class ChatSession {
 
 **Prometheus + Micrometer**
 
-Собираются:
+Ведётся учёт:
 
-- HTTP latency
-- количество запросов
-- ошибки
-- Resilience4J
-- бизнес-метрики
-
+* `HTTP latency`
+  <img src="./docs/screen/prometheus_http_requests.png" weight="480">
+---
+* `Количество запросов`
+  <img src="./docs/screen/prometheus_request_count.png" weight="480">
+---
+* `Ошибки`
+  <img src="./docs/screen/prometheus_errors.png" weight="480">
+---
+* `Resilience4J`
+  <img src="./docs/screen/circuit_breaker.png" weight="480">
+---
+* `Бизнес-метрики`
+  <img src="./docs/screen/service_users_creation.png" weight="480">
+---
 ### Логи
 
 **Loki + Promtail**
 
 Централизованно собираются структурированные JSON логи.
 
+  <img src="./docs/screen/loki.png" weight="480">
+
 ### Трассировка
 
 **OpenTelemetry + Tempo**
 
 Поддерживается сквозная трассировка запросов между сервисами по Trace ID.
+
+  <img src="./docs/screen/tempo.png" weight="480">
 
 ### Визуализация
 
@@ -269,9 +282,9 @@ public class ChatSession {
 ---
 > ## Скриншоты
 
-| **Привязка Телеграмм к профилю сервиса**                     | +++++ | **Создание вида работы в каталог**                             |
-|:-------------------------------------------------------------|-------|:---------------------------------------------------------------|
-| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720">  |       | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
+| **Привязка Телеграмм к профилю сервиса**                     | --- | **Создание вида работы в каталог**                             |
+|:-------------------------------------------------------------|-----|:---------------------------------------------------------------|
+| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720">  |     | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
 ---
 
 **Динамическая таблица и карта работ**
@@ -286,7 +299,7 @@ public class ChatSession {
 
 ---
 
-**Отображение статусов в таблице***
+**Отображение статусов в таблице**
 
 <img src="./docs/screen/video_2026-07-08_19-42-35.gif" weight="480">
 
