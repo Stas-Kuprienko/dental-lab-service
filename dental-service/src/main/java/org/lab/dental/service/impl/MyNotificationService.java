@@ -34,13 +34,18 @@ public class MyNotificationService implements NotificationService {
                                  EventMessageService eventMessageService,
                                  LetterTemplateUtility letterTemplateUtility,
                                  @Value("${project.variables.service-url}") String serviceUrl,
-                                 @Value("${project.mailing.is-mock:false}") Boolean isMock) {
-        if (isMock) {
+                                 @Value("${project.mailing.mock-mode.email:false}") Boolean isEmailMock,
+                                 @Value("${project.mailing.mock-mode.telegram:false}") Boolean isTelegramMock) {
+        if (isEmailMock) {
             this.emailNotificationService = new MockMailSender();
-            this.eventMessageService = new MockTelegramSender();
-            log.info("NotificationService is configured with mock mailing");
         } else {
             this.emailNotificationService = emailNotificationService;
+            log.info("NotificationService is configured with mock Email notifications");
+        }
+        if (isTelegramMock) {
+            this.eventMessageService = new MockTelegramSender();
+            log.info("NotificationService is configured with mock Telegram notifications");
+        } else {
             this.eventMessageService = eventMessageService;
         }
         this.letterTemplateUtility = letterTemplateUtility;

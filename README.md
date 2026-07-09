@@ -10,7 +10,7 @@
 ### Основные возможности
 
 - Ведение персонального каталога зуботехнических работ с указанием стоимости.
-- Записьи управление заказами (клиника, пациент, работы, даты, комментарии, статус).
+- Запись и управление заказами (клиника, пациент, работы, даты, комментарии, статус).
 - Загрузка и хранение фотографий выполненных работ.
 - Расчёт дохода по месяцам с учётом статуса заказов.
 - Экспорт и импорт отчётов в формате XLSX.
@@ -37,7 +37,8 @@
 ---
 ### [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
 
-_*client-secret не требуется_
+_Swagger UI поддерживает OAuth2 Authorization Code Flow (PKCE).
+ Для авторизации достаточно выполнить вход через Keycloak, **client secret** пользователю не требуется_
 
 ---
 #### [main версия 👈](https://github.com/Stas-Kuprienko/dental-lab-service)
@@ -101,8 +102,8 @@ _*client-secret не требуется_
 
 ### Динамическая модель данных таблиц
 
-Каждый пользователь формирует собственный каталог изделий (ProductMap), содержащий индивидуальный набор типов работ и их стоимость.
-На основе этого каталога динамически формируются:
+Каждый пользователь имеет собственный каталог изделий (ProductMap),
+ который определяет набор доступных типов работ и их стоимость. На его основе динамически формируются:
 
 * таблицы работ в Web UI (Thymeleaf);
 * Excel-отчёты (XLSX Export);
@@ -116,7 +117,7 @@ _*client-secret не требуется_
 ### Stateful Telegram Bot
 
 Для поддержки многошаговых сценариев взаимодействия реализован механизм ChatSession.
-```
+```java
 public class ChatSession {
 
     private Long chatId;
@@ -133,7 +134,7 @@ public class ChatSession {
 ```
 При каждом запросе CommandHandler сохраняет в сессию текущую команду, шаг (у каждого CommandHandler свои шаги) и по необходимости атрибуты.
 
-```
+```java
     private SendMessage input(ChatSession session, Locale locale, String messageText, int messageId) {
     
         NewDentalWork newDentalWork = ... // парсинг сообщения в данные для объекта нового заказа
@@ -161,7 +162,7 @@ public class ChatSession {
 ### Отсутствие брокера сообщений
 
 Из-за ограниченных ресурсов VDS пришлось отказаться от брокера сообщений.
-Отправка событий реализована через обычное HTTP соединение (RestClient) и завёрнуто в CompletableFuture.
+Отправка событий реализована через обычные HTTP REST-вызовы (RestClient) и завёрнуто в CompletableFuture.
 Добавлена логика retry, на случай сбоев.
 
 ```java
@@ -209,20 +210,52 @@ public class ChatSession {
 
 Это позволяет сосредоточиться на бизнес-логике приложения, не реализуя собственный Identity Provider.
 
+> ## Скриншоты
+
+| **Привязка Telegram к профилю сервиса**                              | --- | **Создание вида работы в каталог**                                   |
+|:---------------------------------------------------------------------|-----|:---------------------------------------------------------------------|
+| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720"> |     | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
+---
+
+**Динамическая таблица и карта работ**
+
+<img src="./docs/screen/video_2026-07-08_19-42-39.gif" weight="480">
+
+---
+
+**Импорт excel файлов**
+
+<img src="./docs/screen/video_2026-07-08_19-42-42 (1).gif" weight="480">
+
+---
+
+**Отображение статусов в таблице**
+
+<img src="./docs/screen/video_2026-07-08_19-42-35.gif" weight="480">
+
 ---
 > ## Запуск проекта
 
 **Требования**
 
-- RAM - 4 GB
-- CPU - 2 cores
-- Disk - 10 GB
+- RAM - 4+ GB
+- CPU - 2+ cores
+- Disk - 10+ GB
 - Docker engine - version 26+
 - Docker compose - V2+
 - Java 21 (для запуска проекта через IDE)
 
-* Для запуска приложения Dental-Lab-service нужно настроить smtp и указать данные в переменных!
-* Для запуска приложения Telegram-bot нужно создать бота в Telegram с помощью BotFather, затем указать botname и токен в переменных!
+#### Моменты, которые нужно учесть 
+
+* При запуске приложения Dental-Lab-service будет включён режим `mock-mode` для рассылки.
+ Чтобы включить реальную рассылку по Email, нужно настроить smtp и указать данные в переменных! (`application.yaml: project.mail.*`)
+ И нужно выключить режим `mock-mode` (`project.mailing.mock-mode.email: false`)
+
+* Для запуска Telegram-bot требуется создать собственного бота через [BotFather](https://t.me/BotFather) и указать bot-name и token в переменных! (`application.yaml: project.variables.telegram.*`).
+ Для включения рассылки через Telegram, нужно отключить режим `mock-mode` в приложении `dental-service` (`project.mailing.mock-mode.telegram: false`).
+* Также для запуска Telegram-bot может понадобиться настройка параметров прокси для доступа через VPN! (`application.yaml: project.telegram.proxy.*`)
+
+* Но Telegram-bot можно не запускать — приложение полностью работоспособно без него.
 
 **Локальный запуск**
 
@@ -230,19 +263,30 @@ public class ChatSession {
 
 1. Если скачивали Zip архив: Извлечь из архива проект, перейти в директорию `dental-lab-service`.
 2. Если клонировали через Git: Перейти в директорию `cd dental-lab-service`, затем переключить ветку `git checkout simple-release`
-*
-1. Запустить проект командой `docker compose -d up ui-application telegram-bot`.
- Если вы не создавали бота в Telegram и не указали в переменных botname и токен, то не запускайте telegram-bot,
- команда будет такой `docker compose -d up ui-application`.
-2. Для запуска через IDE, запустите компоненты через [docker-compose](docker-compose.local.yml) с укороченной и упрощённой конфигурацией.
+
+* Для запуска через IDE, запустите инфраструктурные компоненты через [docker-compose](docker-compose.local.yml)
+ `docker compose -f docker-compose.local.yml -d up` с укороченной и упрощённой конфигурацией.
  Затем запустите `dental-lab-service`, `ui-mvc-application` и `telegram-bot` (если указали bot-name и токен) через IDE.
 
-* Открыть [страницу UI](http://localhost:8081/) локального приложения или [open API](http://localhost:8082/swagger-ui/index.html).
+* Открыть [страницу UI](http://localhost:8081/) локального приложения или [open API](http://localhost:8082/docs/index.html).
  [Страница Keycloak](http://localhost:8080/) админ консоли.
+
+**Запуск на VDS через домен с SSL сертификатом**
+
+* Скачать на сервер проект [в виде архива](https://github.com/Stas-Kuprienko/dental-lab-service/archive/refs/heads/simple-release.zip) или через `git clone https://github.com/Stas-Kuprienko/dental-lab-service.git`.
+* Подключить к серверу домен, получить SSL сертификат, переместить сертификат в директорию `dental-lab-service`.
+* Указать домен в [файле Nginx](./config/nginx/conf.d/dental-lab-service.conf) в переменных `server.server_name:`.
+* Получить данные для smtp и указать в `dental-lab-service:application.yaml:project.mail.*` или в `environment` переменных в [файле docker-compose](./docker-compose.yml).
+* Также нужно проверить конфигурацию `mock-mode` для рассылок ([см. "Моменты, которые нужно учесть"](#моменты-которые-нужно-учесть-))
+* Создать файл `.env` и указать переменные для инфраструктурных компонентов ([см. пример](./.env.example))
+* Настроить Telegram-bot ([см. "Моменты, которые нужно учесть"](#моменты-которые-нужно-учесть-)) или обойтись запуском без этого приложения.
+* Запустить проект `docker compose -d up`, если без Telegram-bot, то `docker compose -d up nginx ui-mvc-app` 
 
 ---
 > ## Автор
 
 ### Станислав Куприенко
 
-[Мой Телеграмм](@Stas_Kuprienko) 
+[GitHub](https://github.com/Stas-Kuprienko)
+
+[Telegram](@Stas_Kuprienko) 

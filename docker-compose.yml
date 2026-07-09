@@ -22,6 +22,7 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - PROJECT_VARIABLES_SERVICE-API-URL=${DOMAIN_SERVICE_PATH}
     depends_on:
       keycloak:
         condition: service_healthy
@@ -54,6 +55,7 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - PROJECT_VARIABLES_DENTAL-LAB-API_URL=${DOMAIN_SERVICE_PATH}/api/v1
     depends_on:
       dental-lab-service:
         condition: service_healthy
@@ -76,6 +78,7 @@ services:
       - "8083"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - PROJECT_VARIABLES_DENTAL-LAB-API_URL=${DOMAIN_SERVICE_PATH}/api/v1
     extra_hosts:
       - "host-gateway:host-gateway"
     depends_on:

@@ -49,3 +49,4 @@ bin/
 /.env
 /logs/
 /cloud/gateway/src/main/resources/application-local.yaml
+/cloud/config-server/src/main/resources/application-local.yaml
