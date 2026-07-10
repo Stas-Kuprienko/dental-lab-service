@@ -10,7 +10,7 @@
 ### Основные возможности
 
 - Ведение персонального каталога зуботехнических работ с указанием стоимости.
-- Записьи управление заказами (клиника, пациент, работы, даты, комментарии, статус).
+- Запись и управление заказами (клиника, пациент, работы, даты, комментарии, статус).
 - Загрузка и хранение фотографий выполненных работ.
 - Расчёт дохода по месяцам с учётом статуса заказов.
 - Экспорт и импорт отчётов в формате XLSX.
@@ -20,9 +20,10 @@
 - Аутентификация и авторизация пользователей через Keycloak.
 
 ---
-## [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
+## [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html) 👈
 
-_*client-secret не требуется_
+_Swagger UI поддерживает OAuth2 Authorization Code Flow (PKCE).
+Для авторизации достаточно выполнить вход через Keycloak, **client secret** пользователю не требуется_
 
 ---
 > ## Версии проекта
@@ -118,7 +119,7 @@ _*client-secret не требуется_
 Система состоит из нескольких независимых компонентов:
 пользовательского `веб-интерфейса`, `Telegram-бота`, `backend-сервиса` и `инфраструктурных сервисов`.
 
-Бизнес-логика сосредоточена в `Dental-Lab-Service`, а взаимодействие между компонентами осуществляется через `API Gateway` и `RabbitMQ`.
+Бизнес-логика сосредоточена в `Dental-Service`, а взаимодействие между компонентами осуществляется через `API Gateway` и `RabbitMQ`.
 Аутентификация и авторизация осуществляется через сервис `Keycloak`.
 
 <img src="./docs/diagram.png">
@@ -146,8 +147,8 @@ _*client-secret не требуется_
 ---
 ### Динамическая модель данных таблиц
 
-Каждый пользователь формирует собственный каталог изделий (ProductMap), содержащий индивидуальный набор типов работ и их стоимость.
-На основе этого каталога динамически формируются:
+Каждый пользователь имеет собственный каталог изделий (ProductMap),
+ который определяет набор доступных типов работ и их стоимость. На его основе динамически формируются:
 
 * таблицы работ в Web UI (Thymeleaf);
 * Excel-отчёты (XLSX Export);
@@ -234,6 +235,24 @@ public class ChatSession {
 Это позволяет сосредоточиться на бизнес-логике приложения, не реализуя собственный Identity Provider.
 
 ---
+
+### Виртуальные потоки для оптимизации многопоточности
+
+```java
+
+    @Bean(name = "virtualThreadPerTaskExecutor")
+    public ExecutorService virtualThreadPerTaskExecutor() {
+        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
+        return executorService;
+    }
+
+    @Bean(name = "taskExecutor")
+    public AsyncTaskExecutor taskExecutor() {
+        return new ConcurrentTaskExecutor(virtualThreadPerTaskExecutor());
+    }
+```
+
+---
 > ## Observability
 
 В проекте реализован полный цикл наблюдаемости приложения.
@@ -282,9 +301,9 @@ public class ChatSession {
 ---
 > ## Скриншоты
 
-| **Привязка Телеграмм к профилю сервиса**                     | --- | **Создание вида работы в каталог**                             |
-|:-------------------------------------------------------------|-----|:---------------------------------------------------------------|
-| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720">  |     | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
+| **Привязка Telegram к профилю сервиса**                              | --- | **Создание вида работы в каталог**                                   |
+|:---------------------------------------------------------------------|-----|:---------------------------------------------------------------------|
+| <img src="./docs/screen/video_2026-07-08_19-42-23.gif" height="720"> |     | <img src="./docs/screen/video_2026-07-08_19-42-31.gif" height="720"> |
 ---
 
 **Динамическая таблица и карта работ**
@@ -303,36 +322,57 @@ public class ChatSession {
 
 <img src="./docs/screen/video_2026-07-08_19-42-35.gif" weight="480">
 
-
 ---
 > ## Запуск проекта
 
 **Требования**
 
-- RAM - 12+ GB
-- CPU - 4+ cores 
-- Disk - 15+ GB
+- RAM: 12+ GB
+- CPU: 4+ cores 
+- Disk: 15+ GB
 - Docker engine - version 26+
-- Docker compose - V2+
+- Docker compose V2+
 - Java 21 (для запуска проекта через IDE)
 
-Для запуска приложения Telegram-bot нужно создать бота в Telegram с помощью BotFather, затем указать botname и токен в переменных!
-Также для запуска Telegram-bot может понадобится настройка параметров прокси для доступа через VPN. 
+#### Моменты, которые нужно учесть 
+
+* При запуске приложения **Dental-service** будет включён режим `mock-mode` для рассылки.
+ Чтобы включить реальную рассылку по Email, нужно настроить smtp и указать данные в переменных! (`application.yaml: project.mail.*`)
+ и выключить режим `mock-mode` (`project.mailing.mock-mode.email: false`)
+
+* Для запуска **Telegram-bot** требуется создать собственного бота через [BotFather](https://t.me/BotFather) и указать bot-name и token в переменных! (`application.yaml: project.variables.telegram.*`).
+ Для включения рассылки через Telegram, нужно отключить режим `mock-mode` в приложении **Dental-service** (`project.mailing.mock-mode.telegram: false`).
+* Также для запуска **Telegram-bot** может понадобиться настройка параметров прокси для доступа через VPN! (`application.yaml: project.telegram.proxy.*`)
+
+* Но **Telegram-bot** можно не запускать — приложение полностью работоспособно без него.
+
+* Для запуска **Config-server** нужно создать репозиторий с конфигурациями в GitHub, создать токен для этого репозитория
+ и указать переменные в `config-server:appliction.yaml:project.variables.git.*`.
+
+* Но **Config-server** можно не запускать — приложение полностью работоспособно без него.
 
 **Локальный запуск**
 
 * Скачать проект [в виде архива](https://github.com/Stas-Kuprienko/dental-lab-service/archive/refs/heads/master.zip) или через `git clone https://github.com/Stas-Kuprienko/dental-lab-service.git`.
 
-* Извлечь из архива проект (если скачивали Zip архив), перейти в директорию `cd dental-lab-service`.
+1. Если скачивали Zip архив: Извлечь из архива проект.
+2. Если клонировали через Git: Перейти в директорию `cd dental-lab-service`, затем переключить ветку `git checkout simple-release`
 
-* Запустить проект командой `docker compose -d up api-gateway ui-application telegram-bot grafana`. Если вы не создавали бота в Telegram и не указали в переменных botname и токен, то не запускайте telegram-bot, команда будет такой `docker compose -d up api-gateway ui-application grafana`.
+* Открыть директорию `dental-lab-service` как проект в IDE.
 
-* Открыть [страницу UI](http://localhost:8081/) локального приложения или [open API](http://localhost:8079/swagger-ui/index.html).
-  [Страница Grafana](http://localhost:3000/), чтобы посмотреть логи и метрику. [Страница Keycloak](http://localhost:8080/) админ консоли.
+* Запустить инфраструктурные компоненты через [docker-compose](docker-compose.local.yml)
+  `docker compose -f docker-compose.local.yml -d up` с укороченной и упрощённой конфигурацией.
+
+* Затем запустить через IDE `config-server`(_необязательно_), `api-gateway`, `dental-service`, `ui-mvc-app` и `telegram-bot`(_необязательно_).
+
+* Открыть [страницу UI](http://localhost:8081) локального приложения или [open API](http://localhost:8082/docs/index.html).
+  [Страница Keycloak](http://localhost:8080) админ консоли, [страница Grafana](http://localhost:3000) с визуализацией метрик, логов и трассировкой.
 
 ---
 > ## Автор
 
 ### Станислав Куприенко
 
-[Мой Телеграмм](@Stas_Kuprienko) 
+[GitHub](https://github.com/Stas-Kuprienko)
+
+[Telegram](@Stas_Kuprienko) 

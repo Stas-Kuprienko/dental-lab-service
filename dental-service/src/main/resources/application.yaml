@@ -193,5 +193,7 @@ project:
     schedule:
       cron: "0 30 9 * * *" #pattern: S M H (24)
       zone: "Asia/Omsk"
-    is-mock: true
+    mock-mode:
+      email: true
+      telegram: true
 
