@@ -35,13 +35,13 @@
 Эта версия приложения развёрнута на VDS и доступна через домен [dental-lab-service](https://dental-lab-service.ru) с SSL-сертификатом и прокси Nginx.
 
 ---
-### [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html)
+### [Open API](https://dental-lab-service.ru/docs/swagger-ui/index.html) 👈
 
 _Swagger UI поддерживает OAuth2 Authorization Code Flow (PKCE).
  Для авторизации достаточно выполнить вход через Keycloak, **client secret** пользователю не требуется_
 
 ---
-#### [main версия 👈](https://github.com/Stas-Kuprienko/dental-lab-service)
+#### [**Main** версия проекта с расширенной архитектурой](https://github.com/Stas-Kuprienko/dental-lab-service) 👈
 
 ---
 > ## Технологический стек
@@ -88,7 +88,7 @@ _Swagger UI поддерживает OAuth2 Authorization Code Flow (PKCE).
 Система состоит из нескольких независимых компонентов:
 пользовательского `веб-интерфейса`, `Telegram-бота`, `backend-сервиса` и `инфраструктурных сервисов`.
 
-Бизнес-логика сосредоточена в `Dental-Lab-Service`, а взаимодействие между компонентами осуществляется по _HTTP_.
+Бизнес-логика сосредоточена в `Dental-Service`, а взаимодействие между компонентами осуществляется по _HTTP_.
 Аутентификация и авторизация осуществляется через сервис `Keycloak`.
 
 <img src="./docs/diagram.png">
@@ -210,6 +210,25 @@ public class ChatSession {
 
 Это позволяет сосредоточиться на бизнес-логике приложения, не реализуя собственный Identity Provider.
 
+---
+
+### Виртуальные потоки для оптимизации многопоточности
+
+```java
+
+    @Bean(name = "virtualThreadPerTaskExecutor")
+    public ExecutorService virtualThreadPerTaskExecutor() {
+        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
+        return executorService;
+    }
+
+    @Bean(name = "taskExecutor")
+    public AsyncTaskExecutor taskExecutor() {
+        return new ConcurrentTaskExecutor(virtualThreadPerTaskExecutor());
+    }
+```
+
+---
 > ## Скриншоты
 
 | **Привязка Telegram к профилю сервиса**                              | --- | **Создание вида работы в каталог**                                   |
@@ -238,43 +257,41 @@ public class ChatSession {
 
 **Требования**
 
-- RAM - 4+ GB
-- CPU - 2+ cores
-- Disk - 10+ GB
+- RAM: 4+ GB
+- CPU: 2+ cores
+- Disk: 10+ GB
 - Docker engine - version 26+
-- Docker compose - V2+
+- Docker compose V2+
 - Java 21 (для запуска проекта через IDE)
 
 #### Моменты, которые нужно учесть 
 
-* При запуске приложения Dental-Lab-service будет включён режим `mock-mode` для рассылки.
+* При запуске приложения **Dental-service** будет включён режим `mock-mode` для рассылки.
  Чтобы включить реальную рассылку по Email, нужно настроить smtp и указать данные в переменных! (`application.yaml: project.mail.*`)
- И нужно выключить режим `mock-mode` (`project.mailing.mock-mode.email: false`)
+ и выключить режим `mock-mode` (`project.mailing.mock-mode.email: false`)
 
-* Для запуска Telegram-bot требуется создать собственного бота через [BotFather](https://t.me/BotFather) и указать bot-name и token в переменных! (`application.yaml: project.variables.telegram.*`).
- Для включения рассылки через Telegram, нужно отключить режим `mock-mode` в приложении `dental-service` (`project.mailing.mock-mode.telegram: false`).
-* Также для запуска Telegram-bot может понадобиться настройка параметров прокси для доступа через VPN! (`application.yaml: project.telegram.proxy.*`)
+* Для запуска **Telegram-bot** требуется создать собственного бота через [BotFather](https://t.me/BotFather) и указать bot-name и token в переменных! (`application.yaml: project.variables.telegram.*`).
+ Для включения рассылки через Telegram, нужно отключить режим `mock-mode` в приложении **Dental-service** (`project.mailing.mock-mode.telegram: false`).
+* Также для запуска **Telegram-bot** может понадобиться настройка параметров прокси для доступа через VPN! (`application.yaml: project.telegram.proxy.*`)
 
-* Но Telegram-bot можно не запускать — приложение полностью работоспособно без него.
+* Но **Telegram-bot** можно не запускать — приложение полностью работоспособно без него.
 
 **Локальный запуск**
 
 * Скачать проект [в виде архива](https://github.com/Stas-Kuprienko/dental-lab-service/archive/refs/heads/simple-release.zip) или через `git clone https://github.com/Stas-Kuprienko/dental-lab-service.git`.
-
-1. Если скачивали Zip архив: Извлечь из архива проект, перейти в директорию `dental-lab-service`.
+1. Если скачивали Zip архив: Извлечь из архива проект.
 2. Если клонировали через Git: Перейти в директорию `cd dental-lab-service`, затем переключить ветку `git checkout simple-release`
-
-* Для запуска через IDE, запустите инфраструктурные компоненты через [docker-compose](docker-compose.local.yml)
- `docker compose -f docker-compose.local.yml -d up` с укороченной и упрощённой конфигурацией.
- Затем запустите `dental-lab-service`, `ui-mvc-application` и `telegram-bot` (если указали bot-name и токен) через IDE.
-
-* Открыть [страницу UI](http://localhost:8081/) локального приложения или [open API](http://localhost:8082/docs/index.html).
- [Страница Keycloak](http://localhost:8080/) админ консоли.
+* Открыть директорию `dental-lab-service` как проект в IDE.
+* Запустить инфраструктурные компоненты через [docker-compose](docker-compose.local.yml)
+  `docker compose -f docker-compose.local.yml -d up` с укороченной и упрощённой конфигурацией.
+* Затем запустить через IDE `dental-service`, `ui-mvc-app` и `telegram-bot`(_необязательно_).
+* Открыть [страницу UI](http://localhost:8081) локального приложения или [open API](http://localhost:8082/docs/index.html). [Страница Keycloak](http://localhost:8080) админ консоли.
 
 **Запуск на VDS через домен с SSL сертификатом**
 
 * Скачать на сервер проект [в виде архива](https://github.com/Stas-Kuprienko/dental-lab-service/archive/refs/heads/simple-release.zip) или через `git clone https://github.com/Stas-Kuprienko/dental-lab-service.git`.
 * Подключить к серверу домен, получить SSL сертификат, переместить сертификат в директорию `dental-lab-service`.
+* Перейти в директорию `cd dental-lab-service`.
 * Указать домен в [файле Nginx](./config/nginx/conf.d/dental-lab-service.conf) в переменных `server.server_name:`.
 * Получить данные для smtp и указать в `dental-lab-service:application.yaml:project.mail.*` или в `environment` переменных в [файле docker-compose](./docker-compose.yml).
 * Также нужно проверить конфигурацию `mock-mode` для рассылок ([см. "Моменты, которые нужно учесть"](#моменты-которые-нужно-учесть-))
